@@ -27,9 +27,9 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               <View style={styles.logoIcon}>
-                <Crown color="#fbbf24" size={32} />
+                <Crown color="#D4AF37" size={32} />
               </View>
-              <Text style={styles.logoText}>LUXURIA</Text>
+              <Text style={styles.logoText}>AURORA</Text>
             </View>
             <Text style={styles.subtitle}>Maison de Couture</Text>
           </View>
@@ -38,7 +38,7 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
           <Card style={styles.card}>
             <CardHeader style={styles.cardHeader}>
               <CardTitle style={styles.cardTitle}>
-                {isLogin ? 'Welcome Back' : 'Join Luxuria'}
+                {isLogin ? 'Welcome Back' : 'Join Aurora'}
               </CardTitle>
               <CardDescription style={styles.cardDescription}>
                 {isLogin ? 'Access your exclusive account' : 'Enter the world of luxury'}
@@ -112,7 +112,10 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
 
                 <Button 
                   title={isLogin ? 'Login' : 'Register'}
-                  onPress={onSubmit}
+                  onPress={() => {
+                    console.log('Button clicked in AuthPage');
+                    onSubmit();
+                  }}
                 />
               </View>
 
@@ -164,7 +167,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 24,
     fontWeight: '300',
-    color: '#fbbf24',
+    color: '#D4AF37',
   },
   subtitle: {
     color: '#9ca3af',

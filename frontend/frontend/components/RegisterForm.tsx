@@ -1,6 +1,6 @@
 // components/RegisterForm.tsx
 import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import { registerUser } from '../api/auth';
 import { AuthPage } from './AuthPage';
 
@@ -12,22 +12,31 @@ export default function RegisterForm() {
     firstName: '',
     lastName: '',
   });
-  const router = useRouter();
+  const navigation = useNavigation();
 
   const handleRegister = async () => {
+    console.log('Register button pressed'); // Debug log
+    console.log('Form data:', formData); // Debug log
+    
     if (formData.password !== formData.confirmPassword) {
       alert('Şifreler eşleşmiyor');
       return;
     }
 
-    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-    const result = await registerUser(fullName, formData.email, formData.password);
+    try {
+      console.log('Calling registerUser...'); // Debug log
+      const result = await registerUser(formData.firstName, formData.lastName, formData.email, formData.password);
+      console.log('Register result:', result); // Debug log
 
-    if (result.message === 'User registered successfully.') {
-      alert('Kayıt başarılı');
-      router.push('/login');
-    } else {
-      alert(result.message);
+      if (result.message === 'User registered successfully.') {
+        alert('Kayıt başarılı');
+        (navigation as any).navigate('Login');
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error('Register error:', error);
+      alert('Kayıt sırasında hata oluştu');
     }
   };
 
@@ -37,7 +46,7 @@ export default function RegisterForm() {
       formData={formData}
       onChange={(key, value) => setFormData(prev => ({ ...prev, [key]: value }))}
       onSubmit={handleRegister}
-      onToggle={() => router.push('/login')}
+      onToggle={() => (navigation as any).navigate('Login')}
     />
   );
 }

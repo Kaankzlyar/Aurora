@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "main": "expo-router/entry",
+  "main": "./App.js",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -11,12 +11,15 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo-google-fonts/cormorant-garamond": "^0.4.0",
+    "@expo-google-fonts/montserrat": "^0.4.1",
+    "@expo-google-fonts/playfair-display": "^0.4.1",
     "@expo/vector-icons": "^14.1.0",
-    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
-    "@react-navigation/native": "^7.1.17",
-    "@react-navigation/native-stack": "^7.3.24",
+    "@react-navigation/native": "^7.1.6",
+    "@react-navigation/native-stack": "^7.3.10",
     "@types/react-dom": "^19.1.7",
     "expo": "~53.0.20",
     "expo-blur": "~14.1.5",
@@ -44,7 +47,8 @@
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-web": "~0.20.0",
-    "react-native-webview": "13.13.5"
+    "react-native-webview": "13.13.5",
+    "undefined": "\\"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
