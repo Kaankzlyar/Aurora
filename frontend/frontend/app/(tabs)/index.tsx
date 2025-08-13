@@ -56,7 +56,7 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0B0B0B" },
   content: { padding: 20 },
   heroOverline: {
-    fontFamily: "Montserrat-Medium",
+    fontFamily: "Montserrat_500Medium",
     color: "#B3B3B3",
     letterSpacing: 2,
     textTransform: "uppercase",
@@ -64,14 +64,14 @@ const s = StyleSheet.create({
     marginTop: 8,
   },
   heroTitle: {
-    fontFamily: "PlayfairDisplay-Bold",
+    fontFamily: "PlayfairDisplay_700Bold",
     color: "#FFFFFF",
     fontSize: 28,
     letterSpacing: 1,
     marginTop: 6,
   },
   heroBody: {
-    fontFamily: "CormorantGaramond-Regular",
+    fontFamily: "CormorantGaramond_400Regular",
     color: "#E0E0E0",
     fontSize: 16,
     lineHeight: 24,
@@ -87,14 +87,14 @@ const s = StyleSheet.create({
     borderColor: "#1F1F1F",
   },
   cardTitle: {
-    fontFamily: "PlayfairDisplay-Bold",
+    fontFamily: "PlayfairDisplay_700Bold",
     color: "#D4AF37",
     fontSize: 16,
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   cardSub: {
-    fontFamily: "CormorantGaramond-Regular",
+    fontFamily: "CormorantGaramond_400Regular",
     color: "#CFCFCF",
     fontSize: 13,
     marginTop: 6,
@@ -115,7 +115,7 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   collectionText: {
-    fontFamily: "Montserrat-Medium",
+    fontFamily: "CormorantGaramond_500Medium",
     color: "#FFFFFF",
     letterSpacing: 2,
     textTransform: "uppercase",
@@ -132,7 +132,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 6,
   },
   badgeText: {
-    fontFamily: "Montserrat-Medium",
+    fontFamily: "Montserrat_500Medium",
     color: "#0B0B0B",
     fontSize: 12,
   },

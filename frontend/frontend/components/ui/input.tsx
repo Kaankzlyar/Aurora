@@ -1,5 +1,5 @@
 // components/ui/input.tsx
-import React from "react";
+import React, { forwardRef } from "react";
 import { TextInput, StyleSheet, TextInputProps } from "react-native";
 
 interface InputProps extends TextInputProps {
@@ -7,18 +7,26 @@ interface InputProps extends TextInputProps {
   type?: string; // Keep for compatibility - will map to secureTextEntry
 }
 
-export function Input({ type, style, ...props }: InputProps) {
-  const secureTextEntry = type === "password";
+export const Input = forwardRef<TextInput, InputProps>(({ type, style, ...props }, ref) => {
+  const secureTextEntry = type === "password" || props.secureTextEntry;
   
   return (
     <TextInput
+      ref={ref}
       style={[styles.input, style]}
       secureTextEntry={secureTextEntry}
       placeholderTextColor="#9ca3af"
+      autoCorrect={false}
+      spellCheck={false}
+      autoCapitalize="none"
+      blurOnSubmit={false}
+      returnKeyType="next"
       {...props}
     />
   );
-}
+});
+
+Input.displayName = 'Input';
 
 const styles = StyleSheet.create({
   input: {
@@ -30,5 +38,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#e5e5e5",
     backgroundColor: "rgba(0, 0, 0, 0.3)",
+    fontFamily: 'Montserrat_400Regular',
   },
 });

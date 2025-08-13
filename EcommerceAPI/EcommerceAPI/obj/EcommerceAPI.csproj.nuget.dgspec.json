@@ -1,7 +1,6 @@
 {
   "format": 1,
   "restore": {
-<<<<<<< HEAD
     "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj": {}
   },
   "projects": {
@@ -13,19 +12,6 @@
         "projectPath": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj",
         "packagesPath": "C:\\Users\\kaank\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\obj\\",
-=======
-    "D:\\EcommerceApp\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj": {}
-  },
-  "projects": {
-    "D:\\EcommerceApp\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "D:\\EcommerceApp\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj",
-        "projectName": "EcommerceAPI",
-        "projectPath": "D:\\EcommerceApp\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj",
-        "packagesPath": "C:\\Users\\kaank\\.nuget\\packages\\",
-        "outputPath": "D:\\EcommerceApp\\EcommerceAPI\\EcommerceAPI\\obj\\",
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

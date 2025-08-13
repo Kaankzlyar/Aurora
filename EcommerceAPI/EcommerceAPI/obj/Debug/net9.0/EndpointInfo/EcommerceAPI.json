@@ -5,31 +5,30 @@
     "version": "v1"
   },
   "paths": {
-<<<<<<< HEAD
     "/api/auth/login": {
-=======
-    "/login": {
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
       "post": {
         "tags": [
           "Auth"
         ],
-        "parameters": [
-          {
-            "name": "Email",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "Password",
-            "in": "query",
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -37,16 +36,11 @@
         }
       }
     },
-<<<<<<< HEAD
     "/api/auth/register": {
-=======
-    "/register": {
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
       "post": {
         "tags": [
           "Auth"
         ],
-<<<<<<< HEAD
         "requestBody": {
           "content": {
             "application/json": {
@@ -66,31 +60,6 @@
             }
           }
         },
-=======
-        "parameters": [
-          {
-            "name": "Name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "Email",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "Password",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
         "responses": {
           "200": {
             "description": "OK"
@@ -112,8 +81,21 @@
     }
   },
   "components": {
-<<<<<<< HEAD
     "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UserDto": {
         "type": "object",
         "properties": {
@@ -137,8 +119,6 @@
         "additionalProperties": false
       }
     },
-=======
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     "securitySchemes": {
       "Bearer": {
         "type": "apiKey",

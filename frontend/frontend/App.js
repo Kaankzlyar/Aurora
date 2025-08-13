@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts } from 'expo-font';
+import {
+  PlayfairDisplay_400Regular,
+  PlayfairDisplay_700Bold,
+  PlayfairDisplay_900Black,
+} from '@expo-google-fonts/playfair-display';
+import {
+  Montserrat_400Regular,
+  Montserrat_500Medium,
+  Montserrat_600SemiBold,
+  Montserrat_700Bold,
+} from '@expo-google-fonts/montserrat';
+import {
+  CormorantGaramond_400Regular,
+  CormorantGaramond_500Medium,
+  CormorantGaramond_500Medium_Italic,
+  CormorantGaramond_600SemiBold,
+  CormorantGaramond_700Bold,
+} from '@expo-google-fonts/cormorant-garamond';
 
 // Import your screens
 import LoginForm from './components/LoginForm';
@@ -13,9 +32,39 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load custom fonts
+  const [fontsLoaded, fontError] = useFonts({
+    PlayfairDisplay_400Regular,
+    PlayfairDisplay_700Bold, 
+    PlayfairDisplay_900Black,
+    Montserrat_400Regular,
+    Montserrat_500Medium,
+    Montserrat_600SemiBold,
+    Montserrat_700Bold,
+    CormorantGaramond_400Regular,
+    CormorantGaramond_500Medium,
+    CormorantGaramond_600SemiBold,
+    CormorantGaramond_700Bold,
+    CormorantGaramond_500Medium_Italic
+  });
+
   useEffect(() => {
-    checkAuthStatus();
-  }, []);
+    // Always check auth status after 2 seconds, regardless of font loading
+    const timer = setTimeout(() => {
+      if (!fontsLoaded && !fontError) {
+        console.log('[App] Font loading taking too long, proceeding without custom fonts');
+      }
+      checkAuthStatus();
+    }, 2000);
+
+    if (fontsLoaded || fontError) {
+      console.log('[App] Fonts loaded:', fontsLoaded, 'Font error:', fontError);
+      clearTimeout(timer);
+      checkAuthStatus();
+    }
+
+    return () => clearTimeout(timer);
+  }, [fontsLoaded, fontError]);
 
   const checkAuthStatus = async () => {
     try {
@@ -86,7 +135,14 @@ function App() {
     return (
       <View style={styles.loadingContainer}>
         <StatusBar style="light" />
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={styles.loadingText}>
+          {(!fontsLoaded && !fontError) ? 'Loading fonts...' : 'Loading...'}
+        </Text>
+        {fontError && (
+          <Text style={[styles.loadingText, { color: '#ff6b6b', fontSize: 12, marginTop: 8 }]}>
+            Font loading failed, using system fonts
+          </Text>
+        )}
       </View>
     );
   }
@@ -105,8 +161,8 @@ function App() {
           onToggle={navigateToLogin} 
         />
       )}
-      {/* Show login screen if not authenticated OR if explicitly on login screen */}
-      {(currentScreen === 'login' || !isAuthenticated) && !isLoading && (
+      {/* Show login screen only if on login screen and not loading */}
+      {currentScreen === 'login' && !isLoading && (
         <LoginForm 
           onSuccess={handleLoginSuccess} 
           onToggle={navigateToRegister} 
@@ -126,6 +182,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#fff',
     fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
 });
 

@@ -21,5 +21,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#e5e5e5", // Light color for dark theme
     marginBottom: 4,
+    fontFamily: 'Montserrat_500Medium',
   },
 });

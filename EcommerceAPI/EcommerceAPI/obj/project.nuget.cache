@@ -1,14 +1,8 @@
 {
   "version": 2,
-<<<<<<< HEAD
   "dgSpecHash": "/S/ncFJfV4o=",
   "success": true,
   "projectFilePath": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj",
-=======
-  "dgSpecHash": "PcOLvDfUxwU=",
-  "success": true,
-  "projectFilePath": "D:\\EcommerceApp\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj",
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
   "expectedPackageFiles": [
     "C:\\Users\\kaank\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\kaank\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

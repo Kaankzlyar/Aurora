@@ -1,7 +1,7 @@
 // components/LoginForm.tsx
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loginUser } from '../api/auth';
+import { loginUser, testServerConnection } from '../api/auth';
 import { AuthPage } from './AuthPage';
 
 export default function LoginForm({ onSuccess, onToggle }: { onSuccess: () => void; onToggle: () => void }) {
@@ -9,6 +9,16 @@ export default function LoginForm({ onSuccess, onToggle }: { onSuccess: () => vo
 
   const handleLogin = async () => {
     try {
+      // First test the server connection
+      console.log('[LoginForm] Testing server connection before login...');
+      const connectionTest = await testServerConnection();
+      
+      if (!connectionTest.success) {
+        alert(`Server bağlantısı başarısız: ${connectionTest.error}`);
+        return;
+      }
+      
+      console.log('[LoginForm] Server connection successful, proceeding with login...');
       const result = await loginUser(formData.email, formData.password);
       
       if (result?.token) {

@@ -3,7 +3,21 @@
   "WorkspaceRootPath": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\",
   "Documents": [
     {
-<<<<<<< HEAD
+      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -12,56 +26,20 @@
       "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\dtos\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-=======
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
       "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-<<<<<<< HEAD
       "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\dtos\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\dtos\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-=======
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
       "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-<<<<<<< HEAD
       "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-=======
-      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-<<<<<<< HEAD
-=======
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|c:\\users\\kaank\\source\\repos\\ecommerceapi\\ecommerceapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5A1D749B-84E2-4333-B598-DC9970B8D924}|EcommerceAPI\\EcommerceAPI.csproj|solutionrelative:ecommerceapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     }
   ],
   "DocumentGroupContainers": [
@@ -71,38 +49,25 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-<<<<<<< HEAD
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-=======
-          "SelectedChildIndex": 8,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
+              "DocumentIndex": 4,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "EcommerceAPI\\Controllers\\AuthController.cs",
               "ToolTip": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Controllers\\AuthController.cs",
               "RelativeToolTip": "EcommerceAPI\\Controllers\\AuthController.cs",
-<<<<<<< HEAD
-              "ViewState": "AgIAAAIAAAAAAAAAAAAowBAAAAAlAAAAAAAAAA==",
-=======
-              "ViewState": "AgIAABkAAAAAAAAAAAAQwFYAAAAAAAAAAAAAAA==",
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
+              "ViewState": "AgIAAAUAAAAAAAAAAAAowDkAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-07T12:20:39.843Z",
               "IsPinned": true,
               "EditorCaption": ""
             },
             {
-<<<<<<< HEAD
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 2,
               "Title": "launchSettings.json",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "EcommerceAPI\\Properties\\launchSettings.json",
@@ -115,8 +80,6 @@
               "EditorCaption": ""
             },
             {
-=======
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             },
@@ -142,46 +105,46 @@
             },
             {
               "$type": "Document",
-<<<<<<< HEAD
-              "DocumentIndex": 5,
+              "DocumentIndex": 3,
               "Title": "Microsoft.Common.CurrentVersion.targets",
               "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "RelativeToolTip": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "ViewState": "AgIAAAEVAAAAAAAAAAAMwBEVAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAAAEVAAAAAAAAAAAMwAEVAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
               "WhenOpened": "2025-08-12T09:18:03.522Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Program.cs",
               "RelativeDocumentMoniker": "EcommerceAPI\\Program.cs",
               "ToolTip": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Program.cs",
               "RelativeToolTip": "EcommerceAPI\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAsAAAAAAAAAAIAywBYAAAA7AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-11T13:03:05.975Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 0,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\appsettings.json",
               "RelativeDocumentMoniker": "EcommerceAPI\\appsettings.json",
               "ToolTip": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\appsettings.json",
               "RelativeToolTip": "EcommerceAPI\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABMAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-11T08:28:38.488Z"
+              "WhenOpened": "2025-08-11T08:28:38.488Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "LoginDto.cs",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Dtos\\LoginDto.cs",
               "RelativeDocumentMoniker": "EcommerceAPI\\Dtos\\LoginDto.cs",
@@ -189,24 +152,11 @@
               "RelativeToolTip": "EcommerceAPI\\Dtos\\LoginDto.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-11T08:03:27.814Z",
-=======
-              "DocumentIndex": 1,
-              "Title": "User.cs",
-              "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Models\\User.cs",
-              "RelativeDocumentMoniker": "EcommerceAPI\\Models\\User.cs",
-              "ToolTip": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Models\\User.cs",
-              "RelativeToolTip": "EcommerceAPI\\Models\\User.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-08T07:38:12.197Z",
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-11T08:03:27.814Z"
             },
             {
               "$type": "Document",
-<<<<<<< HEAD
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "AppDbContext.cs",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Data\\AppDbContext.cs",
               "RelativeDocumentMoniker": "EcommerceAPI\\Data\\AppDbContext.cs",
@@ -218,7 +168,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 7,
               "Title": "UserDto.cs",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Dtos\\UserDto.cs",
               "RelativeDocumentMoniker": "EcommerceAPI\\Dtos\\UserDto.cs",
@@ -226,33 +176,23 @@
               "RelativeToolTip": "EcommerceAPI\\Dtos\\UserDto.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-11T07:58:58.062Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-11T07:58:58.062Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-=======
-              "DocumentIndex": 0,
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
+              "DocumentIndex": 6,
               "Title": "UserController.cs",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "EcommerceAPI\\Controllers\\UserController.cs",
               "ToolTip": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Controllers\\UserController.cs",
               "RelativeToolTip": "EcommerceAPI\\Controllers\\UserController.cs",
-<<<<<<< HEAD
               "ViewState": "AgIAABUAAAAAAAAAAAA1wBQAAAAcAAAAAAAAAA==",
-=======
-              "ViewState": "AgIAABgAAAAAAAAAAAAYwBkAAAAfAAAAAAAAAA==",
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-08T07:36:23.244Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-08T07:36:23.244Z"
             },
             {
               "$type": "Document",
-<<<<<<< HEAD
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Models\\User.cs",
               "RelativeDocumentMoniker": "EcommerceAPI\\Models\\User.cs",
@@ -261,44 +201,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAA8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-08T07:38:12.197Z"
-=======
-              "DocumentIndex": 5,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Program.cs",
-              "RelativeDocumentMoniker": "EcommerceAPI\\Program.cs",
-              "ToolTip": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Program.cs",
-              "RelativeToolTip": "EcommerceAPI\\Program.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAgwDsAAAA1AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T12:25:59.163Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\appsettings.json",
-              "RelativeDocumentMoniker": "EcommerceAPI\\appsettings.json",
-              "ToolTip": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\appsettings.json",
-              "RelativeToolTip": "EcommerceAPI\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-07T12:22:17.285Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "launchSettings.json",
-              "DocumentMoniker": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Properties\\launchSettings.json",
-              "RelativeDocumentMoniker": "EcommerceAPI\\Properties\\launchSettings.json",
-              "ToolTip": "C:\\Users\\kaank\\source\\repos\\EcommerceAPI\\EcommerceAPI\\Properties\\launchSettings.json",
-              "RelativeToolTip": "EcommerceAPI\\Properties\\launchSettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-07T12:21:14.437Z",
-              "EditorCaption": ""
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
             }
           ]
         }

@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: 'Montserrat_500Medium',
   },
   disabled: {
     opacity: 0.5,
@@ -41,12 +41,12 @@ const styles = StyleSheet.create({
 
 const variantStyles = {
   default: {
-    backgroundColor: "#facc15", // Amber
+    backgroundColor: "#D4AF37", // Amber
   },
   outline: {
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: "#facc15",
+    borderColor: "#D4AF37",
   },
   destructive: {
     backgroundColor: "#ef4444", // Red

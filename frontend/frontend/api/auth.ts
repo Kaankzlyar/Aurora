@@ -1,23 +1,40 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
+// Detect if running on emulator vs physical device
+const isEmulator = Platform.select({
+  android: Constants.platform?.android?.isDevice === false,
+  ios: Constants.platform?.ios?.isDevice === false,
+  default: false,
+});
+
 // Prefer configurable API URL via app.json -> expo.extra.API_URL
 // Fallbacks:
 // - Android Emulator: 10.0.2.2
 // - iOS Simulator: localhost
-// - Physical devices: set your machine IP in expo.extra.API_URL
+// - Physical devices: use your machine's IP from expo.extra.API_URL
 const DEFAULT_BASE = Platform.select({
-  android: "http://10.0.2.2:5270",
-  ios: "https://localhost:7120",
-  default: "http://10.0.2.2:5270",
+  android: isEmulator ? "http://10.0.2.2:5270" : "http://192.168.1.142:5270",
+  ios: isEmulator ? "https://localhost:7120" : "http://192.168.1.142:5270",
+  default: "http://192.168.1.142:5270",
 });
 
 const API_BASE = (Constants.expoConfig as any)?.extra?.API_URL || DEFAULT_BASE;
 const BASE_URL = `${API_BASE}/api/auth`;
 
+console.log("[auth.ts] ===== API CONFIGURATION =====");
+console.log("[auth.ts] Platform:", Platform.OS);
+console.log("[auth.ts] Is Emulator:", isEmulator);
+console.log("[auth.ts] Device Info:", Constants.platform);
+console.log("[auth.ts] Default Base URL:", DEFAULT_BASE);
+console.log("[auth.ts] Configured API_URL:", (Constants.expoConfig as any)?.extra?.API_URL);
+console.log("[auth.ts] Final API_BASE:", API_BASE);
+console.log("[auth.ts] Final BASE_URL:", BASE_URL);
+console.log("[auth.ts] =====================================");
+
 // Small helper to add a timeout to fetch (abort after N ms)
 async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & { timeoutMs?: number } = {}) {
-  const { timeoutMs = 10000, ...rest } = init;
+  const { timeoutMs = 15000, ...rest } = init; // Increased default timeout
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -211,6 +228,7 @@ export const loginUser = async (email: string, password: string) => {
     console.log("  - Method: POST");
     console.log("  - Content-Type: application/json; charset=utf-8");
     console.log("  - Body size:", JSON.stringify(payload).length, "bytes");
+    console.log("  - Timeout: 20000ms");
     
     const response = await fetchWithTimeout(`${BASE_URL}/login`, {
       method: "POST",
@@ -220,7 +238,7 @@ export const loginUser = async (email: string, password: string) => {
         "User-Agent": "Expo-Mobile-App"
       },
       body: JSON.stringify(payload),
-      timeoutMs: 12000,
+      timeoutMs: 20000, // Increased from 12000 to 20000
     });
 
     console.log("[loginUser] Response status:", response.status, response.statusText);
@@ -281,7 +299,35 @@ export const loginUser = async (email: string, password: string) => {
     console.log("[loginUser] Error details:", error?.message || error);
     console.log("[loginUser] Error name:", error?.name);
     console.log("[loginUser] Error stack:", error?.stack);
+    console.log("[loginUser] Trying to connect to:", `${BASE_URL}/login`);
+    
     const isAbort = error?.name === "AbortError";
-    return { message: isAbort ? "İstek zaman aşımına uğradı." : "Giriş sırasında ağ hatası oluştu." };
+    let errorMessage;
+    
+    if (isAbort) {
+      errorMessage = "Server bağlantısı zaman aşımına uğradı. Server çalışıyor mu kontrol edin.";
+    } else if (error?.message?.includes('Network request failed')) {
+      errorMessage = "Network bağlantısı başarısız. Server adresini kontrol edin.";
+    } else {
+      errorMessage = "Giriş sırasında ağ hatası oluştu: " + (error?.message || 'Bilinmeyen hata');
+    }
+    
+    return { message: errorMessage };
+  }
+};
+
+// Test server connectivity
+export const testServerConnection = async () => {
+  try {
+    console.log("[testServerConnection] Testing connection to:", API_BASE);
+    const response = await fetchWithTimeout(API_BASE, {
+      method: "GET",
+      timeoutMs: 5000,
+    });
+    console.log("[testServerConnection] Server responded with status:", response.status);
+    return { success: true, status: response.status };
+  } catch (error: any) {
+    console.log("[testServerConnection] Connection failed:", error?.message);
+    return { success: false, error: error?.message };
   }
 };
