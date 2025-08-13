@@ -5,7 +5,11 @@
     "version": "v1"
   },
   "paths": {
+<<<<<<< HEAD
     "/api/auth/login": {
+=======
+    "/login": {
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
       "post": {
         "tags": [
           "Auth"
@@ -33,11 +37,16 @@
         }
       }
     },
+<<<<<<< HEAD
     "/api/auth/register": {
+=======
+    "/register": {
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
       "post": {
         "tags": [
           "Auth"
         ],
+<<<<<<< HEAD
         "requestBody": {
           "content": {
             "application/json": {
@@ -57,6 +66,31 @@
             }
           }
         },
+=======
+        "parameters": [
+          {
+            "name": "Name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Password",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
         "responses": {
           "200": {
             "description": "OK"
@@ -78,6 +112,7 @@
     }
   },
   "components": {
+<<<<<<< HEAD
     "schemas": {
       "UserDto": {
         "type": "object",
@@ -102,6 +137,8 @@
         "additionalProperties": false
       }
     },
+=======
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     "securitySchemes": {
       "Bearer": {
         "type": "apiKey",

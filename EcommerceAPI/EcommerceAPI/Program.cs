@@ -17,11 +17,15 @@ namespace EcommerceAPI
 
             // Add services to the container.
 
+<<<<<<< HEAD
             builder.Services.AddControllers()
                 .AddJsonOptions( o=>
                 {
                     o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 });
+=======
+            builder.Services.AddControllers();
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -61,7 +65,11 @@ namespace EcommerceAPI
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
+<<<<<<< HEAD
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+=======
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured"))
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
             ),
             ValidateIssuer = false,
             ValidateAudience = false

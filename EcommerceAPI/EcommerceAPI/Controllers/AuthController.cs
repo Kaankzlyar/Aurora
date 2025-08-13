@@ -4,13 +4,20 @@
     using EcommerceAPI.Dtos;
     using EcommerceAPI.Models;
     using Microsoft.AspNetCore.Mvc;
+<<<<<<< HEAD
     using Microsoft.EntityFrameworkCore;
+=======
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     using Microsoft.IdentityModel.Tokens;
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Text;
 
+<<<<<<< HEAD
     [Route("api/auth")]
+=======
+
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -23,6 +30,7 @@
             _configuration = configuration;
         }
 
+<<<<<<< HEAD
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
@@ -107,10 +115,51 @@
                 Console.WriteLine($"❌ LOGIN ERROR: {ex.Message}");
                 return BadRequest(new { message = "Giriş sırasında hata oluştu." });
             }
+=======
+
+        [HttpPost("login")]
+        public IActionResult Login(LoginDto request)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email == request.Email);
+            if (user == null)
+            {
+                // Mail hiç kayıtlı değil
+                return BadRequest(new { message = "E-posta adresi hatalı veya sistemde kayıtlı değil." });
+            }
+
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+
+            if (!isPasswordValid)
+            {
+                // Şifre yanlış
+                return BadRequest(new { message = "Şifre eksik veya hatalı girildi." });
+            }
+
+            // JWT Token oluştur
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Name)
+        }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwt = tokenHandler.WriteToken(token);
+
+            return Ok(new { token = jwt });
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
         }
 
 
         [HttpPost("register")]
+<<<<<<< HEAD
         public async Task<IActionResult> RegisterAsync([FromBody] UserDto request)
         {
             // Geçici: ne geliyor görelim
@@ -131,22 +180,57 @@
 
             Console.WriteLine($"✅ Email is available");
 
+=======
+        public IActionResult Register(UserDto request)
+        {
+            if (_context.Users.Any(u => u.Email == request.Email))
+            {
+                return BadRequest(new { message = "Email already registered." });
+            }
+
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             var user = new User
             {
                 Name = request.Name,
+<<<<<<< HEAD
                 LastName = request.LastName,
+=======
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
                 Email = request.Email,
                 PasswordHash = passwordHash,
                 CreatedAt = DateTime.UtcNow
             };
 
             _context.Users.Add(user);
+<<<<<<< HEAD
             await _context.SaveChangesAsync(); // <-- ADD AWAIT HERE!
 
             Console.WriteLine($"✅ User saved to database with ID: {user.Id}");
             return Ok(new { message = "User registered successfully." });
+=======
+            _context.SaveChanges();
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Name)
+        }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwt = tokenHandler.WriteToken(token);
+
+            return Ok(new { token = jwt });
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
         }
     }
 }

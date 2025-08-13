@@ -1,8 +1,24 @@
 [
   {
+<<<<<<< HEAD
     "ContainingType": "EcommerceAPI.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/auth/login",
+=======
+    "ContainingType": "EcommerceAPI.Controllers.UserController",
+    "Method": "GetProfile",
+    "RelativePath": "api/user/profile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EcommerceAPI.Controllers.AuthController",
+    "Method": "Login",
+    "RelativePath": "login",
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -22,13 +38,19 @@
   },
   {
     "ContainingType": "EcommerceAPI.Controllers.AuthController",
+<<<<<<< HEAD
     "Method": "RegisterAsync",
     "RelativePath": "api/auth/register",
+=======
+    "Method": "Register",
+    "RelativePath": "register",
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
+<<<<<<< HEAD
         "Name": "request",
         "Type": "EcommerceAPI.Dtos.UserDto",
         "IsRequired": true
@@ -45,5 +67,23 @@
     "Order": 0,
     "Parameters": [],
     "ReturnTypes": []
+=======
+        "Name": "Name",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Email",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Password",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
   }
 ]

@@ -37,10 +37,13 @@ namespace EcommerceAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+<<<<<<< HEAD
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+=======
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

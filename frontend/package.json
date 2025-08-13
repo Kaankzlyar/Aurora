@@ -1,7 +1,10 @@
 {
+<<<<<<< HEAD
   "name": "ecommerce-app",
   "version": "1.0.0",
   "main": "expo-router/entry",
+=======
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
   "devDependencies": {
     "@types/react": "^19.1.9",
     "@types/react-native": "^0.72.8",
@@ -15,8 +18,11 @@
     "react-native": "^0.80.2",
     "react-native-reanimated": "~3.17.4",
     "react-native-svg": "15.11.2"
+<<<<<<< HEAD
   },
   "expo": {
     "plugins": ["expo-router"]
+=======
+>>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
   }
 }
