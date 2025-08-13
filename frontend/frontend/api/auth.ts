@@ -48,7 +48,6 @@ export const registerUser = async (
     const trimmedLast = lastName?.trim();
     const trimmedEmail = email?.trim()?.toLowerCase();
     
-<<<<<<< HEAD
     console.log("[registerUser] ===== REGISTRATION ATTEMPT DETAILS =====");
     console.log("[registerUser] Raw inputs - firstName:", JSON.stringify(firstName), "lastName:", JSON.stringify(lastName), "email:", JSON.stringify(email));
     console.log("[registerUser] Trimmed values - Name:", JSON.stringify(trimmedFirst), "LastName:", JSON.stringify(trimmedLast), "Email:", JSON.stringify(trimmedEmail));
@@ -72,12 +71,6 @@ export const registerUser = async (
     if (!emailRegex.test(trimmedEmail)) {
       return { message: "Geçersiz e-posta formatı" };
     }
-    
-=======
-    console.log("[registerUser] Raw inputs - firstName:", JSON.stringify(firstName), "lastName:", JSON.stringify(lastName), "email:", JSON.stringify(email));
-    console.log("[registerUser] Trimmed values - Name:", JSON.stringify(trimmedFirst), "LastName:", JSON.stringify(trimmedLast), "Email:", JSON.stringify(trimmedEmail));
-    
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     // Match your .NET UserDto exactly: Name, LastName, Email, Password
     const payload = {
       Name: trimmedFirst,
@@ -87,16 +80,12 @@ export const registerUser = async (
     } as const;
 
     console.log("[registerUser] Sending to:", `${BASE_URL}/register`);
-<<<<<<< HEAD
     console.log("[registerUser] Request payload:", JSON.stringify({
       Name: trimmedFirst,
       LastName: trimmedLast,
       Email: trimmedEmail,
       Password: "***" + password.slice(-2)
     }, null, 2));
-=======
-    console.log("[registerUser] Request payload:", JSON.stringify(payload, null, 2));
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     console.log("[registerUser] Payload size:", JSON.stringify(payload).length, "bytes");
 
     const response = await fetchWithTimeout(`${BASE_URL}/register`, {
@@ -110,12 +99,9 @@ export const registerUser = async (
       timeoutMs: 12000,
     });
 
-<<<<<<< HEAD
     console.log("[registerUser] Response status:", response.status, response.statusText);
     console.log("[registerUser] Response headers:", Object.fromEntries(response.headers.entries()));
 
-=======
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     const contentType = response.headers.get("content-type") || "";
     let body: any = null;
     try {
@@ -126,17 +112,11 @@ export const registerUser = async (
       console.log("[registerUser] Failed to parse response body", e);
     }
 
-<<<<<<< HEAD
     console.log("[registerUser] Response body:", body);
 
     if (!response.ok) {
       console.log("[registerUser] ===== REGISTRATION FAILED =====");
       console.log("[registerUser] HTTP Error:", response.status, response.statusText);
-=======
-    if (!response.ok) {
-      console.log("[registerUser] HTTP Error:", response.status, response.statusText);
-      console.log("[registerUser] Response headers:", Object.fromEntries(response.headers.entries()));
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
       console.log("[registerUser] Error body:", body);
       
       // Extract specific error message
@@ -157,7 +137,6 @@ export const registerUser = async (
       return { message: errorMsg };
     }
 
-<<<<<<< HEAD
     console.log("[registerUser] ===== REGISTRATION SUCCESS =====");
     console.log("[registerUser] Success response:", body);
     
@@ -183,13 +162,6 @@ export const registerUser = async (
     console.log("[registerUser] Error details:", error?.message || error);
     console.log("[registerUser] Error name:", error?.name);
     console.log("[registerUser] Error stack:", error?.stack);
-    
-=======
-    console.log("[registerUser] Success", body);
-    return body;
-  } catch (error: any) {
-    console.log("[registerUser] Network error", error?.message || error);
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     const isAbort = error?.name === "AbortError";
     return { message: isAbort ? "İstek zaman aşımına uğradı." : "Kayıt sırasında ağ hatası oluştu." };
   }
@@ -199,7 +171,6 @@ export const registerUser = async (
 // Giriş yap
 export const loginUser = async (email: string, password: string) => {
   try {
-<<<<<<< HEAD
     const trimmedEmail = email?.trim()?.toLowerCase();
     
     console.log("[loginUser] ===== LOGIN ATTEMPT DETAILS =====");
@@ -310,34 +281,6 @@ export const loginUser = async (email: string, password: string) => {
     console.log("[loginUser] Error details:", error?.message || error);
     console.log("[loginUser] Error name:", error?.name);
     console.log("[loginUser] Error stack:", error?.stack);
-    
-=======
-    console.log("[loginUser] URL:", `${BASE_URL}/login`);
-    const response = await fetchWithTimeout(`${BASE_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-      timeoutMs: 12000,
-    });
-
-    const contentType = response.headers.get("content-type") || "";
-    let body: any = null;
-    try {
-      body = contentType.includes("application/json") ? await response.json() : await response.text();
-    } catch (e) {
-      console.log("[loginUser] Failed to parse response body", e);
-    }
-
-    if (!response.ok) {
-      console.log("[loginUser] HTTP", response.status, body);
-      return { message: (body && (body.message || body.error)) || `Sunucu hatası (${response.status})` };
-    }
-
-    console.log("[loginUser] Success", body);
-    return body;
-  } catch (error: any) {
-    console.log("[loginUser] Network error", error?.message || error);
->>>>>>> 6e5bc13e524bf6c95a46101914a8d33bf539a831
     const isAbort = error?.name === "AbortError";
     return { message: isAbort ? "İstek zaman aşımına uğradı." : "Giriş sırasında ağ hatası oluştu." };
   }
