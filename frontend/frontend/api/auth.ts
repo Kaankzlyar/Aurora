@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Detect if running on emulator vs physical device
 const isEmulator = Platform.select({
@@ -332,6 +333,68 @@ export const testServerConnection = async () => {
   }
 };
 
+// Get user profile information
+export const getUserProfile = async () => {
+  try {
+    const token = await AsyncStorage.getItem('userToken');
+    if (!token) {
+      return { message: "No authentication token found" };
+    }
+
+    console.log("[getUserProfile] Fetching user profile...");
+    
+    const response = await fetchWithTimeout(`${BASE_URL}/profile`, {
+      method: "GET",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+      },
+      timeoutMs: 10000,
+    });
+
+    console.log("[getUserProfile] Response status:", response.status);
+
+    const contentType = response.headers.get("content-type") || "";
+    let body: any = null;
+    
+    try {
+      body = contentType.includes("application/json") 
+        ? await response.json() 
+        : await response.text();
+    } catch (e) {
+      console.log("[getUserProfile] Failed to parse response body", e);
+    }
+
+    if (!response.ok) {
+      console.log("[getUserProfile] Profile fetch failed:", body);
+      // If profile endpoint doesn't exist, fallback to token data
+      if (response.status === 404) {
+        console.log("[getUserProfile] Profile endpoint not found, using token data");
+        const tokenData = getUserInfoFromToken(token);
+        return tokenData ? { success: true, user: tokenData } : { message: "Failed to get user info" };
+      }
+      return { message: body?.message || "Failed to fetch profile" };
+    }
+
+    console.log("[getUserProfile] Profile fetched successfully:", body);
+    return { success: true, user: body };
+  } catch (error: any) {
+    console.log("[getUserProfile] Network error:", error?.message);
+    // Fallback to token data on network error
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (token) {
+        const tokenData = getUserInfoFromToken(token);
+        return tokenData ? { success: true, user: tokenData } : { message: "Network error and no token data" };
+      }
+    } catch (e) {
+      console.log("[getUserProfile] Token fallback failed:", e);
+    }
+    return { message: "Network error occurred" };
+  }
+};
+
 // Extract user information from JWT token
 export const getUserInfoFromToken = (token: string) => {
   try {
@@ -361,15 +424,16 @@ export const getUserInfoFromToken = (token: string) => {
       
       // Extract common JWT claims
       const userInfo = {
-        id: userData.sub || userData.id || userData.userId,
+        id: userData.sub || userData.id || userData.userId || userData.nameid,
         email: userData.email || userData.Email,
-        name: userData.name || userData.Name || userData.given_name,
+        name: userData.name || userData.Name || userData.given_name || userData.unique_name,
         firstName: userData.firstName || userData.FirstName || userData.name || userData.Name || userData.given_name,
         lastName: userData.lastName || userData.LastName || userData.family_name,
-        fullName: userData.fullName || userData.FullName,
-        username: userData.username || userData.Username || userData.email || userData.Email,
+        fullName: userData.fullName || userData.FullName || userData.unique_name,
+        username: userData.username || userData.Username || userData.email || userData.Email || userData.unique_name,
         exp: userData.exp, // Expiration time
         iat: userData.iat, // Issued at time
+        nbf: userData.nbf, // Not before time
       };
       
       return userInfo;

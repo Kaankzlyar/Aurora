@@ -12,40 +12,55 @@ import GoldText from "../components/GoldText"; // yolu ayarla
 function FeaturedBanner({ onPress }: { onPress: () => void }) {
   return (
     <View style={fb.wrapper}>
-      {/* İç parlaklık / “glass” derinliği için hafif blur istiyorsan:
-         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} /> */}
-      {/* Altın-sicak degrade panel */}
+      {/* arka panel: sıcak kahve-altın degrade */}
       <LinearGradient
-  colors={["#3b2a16", "#3a2312", "#2b1c10"]}
-  start={{ x: 0, y: 0.5 }}
-  end={{ x: 1, y: 0.5 }}
-  style={fb.panel}
->
-  {/* Parıltı overlay */}
-  <View style={StyleSheet.absoluteFill}>
-    <LinearGradient
-      colors={["rgba(255,255,255,0.08)", "transparent"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0.3, y: 1 }}
-      style={StyleSheet.absoluteFill}
-    />
-  </View>
+        colors={["#3b2a16", "#3a2312", "#2b1c10"]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        style={fb.panel}
+      >
+        {/* parıltı/ışık vurgusu */}
+        <View style={StyleSheet.absoluteFill}>
+          <LinearGradient
+            colors={["rgba(255,255,255,0.08)", "transparent"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0.3, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
 
-  {/* Metin ve buton */}
-  <View style={fb.textCol}>
-    <Text style={fb.overline}>FEATURED</Text>
-    <GoldText style={fb.title}>New Arrivals</GoldText>
-    <Text style={fb.desc}>
-      Discover our latest collection of luxury pieces
-    </Text>
+        {/* sağ üstten diyagonal karartma (derinlik) */}
+        <View style={StyleSheet.absoluteFill}>
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.18)"]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
 
-    <Pressable onPress={onPress} style={fb.cta}>
-      <Text style={fb.ctaText}>EXPLORE</Text>
-    </Pressable>
-  </View>
-</LinearGradient>
+        {/* içerik */}
+        <View style={fb.textCol}>
+          <Text style={fb.overline}>FEATURED</Text>
+          <Text style={fb.title}>New Arrivals</Text>
+          <Text style={fb.desc}>
+            Discover our latest collection of luxury pieces
+          </Text>
 
-      {/* İnce altın çerçeve */}
+          <Pressable onPress={onPress} style={({ pressed }) => [fb.cta, pressed && fb.ctaPressed]}>
+            <LinearGradient
+              colors={["#F1D37A", "#D4AF37", "#B8870B"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={fb.ctaBg}
+            >
+              <Text style={fb.ctaText}>EXPLORE</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+      </LinearGradient>
+
+      {/* ince altın çerçeve */}
       <View pointerEvents="none" style={fb.stroke} />
     </View>
   );
@@ -54,8 +69,8 @@ function FeaturedBanner({ onPress }: { onPress: () => void }) {
 const fb = StyleSheet.create({
   wrapper: {
     borderRadius: 16,
-    marginTop: 24,
     overflow: "hidden",
+    marginTop: 24,
     // subtle shadow
     shadowColor: "#000",
     shadowOpacity: 0.25,
@@ -72,7 +87,7 @@ const fb = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.25)", // Aurora gold ince çerçeve
+    borderColor: "rgba(212,175,55,0.25)", // aurora gold
   },
   textCol: {
     maxWidth: "80%",
@@ -86,7 +101,7 @@ const fb = StyleSheet.create({
     fontFamily: "Montserrat_500Medium",
   },
   title: {
-    color: "#F4E6C1",
+    color: "#F4E6C1", // başlık açık altın
     fontSize: 18,
     marginBottom: 6,
     fontFamily: "PlayfairDisplay_700Bold",
@@ -99,10 +114,16 @@ const fb = StyleSheet.create({
   },
   cta: {
     alignSelf: "flex-start",
-    backgroundColor: "#C48913",           // altın düğme
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  ctaBg: {
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 10,
+  },
+  ctaPressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.95,
   },
   ctaText: {
     color: "#121212",
@@ -113,78 +134,65 @@ const fb = StyleSheet.create({
 });
 
 
-export default function HomeScreen({ 
-  onLogout, 
+export default function HomeScreen({
+  onLogout,
   onNavigateToCollection,
-  onNavigateToProfile
-}: { 
+  onNavigateToProfile,
+}: {
   onLogout: () => void;
   onNavigateToCollection: () => void;
   onNavigateToProfile: () => void;
 }) {
-  // Example basket count (would come from state/store in real app)
   const basketCount = useMemo(() => 2, []);
-  
-  // Get safe area insets to avoid overlapping with status bar
   const insets = useSafeAreaInsets();
-
-  const handleProfilePress = () => {
-    console.log("Profile pressed");
-    onNavigateToProfile();
-  };
-
-  const handleCollectionPress = () => {
-    console.log("Collection pressed");
-    onNavigateToCollection();
-  };
-
 
   return (
     <View style={styles.container}>
-      {/* Aurora Header with safe area */}
+      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <Text style={styles.brand}>AURORA</Text>
-        <Pressable 
-          hitSlop={12} 
-          style={styles.profileBtn} 
+        <Pressable
+          hitSlop={12}
+          style={styles.profileBtn}
           accessibilityLabel="Profil"
-          onPress={handleProfilePress}
+          onPress={onNavigateToProfile}
         >
           <Text style={styles.profileEmoji}>👤</Text>
         </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Hero / Showcase */}
         <Text style={styles.heroOverline}>ZAMANSIZ KLASİKLER</Text>
         <Text style={styles.heroTitle}>Size Özel Seçimler</Text>
         <Text style={styles.heroBody}>
           Gucci, Prada, Tom Ford - yalnızca seçkin üyeler için kürasyon.
         </Text>
-        <FeaturedBanner onPress={() => {
-    // örn: Yeni Gelenler sayfasına git
-    console.log("Explore New Arrivals");
-    // onNavigateToExplore(); veya router.push("/collections/new")
-  }} />
 
-        {/* Collection cards shortcuts */}
-       
+        {/* === Featured / New Arrivals === */}
+        <FeaturedBanner onPress={() => {
+          // buradan yeni gelenler sayfasına yönlendir
+          // router.push("/collections/new") veya onNavigateToCollection();
+          console.log("Explore New Arrivals");
+        }} />
+
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Fixed "My Collection" (cart) button */}
-      <Pressable 
-        style={styles.collectionFab} 
+      {/* Koleksiyonum (sepete giden kısayol) */}
+      <Pressable
+        style={styles.collectionFab}
         accessibilityLabel="Koleksiyonum"
-        onPress={handleCollectionPress}
+        onPress={onNavigateToCollection}
       >
         <Text style={styles.collectionText}>Koleksiyonum</Text>
         {basketCount > 0 && (
-          <View style={styles.badge}><Text style={styles.badgeText}>{basketCount}</Text></View>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{basketCount}</Text>
+          </View>
         )}
       </Pressable>
 
-      {/* Temporary logout button */}
+      {/* Logout (geçici) */}
       <View style={styles.logoutContainer}>
         <Button title="Logout" onPress={onLogout} />
       </View>
@@ -211,11 +219,12 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: "#C48913",
     fontSize: 29,
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: "PlayfairDisplay_700Bold",
   },
   profileBtn: { position: "absolute", right: 12, padding: 6 },
   profileEmoji: { fontSize: 22 },
   content: { padding: 20 },
+
   heroOverline: {
     fontWeight: "500",
     color: "#B3B3B3",
@@ -223,44 +232,23 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     fontSize: 11,
     marginTop: 8,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: "Montserrat_500Medium",
   },
   heroTitle: {
     color: "#FFFFFF",
     fontSize: 35,
     letterSpacing: 1,
     marginTop: 6,
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: "PlayfairDisplay_700Bold",
   },
   heroBody: {
     color: "#E0E0E0",
     fontSize: 16,
     lineHeight: 24,
     marginTop: 8,
-    fontFamily: 'CormorantGaramond_400Regular',
+    fontFamily: "CormorantGaramond_400Regular",
   },
-  cardsRow: { flexDirection: "row", gap: 12, marginTop: 20 },
-  card: {
-    flex: 1,
-    backgroundColor: "#111111",
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#1F1F1F",
-  },
-  cardTitle: {
-    color: "#C48913",
-    fontSize: 16,
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    fontFamily: 'PlayfairDisplay_700Bold',
-  },
-  cardSub: {
-    color: "#CFCFCF",
-    fontSize: 13,
-    marginTop: 6,
-    fontFamily: 'CormorantGaramond_400Regular',
-  },
+
   collectionFab: {
     position: "absolute",
     left: 16,
@@ -281,12 +269,14 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     textTransform: "uppercase",
     fontSize: 11,
-    fontFamily: 'CormorantGaramond_500Medium',
+    fontFamily: "CormorantGaramond_500Medium",
   },
   badge: {
     position: "absolute",
-    right: 14, top: 8,
-    minWidth: 22, height: 22,
+    right: 14,
+    top: 8,
+    minWidth: 22,
+    height: 22,
     borderRadius: 11,
     backgroundColor: "#C48913",
     alignItems: "center",
@@ -297,12 +287,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#0B0B0B",
     fontSize: 12,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: "Montserrat_500Medium",
   },
-  logoutContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-  },
+  logoutContainer: { position: "absolute", bottom: 20, left: 20, right: 20 },
 });

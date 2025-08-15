@@ -1,9 +1,49 @@
 import { View, Text, ScrollView, StyleSheet, Pressable, Alert } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
+import { getUserProfile } from "../../api/auth";
+import { useState, useEffect, useMemo } from "react";
 import AuroraHeader from "../../components/AuroraHeader";
 
 export default function Screen() {
-  const { logout } = useAuth();
+  const { logout, userInfo, updateUserInfo } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      // Don't fetch if we already have userInfo from context
+      if (userInfo && Object.keys(userInfo).length > 0) {
+        console.log('[Profile] Using existing userInfo from context');
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        console.log('[Profile] Fetching user profile...');
+        const result = await getUserProfile();
+        
+        if (result.success && result.user) {
+          console.log('[Profile] Profile fetched successfully:', result.user);
+          
+          // Only update if the data is different
+          const isDifferent = JSON.stringify(profileData) !== JSON.stringify(result.user);
+          if (isDifferent) {
+            setProfileData(result.user);
+            updateUserInfo(result.user);
+          }
+        } else {
+          console.log('[Profile] Profile fetch failed, using existing userInfo');
+        }
+      } catch (error) {
+        console.error('[Profile] Error fetching profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []); // Remove updateUserInfo dependency to prevent infinite re-renders
 
   const handleLogout = async () => {
     Alert.alert(
@@ -32,6 +72,32 @@ export default function Screen() {
     );
   };
 
+  // Extract display information from userInfo or profileData with useMemo for performance
+  const currentUserData = useMemo(() => profileData || userInfo, [profileData, userInfo]);
+  
+  // For debugging, log the current user data
+  console.log('[Profile] Current user data:', currentUserData);
+  
+  const displayName = useMemo(() => {
+    return currentUserData?.fullName || 
+           currentUserData?.name || 
+           currentUserData?.username ||
+           `${currentUserData?.firstName || ''} ${currentUserData?.lastName || ''}`.trim() ||
+           'Kullanıcı';
+  }, [currentUserData]);
+  
+  const displayEmail = useMemo(() => {
+    return currentUserData?.email || 'E-posta bilgisi mevcut değil';
+  }, [currentUserData]);
+  
+  const displayId = useMemo(() => {
+    return currentUserData?.id || 'ID bilgisi mevcut değil';
+  }, [currentUserData]);
+  
+  // For phone, we don't have this in JWT, so we'll show a placeholder
+  // In a real app, you might fetch additional profile data from a separate API
+  const displayPhone = '+90 555 XXX XX XX (Demo)';
+
   return (
     <View style={styles.container}>
       <AuroraHeader />
@@ -44,20 +110,33 @@ export default function Screen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Kişisel Bilgiler</Text>
           
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Ad Soyad</Text>
-            <Text style={styles.infoValue}>Kullanıcı Adı</Text>
-          </View>
-          
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>E-posta</Text>
-            <Text style={styles.infoValue}>kullanici@example.com</Text>
-          </View>
-          
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Telefon</Text>
-            <Text style={styles.infoValue}>+90 555 123 45 67</Text>
-          </View>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Bilgiler yükleniyor...</Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Ad Soyad</Text>
+                <Text style={styles.infoValue}>{displayName}</Text>
+              </View>
+              
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>E-posta</Text>
+                <Text style={styles.infoValue}>{displayEmail}</Text>
+              </View>
+              
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Kullanıcı ID</Text>
+                <Text style={styles.infoValue}>{displayId}</Text>
+              </View>
+              
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Telefon</Text>
+                <Text style={styles.infoValue}>{displayPhone}</Text>
+              </View>
+            </>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -169,5 +248,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#D4AF37",
     fontFamily: "Montserrat_400Regular",
+  },
+  loadingContainer: {
+    backgroundColor: "#1A1A1A",
+    padding: 24,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#333333",
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: "Montserrat_400Regular",
+    color: "rgba(255, 255, 255, 0.7)",
   },
 });
