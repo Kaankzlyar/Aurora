@@ -331,3 +331,54 @@ export const testServerConnection = async () => {
     return { success: false, error: error?.message };
   }
 };
+
+// Extract user information from JWT token
+export const getUserInfoFromToken = (token: string) => {
+  try {
+    if (!token) {
+      console.log("[getUserInfoFromToken] No token provided");
+      return null;
+    }
+
+    // Split JWT token into parts
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.log("[getUserInfoFromToken] Invalid JWT format");
+      return null;
+    }
+
+    // Decode the payload (second part)
+    const payload = parts[1];
+    
+    // Add padding if needed for base64 decoding
+    const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+    
+    try {
+      const decodedPayload = atob(paddedPayload);
+      const userData = JSON.parse(decodedPayload);
+      
+      console.log("[getUserInfoFromToken] Decoded user data:", userData);
+      
+      // Extract common JWT claims
+      const userInfo = {
+        id: userData.sub || userData.id || userData.userId,
+        email: userData.email || userData.Email,
+        name: userData.name || userData.Name || userData.given_name,
+        firstName: userData.firstName || userData.FirstName || userData.name || userData.Name || userData.given_name,
+        lastName: userData.lastName || userData.LastName || userData.family_name,
+        fullName: userData.fullName || userData.FullName,
+        username: userData.username || userData.Username || userData.email || userData.Email,
+        exp: userData.exp, // Expiration time
+        iat: userData.iat, // Issued at time
+      };
+      
+      return userInfo;
+    } catch (decodeError) {
+      console.log("[getUserInfoFromToken] Failed to decode JWT payload:", decodeError);
+      return null;
+    }
+  } catch (error: any) {
+    console.log("[getUserInfoFromToken] Error extracting user info:", error?.message);
+    return null;
+  }
+};

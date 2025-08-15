@@ -1,7 +1,7 @@
 // components/RegisterForm.tsx
 import { useState } from 'react';
 import { registerUser } from '../api/auth';
-import { AuthPage } from './AuthPage';
+import AuthPage from './AuthPage';
 
 export default function RegisterForm({ onSuccess, onToggle }: { onSuccess: () => void; onToggle: () => void }) {
   const [formData, setFormData] = useState({

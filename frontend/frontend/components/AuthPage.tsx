@@ -62,7 +62,7 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
             <Card style={styles.card}>
               <CardHeader style={styles.cardHeader}>
                 <CardTitle style={styles.cardTitle}>
-                  {isLogin ? 'Welcome to the House' : 'Join Aurora'}
+                  {isLogin ? 'The House' : 'Join Aurora'}
                 </CardTitle>
                 <CardDescription style={styles.cardDescription}>
                   {isLogin ? 'Access your exclusive account' : 'Enter the world of luxury'}
