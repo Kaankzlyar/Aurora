@@ -1,6 +1,16 @@
 import React, { useState, useRef } from 'react';
 import { BlurView } from 'expo-blur';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  ScrollView, 
+  TextInput, 
+  KeyboardAvoidingView, 
+  Platform,
+  Dimensions 
+} from 'react-native';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -27,9 +37,11 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
   const lastNameRef = useRef<TextInput>(null);
 
   return (
-
-    
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
       {/* Arka plan gradient */}
       <LinearGradient
         colors={[
@@ -40,7 +52,11 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
         locations={[0, 0.4, 0.8, 1]}
         style={StyleSheet.absoluteFill}
       />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.contentWrapper}>
           
           {/* Logo & Header */}
@@ -189,14 +205,19 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
           </View>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   // Arka plan koyu
   container: { flex: 1, backgroundColor: '#000' },
-  scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 16 },
+  scrollContainer: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    padding: 16,
+    paddingBottom: 50, // Klavye için extra space
+  },
   contentWrapper: { width: '100%', maxWidth: 400, alignSelf: 'center' },
 
   // Üst bölüm

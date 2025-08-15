@@ -1,8 +1,7 @@
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import {
   PlayfairDisplay_400Regular,
@@ -24,11 +23,11 @@ import {
 } from '@expo-google-fonts/cormorant-garamond';
 import LoginForm from '../components/LoginForm';
 import RegisterForm from '../components/RegisterForm';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 
-export default function RootLayout() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentAuthScreen, setCurrentAuthScreen] = useState('login');
+function AppNavigator() {
+  const { isAuthenticated, isLoading, login } = useAuth();
+  const [currentAuthScreen, setCurrentAuthScreen] = React.useState('login');
 
   // Load custom fonts
   const [fontsLoaded, fontError] = useFonts({
@@ -46,62 +45,11 @@ export default function RootLayout() {
     CormorantGaramond_500Medium_Italic
   });
 
-  useEffect(() => {
-    // Always check auth status after 2 seconds, regardless of font loading
-    const timer = setTimeout(() => {
-      if (!fontsLoaded && !fontError) {
-        console.log('[App] Font loading taking too long, proceeding without custom fonts');
-      }
-      checkAuthStatus();
-    }, 2000);
-
-    if (fontsLoaded || fontError) {
-      console.log('[App] Fonts loaded:', fontsLoaded, 'Font error:', fontError);
-      clearTimeout(timer);
-      checkAuthStatus();
-    }
-
-    return () => clearTimeout(timer);
-  }, [fontsLoaded, fontError]);
-
-  const checkAuthStatus = async () => {
-    try {
-      const token = await AsyncStorage.getItem('userToken');
-      console.log('[App] Checking auth status - token found:', token ? 'YES' : 'NO');
-      console.log('[App] Token value:', token);
-      
-      if (token) {
-        console.log('[App] Token found, setting authenticated to true');
-        setIsAuthenticated(true);
-      } else {
-        console.log('[App] No token found, staying on login screen');
-        setIsAuthenticated(false);
-      }
-    } catch (error) {
-      console.error('[App] Error checking auth status:', error);
-      setIsAuthenticated(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
+    login();
   };
 
-  const handleLogout = async () => {
-    try {
-      console.log('[App] Logging out - removing token');
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userInfo');
-      setIsAuthenticated(false);
-      console.log('[App] Logout complete');
-    } catch (error) {
-      console.error('[App] Error during logout:', error);
-    }
-  };
-
-  if (isLoading) {
+  if (isLoading || (!fontsLoaded && !fontError)) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>
@@ -118,7 +66,7 @@ export default function RootLayout() {
 
   if (!isAuthenticated) {
     return (
-      <SafeAreaProvider>
+      <>
         {currentAuthScreen === 'login' ? (
           <LoginForm 
             onSuccess={handleLoginSuccess} 
@@ -130,15 +78,23 @@ export default function RootLayout() {
             onToggle={() => setCurrentAuthScreen('login')} 
           />
         )}
-      </SafeAreaProvider>
+      </>
     );
   }
 
   return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
     <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
+      <AuthProvider>
+        <AppNavigator />
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

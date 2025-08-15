@@ -1,7 +1,37 @@
-import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Pressable, Alert } from "react-native";
+import { useAuth } from "../../contexts/AuthContext";
 import AuroraHeader from "../../components/AuroraHeader";
 
 export default function Screen() {
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    Alert.alert(
+      "Çıkış Yap",
+      "Çıkış yapmak istediğinizden emin misiniz?",
+      [
+        {
+          text: "İptal",
+          style: "cancel"
+        },
+        {
+          text: "Çıkış Yap",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              console.log('[Profile] User confirmed logout');
+              await logout();
+              console.log('[Profile] Logout completed via AuthContext');
+            } catch (error) {
+              console.error('[Profile] Error during logout:', error);
+              Alert.alert("Hata", "Çıkış yapılırken bir hata oluştu.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <AuroraHeader />
@@ -51,7 +81,7 @@ export default function Screen() {
             <Text style={styles.actionArrow}>›</Text>
           </Pressable>
           
-          <Pressable style={styles.actionButton}>
+          <Pressable style={styles.actionButton} onPress={handleLogout}>
             <Text style={styles.actionIcon}>🚪</Text>
             <Text style={styles.actionText}>Çıkış Yap</Text>
             <Text style={styles.actionArrow}>›</Text>
