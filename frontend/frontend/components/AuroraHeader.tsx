@@ -97,8 +97,8 @@ const s = StyleSheet.create({
     fontFamily: "PlayfairDisplay_700Bold",
     letterSpacing: 2,
     textTransform: "uppercase",
-    color: "#D4AF37",
-    fontSize: 20,
+    color: "#C48913",
+    fontSize: 26,
   },
   profileBtn: { 
     position: "absolute", 
@@ -107,7 +107,7 @@ const s = StyleSheet.create({
   },
   profileEmoji: { 
     fontSize: 22,
-    color: "#D4AF37",
+    color: "#C48913",
   },
   modalOverlay: {
     flex: 1,

@@ -3,6 +3,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMemo } from "react";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from "expo-linear-gradient";
+import GoldText from "../components/GoldText"; // yolu ayarla
+
+// ...
+
+
 
 function FeaturedBanner({ onPress }: { onPress: () => void }) {
   return (
@@ -29,7 +34,7 @@ function FeaturedBanner({ onPress }: { onPress: () => void }) {
   {/* Metin ve buton */}
   <View style={fb.textCol}>
     <Text style={fb.overline}>FEATURED</Text>
-    <Text style={fb.title}>New Arrivals</Text>
+    <GoldText style={fb.title}>New Arrivals</GoldText>
     <Text style={fb.desc}>
       Discover our latest collection of luxury pieces
     </Text>

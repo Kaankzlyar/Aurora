@@ -41,12 +41,12 @@ const styles = StyleSheet.create({
 
 const variantStyles = {
   default: {
-    backgroundColor: "#D4AF37", // Amber
+    backgroundColor: "#C48913", // Amber
   },
   outline: {
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: "#D4AF37",
+    borderColor: "#C48913",
   },
   destructive: {
     backgroundColor: "#ef4444", // Red

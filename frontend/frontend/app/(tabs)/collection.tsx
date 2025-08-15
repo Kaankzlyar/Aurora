@@ -7,7 +7,7 @@ export default function Screen() {
       <AuroraHeader />
       <ScrollView style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>🛍️ Sepetim</Text>
+          <Text style={styles.title}>🛍️ Koleksiyonum</Text>
           <Text style={styles.subtitle}>Seçtiğiniz ürünler</Text>
         </View>
         
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: "PlayfairDisplay_700Bold",
-    color: "#D4AF37",
+    color: "#C48913",
     marginBottom: 8,
   },
   subtitle: {

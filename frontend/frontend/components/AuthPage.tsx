@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BlurView } from 'expo-blur';
 import { 
   View, 
@@ -9,7 +9,8 @@ import {
   TextInput, 
   KeyboardAvoidingView, 
   Platform,
-  Dimensions 
+  Dimensions,
+  Keyboard
 } from 'react-native';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -28,6 +29,8 @@ type Props = {
 
 export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Props) {
   const [showPassword, setShowPassword] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   // Refs for input navigation
   const emailRef = useRef<TextInput>(null);
@@ -35,13 +38,27 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
   const confirmPasswordRef = useRef<TextInput>(null);
   const firstNameRef = useRef<TextInput>(null);
   const lastNameRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardVisible(true);
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
+  }, []);
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
+    <View style={styles.container}>
       {/* Arka plan gradient */}
       <LinearGradient
         colors={[
@@ -53,9 +70,17 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
         style={StyleSheet.absoluteFill}
       />
       <ScrollView 
-        contentContainerStyle={styles.scrollContainer}
+        ref={scrollViewRef}
+        contentContainerStyle={[
+          styles.scrollContainer,
+          keyboardVisible && { 
+            paddingBottom: Math.max(keyboardHeight - 150, 20),
+          }
+        ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={false}
+        automaticallyAdjustContentInsets={false}
       >
         <View style={styles.contentWrapper}>
           
@@ -205,7 +230,7 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -216,7 +241,7 @@ const styles = StyleSheet.create({
     flexGrow: 1, 
     justifyContent: 'center', 
     padding: 16,
-    paddingBottom: 50, // Klavye için extra space
+    minHeight: Dimensions.get('window').height - 100,
   },
   contentWrapper: { width: '100%', maxWidth: 400, alignSelf: 'center' },
 
@@ -232,7 +257,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 44,
     fontWeight: '400',
-    color: '#D4AF37',
+    color: '#C48913',
     fontFamily: 'PlayfairDisplay_700Bold', // font adını projendeki useFonts’a göre ayarla
     letterSpacing: 1,
   },
