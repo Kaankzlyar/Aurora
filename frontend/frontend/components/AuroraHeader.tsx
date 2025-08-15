@@ -7,15 +7,18 @@ export default function AuroraHeader() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const handleProfilePress = () => {
+    console.log("[AuroraHeader] Profile button pressed!");
     setShowProfileMenu(true);
   };
 
   const navigateToProfile = () => {
+    console.log("[AuroraHeader] Navigating to profile...");
     setShowProfileMenu(false);
     router.push("/(tabs)/profile");
   };
 
   const navigateToCart = () => {
+    console.log("[AuroraHeader] Navigating to cart...");
     setShowProfileMenu(false);
     router.push("/(tabs)/collection");
   };
