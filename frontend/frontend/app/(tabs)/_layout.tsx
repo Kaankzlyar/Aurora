@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Text } from "react-native";
-
+import { MaterialDesignIcons } from '@react-native-vector-icons/material-design-icons';
 export default function TabLayout() {
   return (
     <Tabs
@@ -8,8 +8,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "#0B0B0B",
-          borderTopColor: "#1A1A1A",
-          borderTopWidth: 1,
+          borderTopWidth: 0, // Üstteki çizgiyi kaldırıyoruz
         },
         tabBarActiveTintColor: "#D4AF37",
         tabBarInactiveTintColor: "#666666",
@@ -19,8 +18,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Ana Sayfa",
-          tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 20, color }}>🏠</Text>
+          tabBarIcon: ({ color}) => (
+             <MaterialDesignIcons name="home-outline" size={20} color={color} />
           ),
         }}
       />
@@ -29,7 +28,7 @@ export default function TabLayout() {
         options={{
           title: "Keşfet",
           tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 20, color }}>🔍</Text>
+            <MaterialDesignIcons name="magnify" size={20} color={color} />
           ),
         }}
       />
@@ -38,7 +37,7 @@ export default function TabLayout() {
         options={{
           title: "Sepetim",
           tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 20, color }}>🛍️</Text>
+            <MaterialDesignIcons name="shopping-outline" size={20} color={color} />
           ),
         }}
       />
@@ -47,7 +46,7 @@ export default function TabLayout() {
         options={{
           title: "Profil",
           tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 20, color }}>👤</Text>
+            <MaterialDesignIcons name="account-circle" size={20} color={color} />
           ),
         }}
       />

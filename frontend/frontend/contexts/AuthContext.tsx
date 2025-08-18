@@ -50,8 +50,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const savedUserInfo = await AsyncStorage.getItem('userInfo');
       const savedEmail = await AsyncStorage.getItem('userEmail');
       
-      console.log('[AuthContext] Checking auth status - token found:', token ? 'YES' : 'NO');
-      console.log('[AuthContext] Saved email found:', savedEmail);
+      console.log('[AuthContext] ===== AUTH STATUS CHECK =====');
+      console.log('[AuthContext] Token found:', token ? 'YES' : 'NO');
+      console.log('[AuthContext] Token preview:', token ? token.substring(0, 50) + '...' : 'none');
+      console.log('[AuthContext] Saved userInfo raw:', savedUserInfo);
+      console.log('[AuthContext] Saved email:', savedEmail);
+      console.log('[AuthContext] ==============================');
       
       if (token) {
         console.log('[AuthContext] Token found, setting authenticated to true');
@@ -62,9 +66,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (savedUserInfo) {
           try {
             userData = JSON.parse(savedUserInfo);
-            console.log('[AuthContext] Using saved user info (has email):', userData);
+            console.log('[AuthContext] ✅ Parsed saved user info successfully:', userData);
           } catch (e) {
-            console.log('[AuthContext] Failed to parse saved user info');
+            console.log('[AuthContext] ❌ Failed to parse saved user info:', e);
           }
         }
         
@@ -82,7 +86,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (userData) {
           setUserInfo(userData);
-          console.log('[AuthContext] User info loaded:', userData);
+          console.log('[AuthContext] ✅ Final user info set in context:', userData);
+        } else {
+          console.log('[AuthContext] ❌ No user data available');
         }
       } else {
         console.log('[AuthContext] No token found, setting authenticated to false');

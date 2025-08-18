@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getUserProfile } from "../../api/auth";
 import { useState, useEffect, useMemo } from "react";
 import AuroraHeader from "../../components/AuroraHeader";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Screen() {
   const { logout, userInfo, updateUserInfo } = useAuth();
@@ -76,18 +77,28 @@ export default function Screen() {
   const currentUserData = useMemo(() => profileData || userInfo, [profileData, userInfo]);
   
   // For debugging, log the current user data
-  console.log('[Profile] Current user data:', currentUserData);
+  console.log('[Profile] ===== DEBUG INFO =====');
+  console.log('[Profile] userInfo from context:', userInfo);
+  console.log('[Profile] profileData from API:', profileData);
+  console.log('[Profile] currentUserData (merged):', currentUserData);
+  console.log('[Profile] currentUserData keys:', currentUserData ? Object.keys(currentUserData) : 'null');
+  console.log('[Profile] currentUserData email specifically:', currentUserData?.email);
+  console.log('[Profile] ===========================');
   
   const displayName = useMemo(() => {
-    return currentUserData?.fullName || 
+    const result = currentUserData?.fullName || 
            currentUserData?.name || 
            currentUserData?.username ||
            `${currentUserData?.firstName || ''} ${currentUserData?.lastName || ''}`.trim() ||
            'Kullanıcı';
+    console.log('[Profile] displayName calculated:', result);
+    return result;
   }, [currentUserData]);
   
   const displayEmail = useMemo(() => {
-    return currentUserData?.email || 'E-posta bilgisi mevcut değil';
+    const result = currentUserData?.email || 'E-posta bilgisi mevcut değil';
+    console.log('[Profile] displayEmail calculated:', result);
+    return result;
   }, [currentUserData]);
   
   const displayId = useMemo(() => {
@@ -97,6 +108,47 @@ export default function Screen() {
   // For phone, we don't have this in JWT, so we'll show a placeholder
   // In a real app, you might fetch additional profile data from a separate API
   const displayPhone = '+90 555 XXX XX XX (Demo)';
+
+  // Debug function to manually trigger profile fetch
+  const manualFetchProfile = async () => {
+    setIsLoading(true);
+    try {
+      console.log('[Profile] Manual fetch triggered...');
+      const result = await getUserProfile();
+      
+      Alert.alert(
+        "Manual Fetch Result",
+        `Success: ${result.success ? 'YES' : 'NO'}\n\nData: ${JSON.stringify(result, null, 2)}`,
+        [{ text: "OK" }]
+      );
+      
+      if (result.success && result.user) {
+        setProfileData(result.user);
+        updateUserInfo(result.user);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Manual fetch failed: " + error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Debug function to check AsyncStorage
+  const checkAsyncStorage = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const userInfo = await AsyncStorage.getItem('userInfo');
+      const userEmail = await AsyncStorage.getItem('userEmail');
+      
+      Alert.alert(
+        "AsyncStorage Debug",
+        `Token: ${token ? 'EXISTS' : 'NULL'}\n\nUserInfo: ${userInfo || 'NULL'}\n\nUserEmail: ${userEmail || 'NULL'}`,
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Failed to read AsyncStorage: " + error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -137,6 +189,22 @@ export default function Screen() {
               </View>
             </>
           )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Debug İşlemleri</Text>
+          
+          <Pressable style={styles.actionButton} onPress={checkAsyncStorage}>
+            <Text style={styles.actionIcon}>🔍</Text>
+            <Text style={styles.actionText}>AsyncStorage Kontrol Et</Text>
+            <Text style={styles.actionArrow}>›</Text>
+          </Pressable>
+          
+          <Pressable style={styles.actionButton} onPress={manualFetchProfile}>
+            <Text style={styles.actionIcon}>📡</Text>
+            <Text style={styles.actionText}>Manual Profile Fetch</Text>
+            <Text style={styles.actionArrow}>›</Text>
+          </Pressable>
         </View>
 
         <View style={styles.section}>
