@@ -21,6 +21,14 @@ namespace EcommerceAPI
 
             // To this (all interfaces):
             builder.WebHost.UseUrls("http://0.0.0.0:5270");
+
+            builder.Services.AddCors(o =>
+            {
+                o.AddDefaultPolicy(p =>
+                    p.AllowAnyOrigin()   // yayınlamada domain bazlı kısıtla
+                     .AllowAnyHeader()
+                     .AllowAnyMethod());
+            });
             builder.Services.AddControllers()
                 .AddJsonOptions( o=>
                 {
@@ -89,7 +97,8 @@ namespace EcommerceAPI
             // IMPORTANT: Authentication must come before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
-            
+            app.UseCors();
+            app.UseStaticFiles();
             app.MapControllers();
 
             app.Run();
