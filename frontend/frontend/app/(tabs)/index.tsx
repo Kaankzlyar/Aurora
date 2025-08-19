@@ -150,13 +150,7 @@ export default function Home() {
 
         {/* Koleksiyon kartlarına giden kısayollar (örnek) */}
         <View style={s.cardsRow}>
-          <Link href="/collection" asChild>
-            <Pressable style={s.card}>
-              <Text style={s.cardTitle}>Yeni Gelenler</Text>
-              <Text style={s.cardSub}>Bu hafta eklendi</Text>
-            </Pressable>
-          </Link>
-
+          
           <Link href="/profile" asChild>
             <Pressable style={s.card}>
               <Text style={s.cardTitle}>İkonik Seçimler</Text>

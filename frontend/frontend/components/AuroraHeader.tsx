@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { router } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AuroraHeader() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -68,7 +69,7 @@ export default function AuroraHeader() {
             <View style={s.menuDivider} />
             
             <Pressable style={s.menuItem} onPress={navigateToCart}>
-              <Text style={s.menuIcon}>🛍️</Text>
+              <Ionicons name="bag-outline" size={20} color={"#D4AF37"} />
               <Text style={s.menuText}>Sepetim</Text>
             </Pressable>
           </View>

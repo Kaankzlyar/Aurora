@@ -13,6 +13,8 @@ namespace EcommerceAPI.Data
         public DbSet<Product> Products => Set<Product>();
         public DbSet<CartItem> CartItems => Set<CartItem>();
 
+    public DbSet<UserFavorite> UserFavorites => Set<UserFavorite>();
+
         protected override void OnModelCreating(ModelBuilder b)
         {
             base.OnModelCreating(b);
@@ -49,6 +51,21 @@ namespace EcommerceAPI.Data
             b.Entity<CartItem>()
                 .Property(ci => ci.Quantity)
                 .HasDefaultValue(1);
+
+            // UserFavorite ilişkileri
+            b.Entity<UserFavorite>()
+                .HasIndex(uf => new { uf.UserId, uf.ProductId })
+                .IsUnique();
+
+            b.Entity<UserFavorite>()
+                .HasOne(uf => uf.User)
+                .WithMany(u => u.UserFavorites)
+                .HasForeignKey(uf => uf.UserId);
+
+            b.Entity<UserFavorite>()
+                .HasOne(uf => uf.Product)
+                .WithMany()
+                .HasForeignKey(uf => uf.ProductId);
         }
     }
 }

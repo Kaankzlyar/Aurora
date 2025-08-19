@@ -171,6 +171,30 @@ namespace EcommerceAPI.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("EcommerceAPI.Models.UserFavorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId", "ProductId")
+                        .IsUnique();
+
+                    b.ToTable("UserFavorites");
+                });
+
             modelBuilder.Entity("EcommerceAPI.Models.CartItem", b =>
                 {
                     b.HasOne("EcommerceAPI.Models.Product", "Product")
@@ -209,6 +233,25 @@ namespace EcommerceAPI.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("EcommerceAPI.Models.UserFavorite", b =>
+                {
+                    b.HasOne("EcommerceAPI.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EcommerceAPI.Models.User", "User")
+                        .WithMany("UserFavorites")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EcommerceAPI.Models.Brand", b =>
                 {
                     b.Navigation("Products");
@@ -217,6 +260,11 @@ namespace EcommerceAPI.Migrations
             modelBuilder.Entity("EcommerceAPI.Models.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("EcommerceAPI.Models.User", b =>
+                {
+                    b.Navigation("UserFavorites");
                 });
 #pragma warning restore 612, 618
         }

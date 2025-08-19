@@ -38,6 +38,7 @@ import { getProducts, Product } from "../../services/catalog";
 import ProductCard from "../../components/ProductCard";
 import FilterBar from "../../components/FilterBar";
 import { addToCart } from "../../services/cart";
+import { addToFavorites, isFavorite } from "../../services/favorites";
 import { useAuth } from "../../contexts/AuthContext";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PageHeader from "../../components/PageHeader";
@@ -54,6 +55,7 @@ export default function ExploreTab() {
   const [filter, setFilter] = useState<{brandId?:number; categoryId?:number}>({});
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
 
   // 🔧 TOKEN ALMA FONKSİYONU
   const getTokenFromStorage = async (): Promise<string | null> => {
@@ -95,7 +97,19 @@ export default function ExploreTab() {
 
   const load = async () => {
     setLoading(true);
-    try { setItems(await getProducts(filter)); }
+    try { 
+      const products = await getProducts(filter);
+      setItems(products);
+      
+      // Favorileri kontrol et
+      const favIds = new Set<number>();
+      for (const product of products) {
+        if (await isFavorite(product.id)) {
+          favIds.add(product.id);
+        }
+      }
+      setFavoriteIds(favIds);
+    }
     finally { setLoading(false); }
   };
 
@@ -126,6 +140,33 @@ export default function ExploreTab() {
     }
   };
 
+  // ❤️ FAVORİLERE EKLEME FONKSİYONU
+  const onAddToFavorites = async (p: Product) => {
+    try {
+      const isFav = favoriteIds.has(p.id);
+      
+      if (isFav) {
+        // Favorilerden çıkar
+        const { removeFromFavorites } = await import("../../services/favorites");
+        await removeFromFavorites(p.id);
+        setFavoriteIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(p.id);
+          return newSet;
+        });
+        Alert.alert("💔 Favoriler", `"${p.name}" favorilerden çıkarıldı.`);
+      } else {
+        // Favorilere ekle
+        await addToFavorites(p);
+        setFavoriteIds(prev => new Set(prev).add(p.id));
+        Alert.alert("❤️ Favoriler", `"${p.name}" favorilere eklendi!`);
+      }
+    } catch (error) {
+      console.error('[ExploreTab] Favori işlemi hatası:', error);
+      Alert.alert("❌ Hata", "Favori işlemi sırasında hata oluştu.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* PAGE HEADER */}
@@ -148,7 +189,15 @@ export default function ExploreTab() {
           contentContainerStyle={{ padding:16, gap:12 }}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
           ListHeaderComponent={<FilterBar value={filter} onChange={setFilter} />}
-          renderItem={({ item }) => <ProductCard item={item} onAdd={onAdd} />}
+          renderItem={({ item }) => (
+            <ProductCard 
+              item={item} 
+              onAdd={onAdd} 
+              onAddToFavorites={onAddToFavorites}
+              isFavorite={favoriteIds.has(item.id)}
+              showFavoriteButton={true}
+            />
+          )}
         />
       </View>
     </View>

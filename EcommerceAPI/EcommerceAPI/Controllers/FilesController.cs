@@ -5,6 +5,7 @@ using EcommerceAPI.Data;
 using EcommerceAPI.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 
 namespace EcommerceAPI.Controllers;
 
@@ -16,49 +17,48 @@ public class FilesController : ControllerBase
     private static readonly string[] AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
 
     private readonly AppDbContext _db;
-    public FilesController(AppDbContext db) => _db = db;
-
-    /// <summary>Marka/Kategoriye göre dosya yükler</summary>
-    [HttpPost("upload")]
-    [Consumes("multipart/form-data")]
-    [ProducesResponseType(typeof(UploadResponse), StatusCodes.Status200OK)]
-    [RequestSizeLimit(10_000_000)]
-    public async Task<IActionResult> Upload([FromForm] UploadFileForm form)
+    private readonly IWebHostEnvironment _env;
+    public FilesController(AppDbContext db, IWebHostEnvironment env)
     {
-        if (form.File is null || form.File.Length == 0)
-            return BadRequest("Dosya boş.");
-
-        var ext = Path.GetExtension(form.File.FileName).ToLowerInvariant();
-        if (!AllowedExtensions.Contains(ext))
-            return BadRequest("Sadece jpg/jpeg/png/webp yükleyin.");
-
-        var brand = await _db.Brands.FirstOrDefaultAsync(b => b.Id == form.BrandId);
-        var cat = await _db.Categories.FirstOrDefaultAsync(c => c.Id == form.CategoryId);
-        if (brand is null) return BadRequest("Geçersiz brandId.");
-        if (cat is null) return BadRequest("Geçersiz categoryId.");
-
-        var brandSlug = !string.IsNullOrWhiteSpace(brand.Slug) ? brand.Slug! : Slugify(brand.Name);
-        var catSlug = !string.IsNullOrWhiteSpace(cat.Slug) ? cat.Slug! : Slugify(cat.Name);
-
-        var baseName = !string.IsNullOrWhiteSpace(form.FileName)
-            ? Slugify(form.FileName)
-            : Slugify(Path.GetFileNameWithoutExtension(form.File.FileName));
-
-        var finalName = $"{baseName}-{Guid.NewGuid():N}{ext}";
-
-        var diskDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", brandSlug, catSlug);
-        Directory.CreateDirectory(diskDir);
-
-        var fullPath = Path.Combine(diskDir, finalName);
-        using (var stream = System.IO.File.Create(fullPath))
-            await form.File.CopyToAsync(stream);
-
-        var webPath = $"/images/{brandSlug}/{catSlug}/{finalName}";
-        var absoluteUrl = $"{Request.Scheme}://{Request.Host}{webPath}";
-
-        return Ok(new UploadResponse(finalName, webPath, absoluteUrl));
+        _db = db;
+        _env = env;
     }
 
+    /// <summary>Marka/Kategoriye göre dosya yükler</summary>
+     [HttpPost("upload")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Upload([FromForm] UploadFileForm form)
+    {
+        if (form.File is null || form.File.Length == 0) return BadRequest("Dosya boş.");
+        var ext = Path.GetExtension(form.File.FileName).ToLowerInvariant();
+        if (!AllowedExtensions.Contains(ext)) return BadRequest("Sadece jpg/jpeg/png/webp yükleyin.");
+
+        var brand = await _db.Brands.FindAsync(form.BrandId);
+        var cat   = await _db.Categories.FindAsync(form.CategoryId);
+        if (brand is null) return BadRequest("Geçersiz brandId.");
+        if (cat   is null) return BadRequest("Geçersiz categoryId.");
+
+        var brandSlug = string.IsNullOrWhiteSpace(brand.Slug) ? Slugify(brand.Name) : brand.Slug!;
+        var catSlug   = string.IsNullOrWhiteSpace(cat.Slug)   ? Slugify(cat.Name)   : cat.Slug!;
+
+        var baseName  = string.IsNullOrWhiteSpace(form.FileName)
+            ? Slugify(Path.GetFileNameWithoutExtension(form.File.FileName))
+            : Slugify(form.FileName);
+
+        var safeName  = $"{baseName}-{Guid.NewGuid():N}{ext}";
+        var webRoot   = _env.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        Directory.CreateDirectory(webRoot);
+
+        var diskDir   = Path.Combine(webRoot, "images", brandSlug, catSlug);
+        Directory.CreateDirectory(diskDir);
+
+        await using var fs = System.IO.File.Create(Path.Combine(diskDir, safeName));
+        await form.File.CopyToAsync(fs);
+
+        var webPath = $"/images/{brandSlug}/{catSlug}/{safeName}";
+        var url     = $"{Request.Scheme}://{Request.Host}{webPath}";
+        return Ok(new UploadResponse(safeName, webPath, url));
+    }
     // Basit slugify
     private static string Slugify(string input)
     {

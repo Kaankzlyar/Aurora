@@ -1,18 +1,50 @@
 // components/ProductCard.tsx
 import React, { useState } from "react";
 import { View, Text, Image, Pressable } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Product } from "../services/catalog";
 import { imgUri } from "../api/http";
 
 export default function ProductCard({
   item,
   onAdd,
-}: { item: Product; onAdd?: (p: Product) => void }) {
+  onAddToFavorites,
+  isFavorite = false,
+  showFavoriteButton = true,
+}: { 
+  item: Product; 
+  onAdd?: (p: Product) => void;
+  onAddToFavorites?: (p: Product) => void;
+  isFavorite?: boolean;
+  showFavoriteButton?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
   const uri = imgUri(item.imagePath);
 
   return (
-    <View style={{ borderWidth: 1, borderColor: "#333", borderRadius: 12, padding: 12, gap: 8, backgroundColor: "#111" }}>
+    <View style={{ borderWidth: 1, borderColor: "#333", borderRadius: 12, padding: 12, gap: 8, backgroundColor: "#111", position: "relative" }}>
+      {/* FAVORITE BUTTON */}
+      {showFavoriteButton && onAddToFavorites && (
+        <Pressable
+          onPress={() => onAddToFavorites(item)}
+          style={{ 
+            position: "absolute", 
+            top: 8, 
+            right: 8, 
+            zIndex: 1, 
+            backgroundColor: "rgba(0,0,0,0.7)", 
+            borderRadius: 20, 
+            padding: 8 
+          }}
+        >
+          <Ionicons 
+            name={isFavorite ? "heart" : "heart-outline"} 
+            size={20} 
+            color={isFavorite ? "#C48913" : "#fff"} 
+          />
+        </Pressable>
+      )}
+
       {/* IMAGE */}
       {uri && !failed ? (
         <Image

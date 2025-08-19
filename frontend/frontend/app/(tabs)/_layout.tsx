@@ -24,11 +24,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="favorites"
         options={{
-          title: "Keşfet",
+          title: "Favoriler",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="search-outline" size={20} color={color} />
+            <Ionicons name="heart-outline" size={20} color={color} />
           ),
         }}
       />
