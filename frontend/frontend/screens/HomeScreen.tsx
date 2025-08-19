@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Button } from "react-nat
 import { useMemo } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from 'expo-router';
+
 
 function FeaturedBanner({ onPress }: { onPress: () => void }) {
   console.log("FeaturedBanner rendered");
@@ -56,11 +58,10 @@ const fb = StyleSheet.create({
   wrapper: {
     borderRadius: 18,
     overflow: "hidden",
-    // NOT: burada zIndex/elevation YOK — asıl zIndex'i overlay container verecek
   },
   panel: {
     padding: 20,
-    minHeight: 168,
+    minHeight: 200,
     justifyContent: "center",
   },
   stroke: {
@@ -96,15 +97,12 @@ const fb = StyleSheet.create({
   ctaText: { color: "#121212", letterSpacing: 1, fontSize: 12, fontFamily: "Montserrat_500Medium" },
 });
 
-/**  🔥 ZORLAYICI OVERLAY — banner’ı ekranın üstüne sabitle */
-function FeaturedBannerOverlay() {
-  console.log("FeaturedBannerOverlay mounted");
+function FeaturedBannerOverlay({ topOffset }: { topOffset?: number }) {
+  console.log("FeaturedBannerOverlay mounted, topOffset=", topOffset);
   return (
-    <View pointerEvents="box-none" style={overlay.container}>
+    <View pointerEvents="box-none" style={[overlay.container, topOffset !== undefined ? { top: topOffset } : {}]}>
       <View style={overlay.cardShadow}>
-        {/* İstersen alttaki satırı 1 dk’lığına aç: kutu kesin görünsün */}
-        {/* <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: "#5a3c16" }} /> */}
-        <FeaturedBanner onPress={() => console.log("Explore from overlay")} />
+        <FeaturedBanner onPress={() => router.push('/(tabs)/explore')} />
       </View>
     </View>
   );
@@ -115,14 +113,14 @@ const overlay = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
-    // header + hero metinlerden sonra görünsün:
-    top: 220,              // cihazına göre ayarla (görünene kadar artır/azalt)
-    zIndex: 9999,          // iOS
-    elevation: 9999,       // Android
+    top: 160,
+    zIndex: 9999,
+    elevation: 9999,
   },
   cardShadow: {
     borderRadius: 18,
     overflow: "visible",
+    backgroundColor: "rgba(255, 235, 170, 0.03)",
     shadowColor: "#000",
     shadowOpacity: 0.35,
     shadowRadius: 24,
@@ -145,46 +143,58 @@ export default function HomeScreen({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top }]}>
+      {/* <View style={[styles.header, { paddingTop: insets.top }]}>
         <Text style={styles.brand}>AURORA</Text>
         <Pressable hitSlop={12} style={styles.profileBtn} accessibilityLabel="Profil" onPress={onNavigateToProfile}>
           <Text style={styles.profileEmoji}>👤</Text>
         </Pressable>
-      </View>
+      </View> */}
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={[styles.content, { paddingBottom: 320 }]} // overlay + FAB için alan
+        contentContainerStyle={[styles.content, { paddingBottom: 320 }]}
       >
-        <Text style={styles.heroOverline}>ZAMANSIZ KLASİKLER</Text>
+        {/* <Text style={styles.heroOverline}>ZAMANSIZ KLASİKLER</Text>
         <Text style={styles.heroTitle}>Size Özel Seçimler</Text>
         <Text style={styles.heroBody}>
           Gucci, Prada, Tom Ford - yalnızca seçkin üyeler için kürasyon.
-        </Text>
+        </Text> */}
 
-        {/* Normal akıştaki banner (debug için bırak) */}
         <View style={{ height: 24 }} />
-        <FeaturedBanner onPress={() => console.log("Explore New Arrivals")} />
+        <FeaturedBanner onPress={() => router.push('/(tabs)/explore')} />
 
-        <View style={{ height: 600 }} />{/* kaydırmaya alan bırak */}
+        {/* <View style={styles.iconicSection}>
+          <Text style={styles.iconicOverline}>FEATURED</Text>
+          <Text style={styles.iconicTitle}>İkonik Seçimler</Text>
+          <Text style={styles.iconicDesc}>Zamansız, öne çıkan parçalar — keşfedin.</Text>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.iconicRow}>
+            {[1,2,3,4].map((i) => (
+              <Pressable key={i} style={styles.iconCard} onPress={() => router.push('/(tabs)/explore')}>
+                <View style={styles.iconImagePlaceholder} />
+                <Text numberOfLines={1} style={styles.iconCardTitle}>Seçim {i}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View> */}
+
+        <View style={{ height: 600 }} />
       </ScrollView>
 
-      {/* 🔥 ZORLAYICI OVERLAY */}
-      <FeaturedBannerOverlay />
+      {/* <FeaturedBannerOverlay topOffset={insets.top + 40} /> */}
 
-      {/* Sabit alt buton */}
-      <Pressable style={styles.collectionFab} accessibilityLabel="Koleksiyonum" onPress={onNavigateToCollection}>
+      {/* <Pressable style={styles.collectionFab} accessibilityLabel="Koleksiyonum" onPress={onNavigateToCollection}>
         <Text style={styles.collectionText}>KOLEKSİYONUM</Text>
         {basketCount > 0 && (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{basketCount}</Text>
           </View>
         )}
-      </Pressable>
+      </Pressable> */}
 
-      <View style={styles.logoutContainer}>
+      {/* <View style={styles.logoutContainer}>
         <Button title="Logout" onPress={onLogout} />
-      </View>
+      </View> */}
     </View>
   );
 }
@@ -276,4 +286,43 @@ const styles = StyleSheet.create({
   },
   badgeText: { fontWeight: "500", color: "#0B0B0B", fontSize: 12, fontFamily: "Montserrat_500Medium" },
   logoutContainer: { position: "absolute", bottom: 20, left: 20, right: 20 },
+  iconicSection: { marginTop: 18 },
+  iconicOverline: {
+    color: "#B7B7B7",
+    letterSpacing: 2,
+    fontSize: 10,
+    textTransform: "uppercase",
+    marginBottom: 6,
+    fontFamily: "Montserrat_500Medium",
+  },
+  iconicTitle: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    marginBottom: 6,
+    fontFamily: "PlayfairDisplay_700Bold",
+  },
+  iconicDesc: {
+    color: "#DADADA",
+    fontSize: 13,
+    marginBottom: 12,
+    fontFamily: "CormorantGaramond_400Regular",
+  },
+  iconicRow: { flexDirection: "row" },
+  iconCard: {
+    width: 140,
+    marginRight: 12,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#0F0F0F",
+    padding: 10,
+    alignItems: "center",
+  },
+  iconImagePlaceholder: {
+    width: "100%",
+    height: 90,
+    borderRadius: 8,
+    backgroundColor: "#222",
+    marginBottom: 8,
+  },
+  iconCardTitle: { color: "#FFFFFF", fontSize: 13, fontFamily: "Montserrat_500Medium" },
 });

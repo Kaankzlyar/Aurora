@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { View, Text, Image, Pressable } from "react-native";
 import { Product } from "../services/catalog";
-import { imgUri } from "../services/http";
+import { imgUri } from "../api/http";
 
 export default function ProductCard({
   item,

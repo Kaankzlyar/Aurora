@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Text } from "react-native";
-import { MaterialDesignIcons } from '@react-native-vector-icons/material-design-icons';
+import { Ionicons } from '@expo/vector-icons';
 export default function TabLayout() {
   return (
     <Tabs
@@ -19,7 +19,7 @@ export default function TabLayout() {
         options={{
           title: "Ana Sayfa",
           tabBarIcon: ({ color}) => (
-             <MaterialDesignIcons name="home-outline" size={20} color={color} />
+             <Ionicons name="home-outline" size={20} color={color} />
           ),
         }}
       />
@@ -28,7 +28,7 @@ export default function TabLayout() {
         options={{
           title: "Keşfet",
           tabBarIcon: ({ color }) => (
-            <MaterialDesignIcons name="magnify" size={20} color={color} />
+            <Ionicons name="search-outline" size={20} color={color} />
           ),
         }}
       />
@@ -37,7 +37,7 @@ export default function TabLayout() {
         options={{
           title: "Sepetim",
           tabBarIcon: ({ color }) => (
-            <MaterialDesignIcons name="shopping-outline" size={20} color={color} />
+            <Ionicons name="bag-outline" size={20} color={color} />
           ),
         }}
       />
@@ -46,7 +46,7 @@ export default function TabLayout() {
         options={{
           title: "Profil",
           tabBarIcon: ({ color }) => (
-            <MaterialDesignIcons name="account-circle" size={20} color={color} />
+            <Ionicons name="person-circle-outline" size={20} color={color} />
           ),
         }}
       />
