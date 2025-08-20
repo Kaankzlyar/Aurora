@@ -5,13 +5,20 @@ export async function http<T>(
   opts: RequestInit = {},
   token?: string
 ): Promise<T> {
+  // BASE_URL kontrolü
+  if (!BASE_URL || BASE_URL === 'undefined') {
+    console.error('[HTTP] FATAL: BASE_URL is undefined or null!');
+    throw new Error('BASE_URL is not configured properly');
+  }
+  
   const fullUrl = `${BASE_URL}${path}`;
   
   console.log('[HTTP] ===== API ÇAĞRISI BAŞLADI =====');
-  console.log('[HTTP] URL:', fullUrl);
+  console.log('[HTTP] Raw BASE_URL value:', BASE_URL);
+  console.log('[HTTP] Path:', path);
+  console.log('[HTTP] Full URL:', fullUrl);
   console.log('[HTTP] Method:', opts.method || 'GET');
   console.log('[HTTP] Token:', token ? `${token.substring(0, 20)}...` : 'YOK');
-  console.log('[HTTP] BASE_URL:', BASE_URL);
 
   const headers: Record<string,string> = {
     Accept: "application/json",

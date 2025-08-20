@@ -34,6 +34,7 @@ import { imgUri } from "../../api/http";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuroraHeader from "../../components/AuroraHeader";
 import SilverText from "../../components/SilverText";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CollectionTab() {
   // 🔑 TOKEN ALMA SİSTEMİ
@@ -166,30 +167,86 @@ export default function CollectionTab() {
     );
   }
 
-  // ➕ Ürün miktarını artır
+  // ➕ Ürün miktarını artır - Optimized UI update
   const inc = async (it: CartItem) => { 
     if (!currentToken) return;
     try {
+      // 🚀 UI'da hemen güncelle (optimistic update)
+      if (data) {
+        const updatedItems = data.items.map(item => 
+          item.productId === it.productId 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+        
+        // Toplamları yeniden hesapla
+        const newTotalQuantity = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+        const newSubtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        setData({
+          items: updatedItems,
+          totalQuantity: newTotalQuantity,
+          subtotal: newSubtotal
+        });
+      }
+      
+      // Backend'i güncelle (background'da)
       await updateCartItem(currentToken, it.productId, it.quantity + 1); 
-      refresh(); 
     } catch (error) {
       Alert.alert("❌ Hata", "Ürün miktarı artırılamadı.");
+      // Hata durumunda tekrar yükle
+      refresh();
     }
   };
 
-  // ➖ Ürün miktarını azalt
+  // ➖ Ürün miktarını azalt - Optimized UI update
   const dec = async (it: CartItem) => {
     if (!currentToken) return;
     try {
-      const q = it.quantity - 1;
-      if (q <= 0) {
+      const newQuantity = it.quantity - 1;
+      
+      // 🚀 UI'da hemen güncelle (optimistic update)
+      if (data) {
+        if (newQuantity <= 0) {
+          // Ürünü listeden çıkar
+          const updatedItems = data.items.filter(item => item.productId !== it.productId);
+          const newTotalQuantity = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+          const newSubtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          
+          setData({
+            items: updatedItems,
+            totalQuantity: newTotalQuantity,
+            subtotal: newSubtotal
+          });
+        } else {
+          // Miktarı azalt
+          const updatedItems = data.items.map(item => 
+            item.productId === it.productId 
+              ? { ...item, quantity: newQuantity }
+              : item
+          );
+          
+          const newTotalQuantity = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+          const newSubtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          
+          setData({
+            items: updatedItems,
+            totalQuantity: newTotalQuantity,
+            subtotal: newSubtotal
+          });
+        }
+      }
+      
+      // Backend'i güncelle (background'da)
+      if (newQuantity <= 0) {
         await removeFromCart(currentToken, it.productId);
       } else {
-        await updateCartItem(currentToken, it.productId, q);
+        await updateCartItem(currentToken, it.productId, newQuantity);
       }
-      refresh();
     } catch (error) {
       Alert.alert("❌ Hata", "Ürün miktarı değiştirilemedi.");
+      // Hata durumunda tekrar yükle
+      refresh();
     }
   };
 
@@ -219,17 +276,21 @@ export default function CollectionTab() {
           </View>
         </View>
 
-        {/* Loading durumunda küçük bir banner göster */}
-        {loading && (
+        {/* Loading durumunda küçük bir banner göster - sadece sayfa yüklenirken */}
+        {loading && data === null && (
           <View style={styles.loadingBanner}>
             <ActivityIndicator size="small" color="#D4AF37" />
-            <Text style={styles.loadingBannerText}>Sepet güncelleniyor...</Text>
+            <Text style={styles.loadingBannerText}>Sepet yükleniyor...</Text>
           </View>
         )}
         
         <FlatList
           data={data?.items ?? []}
           keyExtractor={(it) => String(it.productId)}
+          extraData={data} // Re-render when data changes
+          removeClippedSubviews={true} // Performance için
+          maxToRenderPerBatch={10} // Batch size küçük tut
+          windowSize={5} // Memory usage için
           ItemSeparatorComponent={() => <View style={{ height:10 }} />}
           renderItem={({ item }) => (
             <View style={styles.cartItem}>
@@ -246,12 +307,63 @@ export default function CollectionTab() {
                   <Pressable onPress={() => inc(item)} style={styles.quantityButton}>
                     <Text style={styles.quantityButtonText}>+</Text>
                   </Pressable>
-                  <Pressable onPress={() => removeFromCart(currentToken!, item.productId).then(refresh)} style={styles.removeButton}>
-                    <Text style={styles.removeButtonText}>Sil</Text>
+                  <Pressable onPress={() => {
+                    // 🚀 Sil butonu sadece 1 azaltır
+                    if (item.quantity > 1) {
+                      // Miktar 1'den fazlaysa sadece azalt
+                      if (data) {
+                        const updatedItems = data.items.map(it => 
+                          it.productId === item.productId 
+                            ? { ...it, quantity: it.quantity - 1 }
+                            : it
+                        );
+                        
+                        const newTotalQuantity = updatedItems.reduce((sum, it) => sum + it.quantity, 0);
+                        const newSubtotal = updatedItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+                        
+                        setData({
+                          items: updatedItems,
+                          totalQuantity: newTotalQuantity,
+                          subtotal: newSubtotal
+                        });
+                      }
+                      
+                      // Backend'i güncelle
+                      updateCartItem(currentToken!, item.productId, item.quantity - 1).catch(() => {
+                        refresh();
+                      });
+                    } else {
+                      // Miktar 1 ise tamamen sil
+                      if (data) {
+                        const updatedItems = data.items.filter(it => it.productId !== item.productId);
+                        const newTotalQuantity = updatedItems.reduce((sum, it) => sum + it.quantity, 0);
+                        const newSubtotal = updatedItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+                        
+                        setData({
+                          items: updatedItems,
+                          totalQuantity: newTotalQuantity,
+                          subtotal: newSubtotal
+                        });
+                      }
+                      
+                      // Backend'den sil
+                      removeFromCart(currentToken!, item.productId).catch(() => {
+                        refresh();
+                      });
+                    }
+                  }} style={styles.removeButton}>
+                    <Ionicons name="trash-outline" style={styles.removeButtonText} size={20} />
                   </Pressable>
                 </View>
               </View>
-              <Text style={styles.lineTotal}>
+              <Text style={[
+                styles.lineTotal,
+                // Dinamik font size - büyük sayılarda küçülür
+                {
+                  fontSize: (item.price * item.quantity) > 99999 ? 12 : 
+                           (item.price * item.quantity) > 9999 ? 14 : 16
+                }
+              ]}>
                 {(item.price * item.quantity).toFixed(2)} ₺
               </Text>
             </View>
@@ -265,7 +377,14 @@ export default function CollectionTab() {
                 </View>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabelBold}>Toplam Tutar:</Text>
-                  <Text style={styles.summaryValueBold}>{data.subtotal.toFixed(2)} ₺</Text>
+                  <Text style={[
+                    styles.summaryValueBold,
+                    // Dinamik font size - büyük toplam fiyatlarda küçülür
+                    {
+                      fontSize: data.subtotal > 99999 ? 14 : 
+                               data.subtotal > 9999 ? 15 : 16
+                    }
+                  ]}>{data.subtotal.toFixed(2)} ₺</Text>
                 </View>
                 <Pressable 
                   style={styles.clearCartButton}
@@ -275,7 +394,23 @@ export default function CollectionTab() {
                       "Tüm ürünleri sepetten çıkarmak istediğinizden emin misiniz?",
                       [
                         { text: "İptal", style: "cancel" },
-                        { text: "Evet", onPress: () => clearCart(currentToken!).then(refresh) }
+                        { 
+                          text: "Evet", 
+                          onPress: () => {
+                            // 🚀 UI'da hemen temizle
+                            setData({
+                              items: [],
+                              totalQuantity: 0,
+                              subtotal: 0
+                            });
+                            
+                            // Backend'i temizle (background'da)
+                            clearCart(currentToken!).catch(() => {
+                              // Hata durumunda tekrar yükle
+                              refresh();
+                            });
+                          }
+                        }
                       ]
                     )
                   }
@@ -427,6 +562,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#333333',
     marginHorizontal: 16,
+    minHeight: 110, // Sabit minimum yükseklik - layout shifting'i önler
   },
   productImage: {
     width: 72,
@@ -436,6 +572,8 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     flex: 1,
+    minHeight: 86, // Image yüksekliği + padding
+    justifyContent: 'space-between', // Content'i düzenli dağıt
   },
   productName: {
     fontFamily: 'Montserrat_600SemiBold',
@@ -477,7 +615,7 @@ const styles = StyleSheet.create({
   removeButton: {
     marginLeft: 12,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 8,
     borderWidth: 1,
     borderColor: '#FF6B6B',
     borderRadius: 6,
@@ -486,14 +624,15 @@ const styles = StyleSheet.create({
   removeButtonText: {
     color: '#FF6B6B',
     fontFamily: 'Montserrat_500Medium',
-    fontSize: 12,
+    fontSize: 16,
   },
   lineTotal: {
-    width: 80,
+    width: 90, // Biraz daha geniş - büyük sayılar için
     textAlign: 'right',
     fontFamily: 'Montserrat_600SemiBold',
     color: '#D4AF37',
     fontSize: 16,
+    flexShrink: 0, // Text wrap olmasını önler
   },
   summary: {
     marginTop: 16,

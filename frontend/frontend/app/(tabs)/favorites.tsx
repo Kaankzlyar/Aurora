@@ -65,6 +65,7 @@ export default function FavoritesTab() {
     try {
       const favs = await getFavorites();
       setFavorites(favs);
+      console.log('[FavoritesTab] Favoriler yüklendi, sayı:', favs.length);
     } catch (error) {
       console.error('[FavoritesTab] Favoriler yüklenemedi:', error);
       Alert.alert("❌ Hata", "Favoriler yüklenirken hata oluştu.");
@@ -85,6 +86,7 @@ export default function FavoritesTab() {
     try {
       await removeFromFavorites(product.id);
       setFavorites(prev => prev.filter(fav => fav.id !== product.id));
+      console.log('[FavoritesTab] Favorilerden çıkarıldı:', product.name);
       Alert.alert("💔 Favoriler", `"${product.name}" favorilerden çıkarıldı.`);
     } catch (error) {
       console.error('[FavoritesTab] Favorilerden çıkarma hatası:', error);
@@ -224,6 +226,7 @@ const styles = StyleSheet.create({
   clearButtonText: {
     color: '#C48913',
     fontSize: 12,
+    paddingBottom: 2,
     fontFamily: 'Montserrat_500Medium',
   },
   emptyContainer: {

@@ -2,7 +2,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Product } from './catalog';
 
-const API_BASE_URL = 'http://10.0.2.2:5050/api';
+// Mevcut backend URL'ini kullan
+const API_BASE_URL = 'http://192.168.1.142:5270/api';
 const FAVORITES_KEY = 'userFavorites';
 
 export interface FavoriteProduct extends Product {
