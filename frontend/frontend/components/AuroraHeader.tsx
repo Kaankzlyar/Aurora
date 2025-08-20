@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
+import GoldText from "./GoldText";
 
 export default function AuroraHeader() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -28,14 +29,14 @@ export default function AuroraHeader() {
     <>
       <SafeAreaView style={s.safeArea}>
         <View style={s.container}>
-          <Text style={s.brand}>AURORA</Text>
-          <Pressable 
-            hitSlop={12} 
-            style={s.profileBtn} 
+          <GoldText style={s.brand}>AURORA</GoldText>
+          <Pressable
+            hitSlop={12}
+            style={s.profileBtn}
             accessibilityLabel="Profil"
             onPress={handleProfilePress}
           >
-            <Text style={s.profileEmoji}>👤</Text>
+            <Ionicons name="menu" size={26} color="#C48913" />
           </Pressable>
         </View>
       </SafeAreaView>
@@ -90,25 +91,20 @@ const s = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 16,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between", // center'dan space-between'e değiştir
+    flexDirection: "row",
   },
   brand: {
-    position: "absolute",
-    left: 16,
+  
     fontFamily: "PlayfairDisplay_700Bold",
     letterSpacing: 2,
     textTransform: "uppercase",
     color: "#C48913",
     fontSize: 26,
+    marginTop: 11.2,
   },
   profileBtn: { 
-    position: "absolute", 
-    right: 12, 
-    padding: 6 
-  },
-  profileEmoji: { 
-    fontSize: 22,
-    color: "#C48913",
+    padding: 4,
   },
   modalOverlay: {
     flex: 1,

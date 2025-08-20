@@ -16,10 +16,7 @@ namespace EcommerceAPI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            // From this (localhost only):
-            builder.WebHost.UseUrls("http://localhost:5270");
-
-            // To this (all interfaces):
+            // Listen on all interfaces for mobile access
             builder.WebHost.UseUrls("http://0.0.0.0:5270");
 
             builder.Services.AddCors(o =>
@@ -28,6 +25,19 @@ namespace EcommerceAPI
                     p.AllowAnyOrigin()   // yayınlamada domain bazlı kısıtla
                      .AllowAnyHeader()
                      .AllowAnyMethod());
+                     
+                // Web ve mobile için spesifik policy
+                o.AddPolicy("WebPolicy", p =>
+                    p.WithOrigins(
+                        "http://localhost:8082", 
+                        "http://localhost:8081", 
+                        "http://localhost:3000",
+                        "http://192.168.1.142:8082",
+                        "http://192.168.1.142:8081"
+                    )
+                     .AllowAnyHeader()
+                     .AllowAnyMethod()
+                     .AllowCredentials());
             });
             builder.Services.AddControllers()
                 .AddJsonOptions( o=>
@@ -89,16 +99,18 @@ namespace EcommerceAPI
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-
             }
 
+            // CORS should be early in the pipeline
+            app.UseCors();
+            
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             // IMPORTANT: Authentication must come before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseCors();
-            app.UseStaticFiles();
+            
             app.MapControllers();
 
             app.Run();

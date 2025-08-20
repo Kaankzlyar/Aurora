@@ -29,11 +29,11 @@ import React, { useCallback, useState, useEffect } from "react";
 import { View, Text, FlatList, Image, Pressable, ActivityIndicator, Alert, StyleSheet, Modal, ScrollView } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
-import { BASE_URL } from "../../constants/config";
 import { CartItem, CartSummary, getCart, updateCartItem, removeFromCart, clearCart } from "../../services/cart";
 import { imgUri } from "../../api/http";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PageHeader from "../../components/PageHeader";
+import AuroraHeader from "../../components/AuroraHeader";
+import SilverText from "../../components/SilverText";
 
 export default function CollectionTab() {
   // 🔑 TOKEN ALMA SİSTEMİ
@@ -49,7 +49,7 @@ export default function CollectionTab() {
   // 🔍 Simple filter modal state
   const [showFilterModal, setShowFilterModal] = useState(false);
 
-  // 🔧 AsyncStorage'dan token alma fonksiyonu
+  // 🔧 TOKEN ALMA FONKSİYONU
   const getTokenFromStorage = async (): Promise<string | null> => {
     try {
       const token = await AsyncStorage.getItem('userToken');
@@ -61,224 +61,110 @@ export default function CollectionTab() {
     }
   };
 
-  //  Token'ı otomatik yükle
-  useEffect(() => {
-    const loadToken = async () => {
-      if (isAuthenticated) {
-        const token = await getTokenFromStorage();
-        setCurrentToken(token);
-        console.log('[CollectionTab] Token yüklendi, authenticated: true');
-      } else {
-        console.log('[CollectionTab] Kullanıcı giriş yapmamış, token ve data temizleniyor');
-        setCurrentToken(null);
-        setData(null); // Auth yoksa sepet verilerini temizle
-        setLoading(false); // Loading durumunu sıfırla
-      }
-    };
-    
-    loadToken();
-  }, [isAuthenticated]);
-
-  // 🛠️ DEBUG: TOKEN DURUMUNU GÖSTER
+  // 🔍 TOKEN DEBUG FONKSİYONU
   const showTokenDebug = () => {
     Alert.alert(
-      "🔑 Sepet Token Debug",
+      "🔑 Token Debug",
       `Authentication: ${isAuthenticated ? '✅ Giriş Yapılmış' : '❌ Giriş Yapılmamış'}\n\n` +
       `Token: ${currentToken ? '✅ Mevcut' : '❌ Yok'}\n\n` +
       `Token Preview: ${currentToken ? currentToken.substring(0, 30) + '...' : 'null'}\n\n` +
-      `Sepet Items: ${data?.items?.length || 0}\n\n` +
-      `Toplam Tutar: ${data?.subtotal?.toFixed(2) || '0'} ₺`,
+      `User Info: ${userInfo ? JSON.stringify(userInfo, null, 2) : 'null'}`,
       [{ text: "Tamam" }]
     );
   };
 
-  // 🔌 SERVER BAĞLANTI TESTİ
+  // 🖥️ SERVER BAĞLANTI TESTİ
   const testServerConnection = async () => {
-    try {
-      console.log('[CollectionTab] Server bağlantısı test ediliyor...');
-      const response = await fetch(`${BASE_URL}/api/health`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      
-      Alert.alert(
-        "🔌 Server Test",
-        `Server: ${response.ok ? '✅ Erişilebilir' : '❌ Erişilemiyor'}\n\n` +
-        `Status: ${response.status}\n\n` +
-        `URL: ${BASE_URL}`,
-        [{ text: "Tamam" }]
-      );
-    } catch (error: any) {
-      Alert.alert(
-        "🔌 Server Test",
-        `❌ Bağlantı Hatası\n\n` +
-        `Hata: ${error?.message || 'Bilinmeyen'}\n\n` +
-        `URL: ${BASE_URL}`,
-        [{ text: "Tamam" }]
-      );
-    }
+    Alert.alert("🔗 Server Test", "Backend bağlantısı test ediliyor...");
   };
 
-  // 🔄 Sepet verilerini yenile
+  // 🔄 TOKEN YÜKLEMECini başlat
+  useEffect(() => {
+    const loadToken = async () => {
+      console.log('[CollectionTab] Token yükleme başlatıldı');
+      const token = await getTokenFromStorage();
+      setCurrentToken(token);
+      console.log('[CollectionTab] Token yüklendi:', token ? 'BAŞARILI' : 'BOŞ');
+    };
+    
+    if (isAuthenticated) {
+      loadToken();
+    } else {
+      setCurrentToken(null);
+      console.log('[CollectionTab] Kullanıcı giriş yapmamış, token temizlendi');
+    }
+  }, [isAuthenticated]);
+
+  // 🔄 SEPET YENİLEME FONKSİYONU
   const refresh = async () => {
-    // İlk kontroller
-    if (!isAuthenticated) {
-      console.log('[CollectionTab] ❌ Kullanıcı giriş yapmamış, sepet yenilenmeyecek');
-      setLoading(false); // Loading'i kapat
-      return;
-    }
-    
     if (!currentToken) {
-      console.log('[CollectionTab] ❌ Token yok, sepet yenilenmeyecek');
-      setLoading(false); // Loading'i kapat
+      console.log('[CollectionTab] Token yok, sepet yenilenemez');
       return;
     }
     
-    setLoading(true);
-    try { 
-      console.log('[CollectionTab] ===== SEPET YENİLEME BAŞLADI =====');
-      console.log('[CollectionTab] isAuthenticated:', isAuthenticated);
-      console.log('[CollectionTab] Token preview:', currentToken.substring(0, 30) + '...');
-      console.log('[CollectionTab] API çağrısı yapılıyor...');
-      
-      const cartData = await getCart(currentToken);
-      
-      console.log('[CollectionTab] ✅ API yanıtı alındı:', cartData);
-      console.log('[CollectionTab] Sepet item sayısı:', cartData?.items?.length || 0);
-      console.log('[CollectionTab] Toplam tutar:', cartData?.subtotal || 0);
-      
-      setData(cartData);
-      console.log('[CollectionTab] ✅ Sepet başarıyla güncellendi');
-    } catch (error: any) {
-      console.error('[CollectionTab] ===== SEPET YENİLEME HATASI =====');
-      console.error('[CollectionTab] Hata tipi:', error?.name || 'Bilinmeyen');
-      console.error('[CollectionTab] Hata mesajı:', error?.message || 'Mesaj yok');
-      console.error('[CollectionTab] Hata stack:', error?.stack || 'Stack yok');
-      console.error('[CollectionTab] Tam hata objesi:', error);
-      console.error('[CollectionTab] isAuthenticated:', isAuthenticated);
-      console.error('[CollectionTab] Token durumu:', currentToken ? 'Mevcut' : 'Yok');
-      console.error('[CollectionTab] =================================');
-      
-      // Network hatası ise demo data göster
-      if (error?.message?.includes('Network request failed') || error?.message?.includes('fetch')) {
-        console.log('[CollectionTab] Network hatası tespit edildi - demo data yükleniyor');
-        
-        // Demo sepet datası
-        const demoCartData: CartSummary = {
-          items: [
-            {
-              productId: 1,
-              name: "Premium Wireless Headphones",
-              price: 299.99,
-              quantity: 2,
-              lineTotal: 599.98,
-              imagePath: "/images/headphones.jpg"
-            },
-            {
-              productId: 2,
-              name: "Smart Watch Pro",
-              price: 499.99,
-              quantity: 1,
-              lineTotal: 499.99,
-              imagePath: "/images/smartwatch.jpg"
-            },
-            {
-              productId: 3,
-              name: "Bluetooth Speaker",
-              price: 149.99,
-              quantity: 1,
-              lineTotal: 149.99,
-              imagePath: "/images/speaker.jpg"
-            }
-          ],
-          totalQuantity: 4,
-          subtotal: 1249.96
-        };
-        
-        setData(demoCartData);
-        console.log('[CollectionTab] ✅ Demo sepet datası yüklendi');
-        return;
-      }
-      
-      // Diğer hatalar için alert göster ama loading'i kapat
-      Alert.alert(
-        "❌ Sepet Yenileme Hatası", 
-        `Hata: ${error?.message || 'Bilinmeyen hata'}\n\n` +
-        `Demo data gösteriliyor.`,
-        [
-          { text: "Tamam", style: "default" },
-          { text: "Demo Yükle", onPress: () => {
-            const demoData: CartSummary = {
-              items: [
-                { productId: 1, name: "Demo Ürün 1", price: 100, quantity: 1, lineTotal: 100, imagePath: null },
-                { productId: 2, name: "Demo Ürün 2", price: 200, quantity: 2, lineTotal: 400, imagePath: null }
-              ],
-              totalQuantity: 3,
-              subtotal: 500
-            };
-            setData(demoData);
-          }}
-        ]
-      );
-    } finally { 
-      setLoading(false); // Her durumda loading'i kapat
+    try {
+      console.log('[CollectionTab] Sepet verisi alınıyor...');
+      setLoading(true);
+      const result = await getCart(currentToken);
+      setData(result);
+      console.log('[CollectionTab] Sepet verisi alındı:', result);
+    } catch (error) {
+      console.error('[CollectionTab] Sepet verisi alınamadı:', error);
+      Alert.alert("❌ Hata", "Sepet verisi alınamadı.");
+    } finally {
+      setLoading(false);
     }
   };
 
   // 📱 Sayfa odaklandığında sepeti yenile
-  useFocusEffect(useCallback(() => { 
-    console.log('[CollectionTab] Sayfa odaklandı - kontroller yapılıyor...');
-    console.log('[CollectionTab] isAuthenticated:', isAuthenticated);
-    console.log('[CollectionTab] currentToken var mı:', currentToken ? 'EVET' : 'HAYIR');
-    
-    if (isAuthenticated && currentToken) {
-      console.log('[CollectionTab] Koşullar sağlandı, sepet yenileniyor...');
-      refresh(); 
-    } else {
-      console.log('[CollectionTab] Koşullar sağlanmadı, sepet yenilenmeyecek');
-    }
-  }, [isAuthenticated, currentToken]));
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[CollectionTab] Sayfa odaklandı, koşullar kontrol ediliyor...');
+      console.log('[CollectionTab] isAuthenticated:', isAuthenticated);
+      console.log('[CollectionTab] currentToken var mı:', currentToken ? 'EVET' : 'HAYIR');
+      
+      if (isAuthenticated && currentToken) {
+        console.log('[CollectionTab] Koşullar sağlandı, sepet yenileniyor...');
+        refresh();
+      } else {
+        console.log('[CollectionTab] Koşullar sağlanmadı, sepet yenilenmeyecek');
+      }
+    }, [isAuthenticated, currentToken])
+  );
 
   // 🚫 Giriş yapılmamışsa uyarı göster
   if (!isAuthenticated || !currentToken) {
     return (
       <View style={styles.container}>
-        <PageHeader 
-          title="🛒 Sepetim" 
-          rightComponent={
+        <AuroraHeader />
+        <View style={styles.pageContent}>
+          <View style={styles.titleSection}>
+            <SilverText style={styles.pageTitle}>🛒 Sepetim</SilverText>
             <Pressable style={styles.debugButtonSmall} onPress={showTokenDebug}>
               <Text style={styles.debugButtonTextSmall}>?</Text>
             </Pressable>
-          }
-        />
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>🔐 Giriş Gerekli</Text>
-          <Text style={styles.emptySubtitle}>
-            {!isAuthenticated 
-              ? "Sepetinizi görmek için giriş yapın" 
-              : "Token yükleniyor, lütfen bekleyin..."
-            }
-          </Text>
-          {!isAuthenticated && (
-            <Pressable 
-              style={styles.loginButton} 
-              onPress={() => router.push('/login')}
-            >
-              <Text style={styles.loginButtonText}>🔑 Giriş Yap</Text>
-            </Pressable>
-          )}
-          <Pressable style={styles.debugButton} onPress={showTokenDebug}>
-            <Text style={styles.debugButtonText}>🔍 Debug Info</Text>
-          </Pressable>
+          </View>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>🔐 Giriş Gerekli</Text>
+            <Text style={styles.emptySubtitle}>
+              {!isAuthenticated 
+                ? "Sepetinizi görmek için giriş yapın" 
+                : "Token yükleniyor, lütfen bekleyin..."
+              }
+            </Text>
+            {!isAuthenticated && (
+              <Pressable 
+                style={styles.loginButton} 
+                onPress={() => router.push('/login')}
+              >
+                <Text style={styles.loginButtonText}>🔑 Giriş Yap</Text>
+              </Pressable>
+            )}
+          </View>
         </View>
       </View>
     );
   }
-
-  // ⏳ Yükleniyor durumu - Artık full screen loading yapmıyoruz, sepeti göstermeye devam
-  // Sadece loading olduğunda küçük bir indicator gösterelim
 
   // ➕ Ürün miktarını artır
   const inc = async (it: CartItem) => { 
@@ -294,8 +180,8 @@ export default function CollectionTab() {
   // ➖ Ürün miktarını azalt
   const dec = async (it: CartItem) => {
     if (!currentToken) return;
-    const q = it.quantity - 1;
     try {
+      const q = it.quantity - 1;
       if (q <= 0) {
         await removeFromCart(currentToken, it.productId);
       } else {
@@ -309,10 +195,14 @@ export default function CollectionTab() {
 
   return (
     <View style={styles.container}>
-      {/* � PAGE HEADER */}
-      <PageHeader 
-        title="🛒 Sepetim" 
-        rightComponent={
+      {/* AURORA HEADER */}
+      <AuroraHeader />
+      
+      {/* PAGE CONTENT */}
+      <View style={styles.pageContent}>
+        {/* Başlık ve Controls */}
+        <View style={styles.titleSection}>
+          <SilverText style={styles.pageTitle}>🛒 Sepetim</SilverText>
           <View style={styles.headerRight}>
             <Pressable 
               onPress={() => setShowFilterModal(true)}
@@ -327,10 +217,8 @@ export default function CollectionTab() {
               <Text style={styles.debugButtonTextSmall}>S</Text>
             </Pressable>
           </View>
-        }
-      />
+        </View>
 
-      <View style={styles.content}>
         {/* Loading durumunda küçük bir banner göster */}
         {loading && (
           <View style={styles.loadingBanner}>
@@ -358,176 +246,90 @@ export default function CollectionTab() {
                   <Pressable onPress={() => inc(item)} style={styles.quantityButton}>
                     <Text style={styles.quantityButtonText}>+</Text>
                   </Pressable>
-                  <Pressable 
-                    onPress={async () => {
-                      if (!currentToken) return;
-                      try {
-                        await removeFromCart(currentToken, item.productId);
-                        refresh();
-                      } catch (error) {
-                        Alert.alert("❌ Hata", "Ürün silinemedi.");
-                      }
-                    }}
-                    style={styles.removeButton}
-                  >
+                  <Pressable onPress={() => removeFromCart(currentToken!, item.productId).then(refresh)} style={styles.removeButton}>
                     <Text style={styles.removeButtonText}>Sil</Text>
                   </Pressable>
                 </View>
               </View>
-              <Text style={styles.lineTotal}>{item.lineTotal.toFixed(2)} ₺</Text>
+              <Text style={styles.lineTotal}>
+                {(item.price * item.quantity).toFixed(2)} ₺
+              </Text>
             </View>
           )}
-          ListFooterComponent={() => (
-            <View style={styles.summary}>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Toplam Adet</Text>
-                <Text style={styles.summaryValue}>{data?.totalQuantity ?? 0}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabelBold}>Ara Toplam</Text>
-                <Text style={styles.summaryValueBold}>{(data?.subtotal ?? 0).toFixed(2)} ₺</Text>
-              </View>
-              {data?.items?.length ? (
+          ListFooterComponent={() => 
+            data && data.items.length > 0 ? (
+              <View style={styles.summary}>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Toplam Ürün:</Text>
+                  <Text style={styles.summaryValue}>{data.totalQuantity}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabelBold}>Toplam Tutar:</Text>
+                  <Text style={styles.summaryValueBold}>{data.subtotal.toFixed(2)} ₺</Text>
+                </View>
                 <Pressable 
-                  onPress={async () => {
-                    if (!currentToken) return;
-                    try {
-                      await clearCart(currentToken);
-                      refresh();
-                      Alert.alert("✅ Başarılı", "Sepet temizlendi!");
-                    } catch (error) {
-                      Alert.alert("❌ Hata", "Sepet temizlenemedi.");
-                    }
-                  }}
                   style={styles.clearCartButton}
+                  onPress={() => 
+                    Alert.alert(
+                      "Sepeti Temizle", 
+                      "Tüm ürünleri sepetten çıkarmak istediğinizden emin misiniz?",
+                      [
+                        { text: "İptal", style: "cancel" },
+                        { text: "Evet", onPress: () => clearCart(currentToken!).then(refresh) }
+                      ]
+                    )
+                  }
                 >
                   <Text style={styles.clearCartButtonText}>🗑️ Sepeti Temizle</Text>
                 </Pressable>
-              ) : (
-                <View style={styles.emptyCart}>
-                  <Text style={styles.emptyCartText}>🛒 Sepetiniz boş</Text>
-                  
-                  {/* Demo data yükleme butonu */}
-                  <Pressable 
-                    onPress={() => {
-                      const demoData: CartSummary = {
-                        items: [
-                          { 
-                            productId: 1, 
-                            name: "Premium Wireless Headphones", 
-                            price: 299.99, 
-                            quantity: 2, 
-                            lineTotal: 599.98, 
-                            imagePath: null 
-                          },
-                          { 
-                            productId: 2, 
-                            name: "Smart Watch Pro", 
-                            price: 499.99, 
-                            quantity: 1, 
-                            lineTotal: 499.99, 
-                            imagePath: null 
-                          },
-                          { 
-                            productId: 3, 
-                            name: "Bluetooth Speaker", 
-                            price: 149.99, 
-                            quantity: 1, 
-                            lineTotal: 149.99, 
-                            imagePath: null 
-                          }
-                        ],
-                        totalQuantity: 4,
-                        subtotal: 1249.96
-                      };
-                      setData(demoData);
-                      console.log('[CollectionTab] ✅ Demo sepet yüklendi');
-                    }}
-                    style={styles.demoButton}
-                  >
-                    <Text style={styles.demoButtonText}>📦 Demo Sepet Yükle</Text>
-                  </Pressable>
-                </View>
-              )}
-            </View>
-          )}
+              </View>
+            ) : (
+              <View style={styles.emptyCart}>
+                <Text style={styles.emptyCartText}>Sepetiniz boş</Text>
+              </View>
+            )
+          }
         />
       </View>
 
-      {/* 🎛️ Simple Filter Modal */}
+      {/* Simple Filter Modal */}
       <Modal
         visible={showFilterModal}
         transparent={true}
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setShowFilterModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            {/* Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>🔍 Filtreler</Text>
-              <Pressable 
-                onPress={() => setShowFilterModal(false)}
-                style={styles.closeButton}
-              >
+              <Text style={styles.modalTitle}>🔍 Sepet Filtresi</Text>
+              <Pressable onPress={() => setShowFilterModal(false)} style={styles.closeButton}>
                 <Text style={styles.closeButtonText}>✕</Text>
               </Pressable>
             </View>
-
-            {/* Content */}
+            
             <ScrollView style={styles.modalContent}>
-              {/* Kategori */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>📦 Kategori</Text>
+                <Text style={styles.filterSectionTitle}>Fiyat Aralığı</Text>
                 <View style={styles.filterGrid}>
-                  {['Elektronik', 'Giyim', 'Ev & Yaşam', 'Spor', 'Kozmetik'].map((cat) => (
-                    <Pressable key={cat} style={styles.filterChip}>
-                      <Text style={styles.filterChipText}>{cat}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-
-              {/* Marka */}
-              <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>🏷️ Marka</Text>
-                <View style={styles.filterGrid}>
-                  {['Apple', 'Samsung', 'Nike', 'Adidas', 'Zara', 'H&M'].map((brand) => (
-                    <Pressable key={brand} style={styles.filterChip}>
-                      <Text style={styles.filterChipText}>{brand}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-
-              {/* Fiyat Aralığı */}
-              <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>💰 Fiyat Aralığı</Text>
-                <View style={styles.filterGrid}>
-                  {['0-100 ₺', '100-500 ₺', '500-1000 ₺', '1000+ ₺'].map((price) => (
-                    <Pressable key={price} style={styles.filterChip}>
-                      <Text style={styles.filterChipText}>{price}</Text>
-                    </Pressable>
-                  ))}
+                  <Pressable style={styles.filterChip}>
+                    <Text style={styles.filterChipText}>0-100 ₺</Text>
+                  </Pressable>
+                  <Pressable style={styles.filterChip}>
+                    <Text style={styles.filterChipText}>100-500 ₺</Text>
+                  </Pressable>
+                  <Pressable style={styles.filterChip}>
+                    <Text style={styles.filterChipText}>500+ ₺</Text>
+                  </Pressable>
                 </View>
               </View>
             </ScrollView>
-
-            {/* Actions */}
+            
             <View style={styles.modalActions}>
-              <Pressable 
-                onPress={() => setShowFilterModal(false)}
-                style={styles.cancelButton}
-              >
+              <Pressable onPress={() => setShowFilterModal(false)} style={styles.cancelButton}>
                 <Text style={styles.cancelButtonText}>İptal</Text>
               </Pressable>
-              <Pressable 
-                onPress={() => {
-                  setShowFilterModal(false);
-                  Alert.alert("✅ Başarılı", "Filtreler uygulandı!");
-                }}
-                style={styles.applyButton}
-              >
+              <Pressable onPress={() => setShowFilterModal(false)} style={styles.applyButton}>
                 <Text style={styles.applyButtonText}>Uygula</Text>
               </Pressable>
             </View>
@@ -543,6 +345,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0B0B0B',
+  },
+  pageContent: {
+    flex: 1,
+  },
+  titleSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1A1A1A',
+    minHeight: 60,
+  },
+  pageTitle: {
+    fontSize: 20,
+    fontFamily: 'Montserrat_600SemiBold',
   },
   headerRight: {
     flexDirection: 'row',
@@ -564,41 +383,6 @@ const styles = StyleSheet.create({
     color: '#0B0B0B',
     fontSize: 8,
     fontFamily: 'Montserrat_700Bold',
-  },
-  debugHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#1A1A1A',
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
-  },
-  debugTitle: {
-    color: '#D4AF37',
-    fontSize: 12,
-    fontFamily: 'Montserrat_400Regular',
-    flex: 1,
-  },
-  debugButton: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginLeft: 8,
-  },
-  debugButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  serverButton: {
-    backgroundColor: '#4ECDC4',
-  },
-  debugButtonText: {
-    color: '#0B0B0B',
-    fontSize: 10,
-    fontFamily: 'Montserrat_600SemiBold',
   },
   emptyContainer: {
     flex: 1,
@@ -633,21 +417,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'center',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: 'Montserrat_400Regular',
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginTop: 16,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
   cartItem: {
     flexDirection: 'row',
     gap: 12,
@@ -657,6 +426,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#333333',
+    marginHorizontal: 16,
   },
   productImage: {
     width: 72,
@@ -732,6 +502,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#333333',
+    marginHorizontal: 16,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -775,6 +546,7 @@ const styles = StyleSheet.create({
   emptyCart: {
     alignItems: 'center',
     paddingVertical: 20,
+    marginHorizontal: 16,
   },
   emptyCartText: {
     fontFamily: 'Montserrat_500Medium',
@@ -791,6 +563,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
+    marginHorizontal: 16,
     marginBottom: 10,
     gap: 8,
   },
@@ -798,19 +571,6 @@ const styles = StyleSheet.create({
     color: '#D4AF37',
     fontSize: 12,
     fontFamily: 'Montserrat_500Medium',
-  },
-  demoButton: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginTop: 12,
-    alignItems: 'center',
-  },
-  demoButtonText: {
-    color: '#0B0B0B',
-    fontSize: 12,
-    fontFamily: 'Montserrat_600SemiBold',
   },
   // 🔍 Filter Button & Modal Styles
   filterButton: {

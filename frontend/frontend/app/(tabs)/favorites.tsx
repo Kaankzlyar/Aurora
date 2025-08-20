@@ -24,8 +24,9 @@ import ProductCard from "../../components/ProductCard";
 import { addToCart } from "../../services/cart";
 import { useAuth } from "../../contexts/AuthContext";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PageHeader from "../../components/PageHeader";
+import AuroraHeader from "../../components/AuroraHeader";
 import { useFocusEffect } from "@react-navigation/native";
+import SilverText from "../../components/SilverText";
 
 export default function FavoritesTab() {
   const { isAuthenticated } = useAuth();
@@ -148,19 +149,22 @@ export default function FavoritesTab() {
 
   return (
     <View style={styles.container}>
-      {/* PAGE HEADER */}
-      <PageHeader 
-        title={`Favorilerim (${favorites.length})`}
-        rightComponent={
-          favorites.length > 0 ? (
+      {/* AURORA HEADER */}
+      <AuroraHeader />
+
+      {/* PAGE CONTENT */}
+      <View style={styles.pageContent}>
+        {/* Favoriler Başlığı */}
+        <View style={styles.titleSection}>
+          <SilverText style={styles.pageTitle}>Favorilerim ({favorites.length})</SilverText>
+          {favorites.length > 0 && (
             <Pressable style={styles.clearButton} onPress={onClearAllFavorites}>
               <Ionicons name="trash-outline" size={20} color="#C48913" />
+              <Text style={styles.clearButtonText}>Temizle</Text>
             </Pressable>
-          ) : null
-        }
-      />
+          )}
+        </View>
 
-      <View style={styles.content}>
         <FlatList
           data={favorites}
           keyExtractor={(x) => String(x.id)}
@@ -189,16 +193,38 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0B0B0B',
   },
-  content: {
+  pageContent: {
     flex: 1,
   },
+  titleSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1A1A1A',
+    minHeight: 60,
+  },
+  pageTitle: {
+    fontSize: 20,
+    fontFamily: 'Montserrat_600SemiBold',
+  },
   clearButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: 'rgba(196, 137, 19, 0.1)',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#C48913',
+  },
+  clearButtonText: {
+    color: '#C48913',
+    fontSize: 12,
+    fontFamily: 'Montserrat_500Medium',
   },
   emptyContainer: {
     flex: 1,

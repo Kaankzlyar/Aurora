@@ -22,7 +22,17 @@ export default function ProductCard({
   const uri = imgUri(item.imagePath);
 
   return (
-    <View style={{ borderWidth: 1, borderColor: "#333", borderRadius: 12, padding: 12, gap: 8, backgroundColor: "#111", position: "relative" }}>
+    <View style={{ 
+      borderWidth: 1, 
+      borderColor: "#333", 
+      borderRadius: 12, 
+      padding: 12, 
+      gap: 8, 
+      backgroundColor: "#111", 
+      position: "relative",
+      flex: 1,
+      minWidth: 160
+    }}>
       {/* FAVORITE BUTTON */}
       {showFavoriteButton && onAddToFavorites && (
         <Pressable
@@ -50,28 +60,52 @@ export default function ProductCard({
         <Image
           source={{ uri }}
           onError={() => setFailed(true)}
-          style={{ height: 180, borderRadius: 10, backgroundColor: "#222" }}
+          style={{ height: 140, borderRadius: 10, backgroundColor: "#222" }}
           resizeMode="cover"
         />
       ) : (
-        <View style={{ height: 180, borderRadius: 10, backgroundColor: "#222", alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: "#777" }}>Görsel yok</Text>
+        <View style={{ height: 140, borderRadius: 10, backgroundColor: "#222", alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ color: "#777", fontSize: 12 }}>Görsel yok</Text>
         </View>
       )}
 
       {/* TEXTS */}
-      <Text style={{ color: "#fff", fontWeight: "700" }}>
+      <Text style={{ 
+        color: "#fff", 
+        fontWeight: "700", 
+        fontSize: 12,
+        lineHeight: 16
+      }} numberOfLines={2}>
         {item.brandName} • {item.name}
       </Text>
-      <Text style={{ color: "#C48913", fontWeight: "600" }}>{item.price.toFixed(2)} ₺</Text>
+      <Text style={{ 
+        color: "#C48913", 
+        fontWeight: "600",
+        fontSize: 14
+      }}>
+        {item.price.toFixed(2)} ₺
+      </Text>
 
       {/* CTA */}
       {onAdd && (
         <Pressable
           onPress={() => onAdd(item)}
-          style={{ marginTop: 6, borderWidth: 1, borderColor: "#C48913", borderRadius: 10, padding: 10, alignItems: "center" }}
+          style={{ 
+            marginTop: 6, 
+            borderWidth: 1, 
+            borderColor: "#C48913", 
+            borderRadius: 8, 
+            padding: 8, 
+            alignItems: "center" 
+          }}
         >
-          <Text style={{ color: "#C48913", fontWeight: "600" }}>Sepete Ekle</Text>
+          <Text style={{ 
+            color: "#C48913", 
+            fontWeight: "600",
+            fontSize: 12
+          }}>
+            Sepete Ekle
+          </Text>
         </Pressable>
       )}
     </View>

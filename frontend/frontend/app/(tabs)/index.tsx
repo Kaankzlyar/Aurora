@@ -1,14 +1,122 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+﻿import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import AuroraHeader from "../../components/AuroraHeader";
 import { Link } from "expo-router";
 import { useMemo } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from 'expo-router';
-import GoldText from "@/components/GoldText";
+import GoldText from "../../components/GoldText";
+
+// === IconicBanner (silver theme) ===
+function IconicBanner({ onPress }: { onPress: () => void }) {
+  return (
+    <View style={ib.wrapper}>
+      {/* arka panel: soğuk gri degrade */}
+      <LinearGradient
+        colors={["#3C3F44", "#2C2F33", "#1C1F22"]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        style={ib.panel}
+      >
+        {/* hafif ışık vurgusu */}
+        <View style={StyleSheet.absoluteFill}>
+          <LinearGradient
+            colors={["rgba(255,255,255,0.10)", "transparent"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0.35, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+        {/* sağ üstten diyagonal karartma */}
+        <View style={StyleSheet.absoluteFill}>
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.20)"]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+
+        {/* içerik */}
+        <View style={ib.textCol}>
+          <Text style={ib.overline}>CURATED</Text>
+          <Text style={ib.title}>Iconic Selections</Text>
+          <Text style={ib.desc}>Timeless signatures, hand‑picked for you</Text>
+
+          <Pressable onPress={onPress} style={({ pressed }) => [ib.cta, pressed && ib.ctaPressed]}>
+            {/* platin düğme */}
+            <LinearGradient
+              colors={["#F3F4F6", "#D6DAE0", "#B7BCC6"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={ib.ctaBg}
+            >
+              <Text style={ib.ctaText}>EXPLORE</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+      </LinearGradient>
+
+      {/* ince gümüş çerçeve */}
+      <View pointerEvents="none" style={ib.stroke} />
+    </View>
+  );
+}
+
+const ib = StyleSheet.create({
+  wrapper: {
+    borderRadius: 18,
+    overflow: "hidden",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 6,
+  },
+  panel: {
+    padding: 20,
+    minHeight: 160,
+    justifyContent: "center",
+  },
+  stroke: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: "rgba(192, 197, 206, 0.45)", // silver stroke
+  },
+  textCol: { maxWidth: "80%" },
+  overline: {
+    color: "#C9CDD3",
+    letterSpacing: 2,
+    fontSize: 10,
+    textTransform: "uppercase",
+    marginBottom: 8,
+    fontFamily: "Montserrat_500Medium",
+  },
+  title: {
+    color: "#E9EAED",
+    fontSize: 18,
+    marginBottom: 6,
+    fontFamily: "PlayfairDisplay_700Bold",
+  },
+  desc: {
+    color: "#D0D3D8",
+    fontSize: 13,
+    marginBottom: 14,
+    fontFamily: "CormorantGaramond_400Regular",
+  },
+  cta: { alignSelf: "flex-start", borderRadius: 10, overflow: "hidden" },
+  ctaBg: { paddingVertical: 10, paddingHorizontal: 16 },
+  ctaPressed: { transform: [{ scale: 0.98 }], opacity: 0.96 },
+  ctaText: {
+    color: "#0F1114",
+    letterSpacing: 1,
+    fontSize: 12,
+    fontFamily: "Montserrat_500Medium",
+  },
+});
 
 function FeaturedBanner({ onPress }: { onPress: () => void }) {
-  console.log("FeaturedBanner rendered");
   return (
     <View style={fb.wrapper}>
       <LinearGradient
@@ -99,41 +207,8 @@ const fb = StyleSheet.create({
   ctaText: { color: "#121212", letterSpacing: 1, fontSize: 12, fontFamily: "Montserrat_500Medium" },
 });
 
-function FeaturedBannerOverlay({ topOffset }: { topOffset?: number }) {
-  console.log("FeaturedBannerOverlay mounted, topOffset=", topOffset);
-  return (
-    <View pointerEvents="box-none" style={[overlay.container, topOffset !== undefined ? { top: topOffset } : {}]}>
-      <View style={overlay.cardShadow}>
-        <FeaturedBanner onPress={() => router.push('/(tabs)/explore')} />
-      </View>
-    </View>
-  );
-}
-
-const overlay = StyleSheet.create({
-  container: {
-    position: "absolute",
-    left: 16,
-    right: 16,
-    top: 160,
-    zIndex: 9999,
-    elevation: 9999,
-  },
-  cardShadow: {
-    borderRadius: 18,
-    overflow: "visible",
-    backgroundColor: "rgba(255, 235, 170, 0.03)",
-    shadowColor: "#000",
-    shadowOpacity: 0.35,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 12,
-  },
-});
-
-
-export default function Home() {
-  // Örnek: Sepetteki adet (gerçekte state/store’dan gelecek)
+export default function HomeTab() {
+  // Örnek: Sepetteki adet (gerçekte state/store'dan gelecek)
   const basketCount = useMemo(() => 2, []);
 
   return (
@@ -143,31 +218,25 @@ export default function Home() {
       <ScrollView contentContainerStyle={s.content}>
         {/* Hero / Vitrin */}
         <Text style={s.heroOverline}>ZAMANSIZ KLASİKLER</Text>
-        <GoldText>Size Özel Seçimler</GoldText>
+        <GoldText style={s.heroTitle}>Size Özel Seçimler</GoldText>
         <Text style={s.heroBody}>
           Gucci, Prada, Tom Ford - yalnızca seçkin üyeler için kürasyon.
         </Text>
 
-        {/* Koleksiyon kartlarına giden kısayollar (örnek) */}
-        <View style={s.cardsRow}>
-          
-          <Link href="/profile" asChild>
-            <Pressable style={s.card}>
-              <Text style={s.cardTitle}>İkonik Seçimler</Text>
-              <Text style={s.cardSub}>Sınırlı stok</Text>
-            </Pressable>
-          </Link>
-        </View>
+        
+
+        {/* Silver Banner */}
+        <IconicBanner onPress={() => router.push('/explore')} />
 
         {/* Featured Banner */}
         <View style={{ marginTop: 24 }}>
-          <FeaturedBanner onPress={() => router.push('/(tabs)/explore')} />
+          <FeaturedBanner onPress={() => router.push('/explore')} />
         </View>
 
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Sabit “Koleksiyonum” (sepet) butonu */}
+      {/* Sabit "Koleksiyonum" (sepet) butonu */}
       <Link href="/collection" asChild>
         <Pressable style={s.collectionFab} accessibilityLabel="Koleksiyonum">
           <Text style={s.collectionText}>Koleksiyonum</Text>
@@ -216,7 +285,7 @@ const s = StyleSheet.create({
   },
   cardTitle: {
     fontFamily: "PlayfairDisplay_700Bold",
-    color: "#D4AF37",
+    color: "#C48913",
     fontSize: 16,
     letterSpacing: 1,
     textTransform: "uppercase",
@@ -227,7 +296,6 @@ const s = StyleSheet.create({
     fontSize: 13,
     marginTop: 6,
   },
-
   collectionFab: {
     position: "absolute",
     left: 16,
@@ -254,7 +322,7 @@ const s = StyleSheet.create({
     right: 14, top: 8,
     minWidth: 22, height: 22,
     borderRadius: 11,
-    backgroundColor: "#D4AF37",
+    backgroundColor: "#C48913",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 6,

@@ -336,3 +336,4 @@ C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.pdb
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.genruntimeconfig.cache
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\ref\EcommerceAPI.dll
+C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\compressed\a4ne4w4z5d-adlstgnntv.gz
