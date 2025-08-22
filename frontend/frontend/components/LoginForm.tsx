@@ -31,7 +31,7 @@ function LoginForm({ onSuccess, onToggle }: LoginFormProps) {
         await AsyncStorage.setItem('userToken', result.token);
         
         // Try to extract user info from JWT token first
-        const tokenUserInfo = getUserInfoFromToken(result.token);
+        const tokenUserInfo = await getUserInfoFromToken(result.token);
         
         let userInfo;
         if (tokenUserInfo) {
@@ -66,8 +66,14 @@ function LoginForm({ onSuccess, onToggle }: LoginFormProps) {
         
         await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
         
+        // Update the AuthContext with the new user info
+        console.log('[LoginForm] Updating AuthContext with userInfo:', userInfo);
+        updateUserInfo(userInfo);
+        
         // Call login in AuthContext with email
-        login(formData.email);
+        console.log('[LoginForm] Calling AuthContext.login with email:', formData.email);
+        await login(formData.email);
+        console.log('[LoginForm] AuthContext.login completed');
         console.log('[LoginForm] Saved user info:', userInfo);
         
         alert('Giriş başarılı!');

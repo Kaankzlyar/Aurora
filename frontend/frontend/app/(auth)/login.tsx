@@ -1,24 +1,30 @@
-// screens/LoginForm.tsx
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loginUser, testServerConnection, getUserInfoFromToken } from '../api/auth';
-import AuthPage from '../components/AuthPage';
+import { loginUser, getUserInfoFromToken } from '../../api/auth';
+import { AuthPage } from '../../components/AuthPage';
+import { PremiumTransition } from '../../components/PremiumTransition';
 
-export default function LoginForm({ onSuccess, onToggle }: { onSuccess: () => void; onToggle: () => void }) {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+export default function LoginScreen() {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger entrance animation
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogin = async () => {
     try {
-      // First test the server connection
-      console.log('[LoginForm] Testing server connection before login...');
-      const connectionTest = await testServerConnection();
+      console.log('[LoginScreen] Attempting login with:', formData.email);
       
-      if (!connectionTest.success) {
-        alert(`Server bağlantısı başarısız: ${connectionTest.error}`);
-        return;
-      }
-      
-      console.log('[LoginForm] Server connection successful, proceeding with login...');
       const result = await loginUser(formData.email, formData.password);
       
       if (result?.token) {
@@ -62,25 +68,42 @@ export default function LoginForm({ onSuccess, onToggle }: { onSuccess: () => vo
         }
         
         await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-        console.log('[LoginForm] Saved user info:', userInfo);
+        await AsyncStorage.setItem('userEmail', userInfo.email);
+        console.log('[LoginScreen] Saved user info:', userInfo);
         
-        alert('Giriş başarılı!');
-        onSuccess();
+        // Navigate to main app
+        router.replace('/(tabs)');
       } else {
         alert(result?.message || 'Giriş başarısız');
       }
     } catch (error) {
-      alert('Giriş sırasında hata oluştu: ' + (error as any)?.message);
+      console.error('[LoginScreen] Login error:', error);
+      alert('Giriş sırasında hata oluştu');
     }
   };
 
+  const navigateToRegister = () => {
+    router.push('/(auth)/register');
+  };
+
   return (
-    <AuthPage
-      isLogin
-      formData={formData}
-      onChange={(key: string, value: string) => setFormData(prev => ({ ...prev, [key]: value }))}
-      onSubmit={handleLogin}
-      onToggle={onToggle}
-    />
+    <View style={styles.container}>
+      <PremiumTransition isVisible={isVisible} duration={900} disableGlow={true}>
+        <AuthPage
+          isLogin={true}
+          formData={formData}
+          onChange={(key, value) => setFormData(prev => ({ ...prev, [key]: value }))}
+          onSubmit={handleLogin}
+          onToggle={navigateToRegister}
+        />
+      </PremiumTransition>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+});

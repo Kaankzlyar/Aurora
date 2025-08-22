@@ -368,12 +368,12 @@ export const getUserProfile = async () => {
 
     if (!response.ok) {
       console.log("[getUserProfile] Profile fetch failed:", body);
-      // If profile endpoint doesn't exist, fallback to token data
-      if (response.status === 404) {
-        console.log("[getUserProfile] Profile endpoint not found, using token data");
-        const tokenData = getUserInfoFromToken(token);
-        return tokenData ? { success: true, user: tokenData } : { message: "Failed to get user info" };
-      }
+             // If profile endpoint doesn't exist, fallback to token data
+       if (response.status === 404) {
+         console.log("[getUserProfile] Profile endpoint not found, using token data");
+         const tokenData = await getUserInfoFromToken(token);
+         return tokenData ? { success: true, user: tokenData } : { message: "Failed to get user info" };
+       }
       return { message: body?.message || "Failed to fetch profile" };
     }
 
@@ -381,22 +381,22 @@ export const getUserProfile = async () => {
     return { success: true, user: body };
   } catch (error: any) {
     console.log("[getUserProfile] Network error:", error?.message);
-    // Fallback to token data on network error
-    try {
-      const token = await AsyncStorage.getItem('userToken');
-      if (token) {
-        const tokenData = getUserInfoFromToken(token);
-        return tokenData ? { success: true, user: tokenData } : { message: "Network error and no token data" };
-      }
-    } catch (e) {
-      console.log("[getUserProfile] Token fallback failed:", e);
-    }
+         // Fallback to token data on network error
+     try {
+       const token = await AsyncStorage.getItem('userToken');
+       if (token) {
+         const tokenData = await getUserInfoFromToken(token);
+         return tokenData ? { success: true, user: tokenData } : { message: "Network error and no token data" };
+       }
+     } catch (e) {
+       console.log("[getUserProfile] Token fallback failed:", e);
+     }
     return { message: "Network error occurred" };
   }
 };
 
 // Extract user information from JWT token
-export const getUserInfoFromToken = (token: string) => {
+export const getUserInfoFromToken = async (token: string) => {
   try {
     if (!token) {
       console.log("[getUserInfoFromToken] No token provided");
@@ -427,7 +427,7 @@ export const getUserInfoFromToken = (token: string) => {
         id: userData.sub || userData.id || userData.userId || userData.nameid,
         email: userData.email || userData.Email,
         name: userData.name || userData.Name || userData.given_name || userData.unique_name,
-        firstName: userData.firstName || userData.FirstName || userData.name || userData.Name || userData.given_name,
+        firstName: userData.firstName || userData.FirstName || userData.name || userData.Name || userData.given_name || userData.unique_name,
         lastName: userData.lastName || userData.LastName || userData.family_name,
         fullName: userData.fullName || userData.FullName || userData.unique_name,
         username: userData.username || userData.Username || userData.email || userData.Email || userData.unique_name,
@@ -435,6 +435,16 @@ export const getUserInfoFromToken = (token: string) => {
         iat: userData.iat, // Issued at time
         nbf: userData.nbf, // Not before time
       };
+      
+      // Special handling for .NET backend field names
+      if (userData.unique_name && !userInfo.fullName) {
+        userInfo.fullName = userData.unique_name;
+        userInfo.name = userData.unique_name;
+        userInfo.firstName = userData.unique_name;
+      }
+      
+      // Add a small delay to ensure proper async handling
+      await new Promise(resolve => setTimeout(resolve, 10));
       
       return userInfo;
     } catch (decodeError) {

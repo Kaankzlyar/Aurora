@@ -47,11 +47,11 @@ export default function ProductCard({
             padding: 8 
           }}
         >
-          <Ionicons 
-            name={isFavorite ? "heart" : "heart-outline"} 
-            size={20} 
-            color={isFavorite ? "#C48913" : "#fff"} 
-          />
+                     <Ionicons 
+             name={isFavorite ? "heart" : "heart-outline"} 
+             size={20} 
+             color={isFavorite ? "#C48913" : "#fff"} 
+           />
         </Pressable>
       )}
 

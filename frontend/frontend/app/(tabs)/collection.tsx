@@ -83,30 +83,43 @@ export default function CollectionTab() {
   useEffect(() => {
     const loadToken = async () => {
       console.log('[CollectionTab] Token yükleme başlatıldı');
+      setLoading(true);
       const token = await getTokenFromStorage();
       setCurrentToken(token);
       console.log('[CollectionTab] Token yüklendi:', token ? 'BAŞARILI' : 'BOŞ');
+      
+      // If we have a token, try to load cart data
+      if (token) {
+        try {
+          const result = await getCart(token);
+          setData(result);
+          console.log('[CollectionTab] Sepet verisi yüklendi:', result);
+        } catch (error) {
+          console.error('[CollectionTab] Sepet verisi yüklenemedi:', error);
+        }
+      }
+      
+      setLoading(false);
     };
     
-    if (isAuthenticated) {
-      loadToken();
-    } else {
-      setCurrentToken(null);
-      console.log('[CollectionTab] Kullanıcı giriş yapmamış, token temizlendi');
-    }
+    loadToken();
   }, [isAuthenticated]);
 
   // 🔄 SEPET YENİLEME FONKSİYONU
   const refresh = async () => {
-    if (!currentToken) {
-      console.log('[CollectionTab] Token yok, sepet yenilenemez');
-      return;
-    }
-    
     try {
       console.log('[CollectionTab] Sepet verisi alınıyor...');
       setLoading(true);
-      const result = await getCart(currentToken);
+      
+      // Get fresh token each time to avoid stale token issues
+      const token = await getTokenFromStorage();
+      if (!token) {
+        console.log('[CollectionTab] Token bulunamadı');
+        Alert.alert("❌ Hata", "Oturum süresi dolmuş, lütfen tekrar giriş yapın.");
+        return;
+      }
+      
+      const result = await getCart(token);
       setData(result);
       console.log('[CollectionTab] Sepet verisi alındı:', result);
     } catch (error) {
@@ -122,19 +135,29 @@ export default function CollectionTab() {
     useCallback(() => {
       console.log('[CollectionTab] Sayfa odaklandı, koşullar kontrol ediliyor...');
       console.log('[CollectionTab] isAuthenticated:', isAuthenticated);
-      console.log('[CollectionTab] currentToken var mı:', currentToken ? 'EVET' : 'HAYIR');
       
-      if (isAuthenticated && currentToken) {
-        console.log('[CollectionTab] Koşullar sağlandı, sepet yenileniyor...');
-        refresh();
-      } else {
-        console.log('[CollectionTab] Koşullar sağlanmadı, sepet yenilenmeyecek');
-      }
-    }, [isAuthenticated, currentToken])
+      // Add a small delay to ensure AuthContext has updated
+      const checkAndRefresh = async () => {
+        // Check if we have a token in storage as backup verification
+        const token = await getTokenFromStorage();
+        console.log('[CollectionTab] Token check:', token ? 'FOUND' : 'NOT FOUND');
+        
+        if (isAuthenticated || token) {
+          console.log('[CollectionTab] Auth verified, sepet yenileniyor...');
+          refresh();
+        } else {
+          console.log('[CollectionTab] Auth not verified, sepet yenilenmeyecek');
+        }
+      };
+      
+      // Small delay to allow context to update after navigation
+      setTimeout(checkAndRefresh, 200);
+    }, [isAuthenticated])
   );
 
-  // 🚫 Giriş yapılmamışsa uyarı göster
-  if (!isAuthenticated || !currentToken) {
+  // 🚫 Giriş yapılmamışsa uyarı göster  
+  // Show login screen only if definitely not authenticated AND no token exists
+  if (!isAuthenticated && !currentToken && !loading) {
     return (
       <View style={styles.container}>
         <AuroraHeader />
@@ -156,7 +179,7 @@ export default function CollectionTab() {
             {!isAuthenticated && (
               <Pressable 
                 style={styles.loginButton} 
-                onPress={() => router.push('/login')}
+                onPress={() => router.push('/(auth)/login')}
               >
                 <Text style={styles.loginButtonText}>🔑 Giriş Yap</Text>
               </Pressable>
@@ -277,7 +300,7 @@ export default function CollectionTab() {
         </View>
 
         {/* Loading durumunda küçük bir banner göster - sadece sayfa yüklenirken */}
-        {loading && data === null && (
+        {loading && (
           <View style={styles.loadingBanner}>
             <ActivityIndicator size="small" color="#D4AF37" />
             <Text style={styles.loadingBannerText}>Sepet yükleniyor...</Text>

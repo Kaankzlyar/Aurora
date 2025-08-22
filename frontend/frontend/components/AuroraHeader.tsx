@@ -91,17 +91,19 @@ const s = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 16,
     alignItems: "center",
-    justifyContent: "space-between", // center'dan space-between'e değiştir
+    justifyContent: "space-between",
     flexDirection: "row",
+    width: '100%',
   },
   brand: {
-  
     fontFamily: "PlayfairDisplay_700Bold",
     letterSpacing: 2,
     textTransform: "uppercase",
     color: "#C48913",
-    fontSize: 26,
+    fontSize: 25,
     marginTop: 11.2,
+    width: '100%',
+    flexWrap: 'wrap',
   },
   profileBtn: { 
     padding: 4,
@@ -147,6 +149,7 @@ const s = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Montserrat_400Regular",
     flex: 1,
+    flexWrap: 'wrap',
   },
   menuDivider: {
     height: 1,

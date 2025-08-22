@@ -1,6 +1,8 @@
 // services/favorites.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Product } from './catalog';
+import { validateStoredToken, clearInvalidToken } from '../utils/tokenValidator';
+import { router } from 'expo-router';
 
 // Mevcut backend URL'ini kullan
 const API_BASE_URL = 'http://192.168.1.142:5270/api';
@@ -11,11 +13,30 @@ export interface FavoriteProduct extends Product {
 }
 
 /**
- * Token'ı AsyncStorage'dan al
+ * Token'ı AsyncStorage'dan al ve doğrula
  */
 const getToken = async (): Promise<string | null> => {
   try {
-    return await AsyncStorage.getItem('userToken');
+    const validation = await validateStoredToken();
+    
+    if (validation.shouldRedirectToLogin) {
+      console.log('🚨 [FavoritesService] Token expired/invalid - redirecting to login');
+      await clearInvalidToken();
+      
+      try {
+        router.replace('/(auth)/login');
+      } catch (routerError) {
+        console.log('🚨 [FavoritesService] Router not available for redirect');
+      }
+      
+      return null;
+    }
+    
+    if (validation.isValid && validation.hasToken) {
+      return await AsyncStorage.getItem('userToken');
+    }
+    
+    return null;
   } catch (error) {
     console.error('Token alma hatası:', error);
     return null;

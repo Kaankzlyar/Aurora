@@ -44,7 +44,7 @@ export default function ProfileScreen({ onBack }: { onBack: () => void }) {
         const token = await AsyncStorage.getItem('userToken');
         if (token) {
           console.log('[ProfileScreen] No saved user info, trying to decode JWT token...');
-          const tokenUserInfo = getUserInfoFromToken(token);
+          const tokenUserInfo = await getUserInfoFromToken(token);
           
           if (tokenUserInfo && (tokenUserInfo.email || tokenUserInfo.name)) {
             const displayName = tokenUserInfo.fullName || 

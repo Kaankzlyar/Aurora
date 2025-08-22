@@ -10,7 +10,9 @@ import {
   KeyboardAvoidingView, 
   Platform,
   Dimensions,
-  Keyboard
+  Keyboard,
+  Animated,
+  Easing
 } from 'react-native';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -18,6 +20,7 @@ import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import GoldText from './GoldText';
 
 type Props = {
   isLogin: boolean;
@@ -31,6 +34,11 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
   const [showPassword, setShowPassword] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  
+  // Animation values - start from initial state for entrance animation
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   // Refs for input navigation
   const emailRef = useRef<TextInput>(null);
@@ -40,7 +48,84 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
   const lastNameRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Smooth transition animation when switching between login/register
+  const animateTransition = () => {
+    Animated.sequence([
+      // Fade out and scale down
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0.7,
+          duration: 150,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 0.95,
+          duration: 150,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: -20,
+          duration: 150,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }),
+      ]),
+      // Fade in and scale back up
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 200,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 200,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  };
+
+  const handleToggle = () => {
+    animateTransition();
+    setTimeout(() => {
+      onToggle();
+    }, 150); // Trigger toggle halfway through animation
+  };
+
   useEffect(() => {
+    // Initial entrance animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
       setKeyboardVisible(true);
       setKeyboardHeight(e.endCoordinates.height);
@@ -88,13 +173,24 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               {/* <View style={styles.logoIcon} /> */}
-              <Text style={styles.logoText}>AURORA</Text>
+              <GoldText style={styles.logoText}>AURORA</GoldText>
             </View>
             <Text style={styles.subtitle}>Maison de Couture</Text>
           </View>
 
           {/* Glassmorphism Card Wrapper */}
-          <View style={styles.glassWrapper}>
+          <Animated.View 
+            style={[
+              styles.glassWrapper,
+              {
+                opacity: fadeAnim,
+                transform: [
+                  { scale: scaleAnim },
+                  { translateY: slideAnim }
+                ]
+              }
+            ]}
+          >
             {/* Blur arka plan */}
             <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
             {/* Hafif karartma overlay (cam derinliği için) */}
@@ -216,7 +312,7 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
                   />
 
                   <View style={styles.toggleContainer}>
-                    <TouchableOpacity onPress={onToggle}>
+                    <TouchableOpacity onPress={handleToggle} style={styles.toggleButton}>
                       <Text style={styles.toggleText}>
                         {isLogin
                           ? 'New to Aurora? Begin Your Journey'
@@ -227,7 +323,7 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
                 </View>
               </CardContent>
             </Card>
-          </View>
+          </Animated.View>
         </View>
       </ScrollView>
     </View>
@@ -310,7 +406,19 @@ const styles = StyleSheet.create({
   eyeButton: { position: 'absolute', right: 12, top: 14 },
 
   toggleContainer: { alignItems: 'center', marginTop: 16 },
-  toggleText: { color: '#9ca3af', fontSize: 14, fontFamily: 'Montserrat_400Regular' },
+  toggleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderWidth: 0,
+  },
+  toggleText: { 
+    color: '#9ca3af',
+    fontSize: 19, 
+    fontFamily: 'CormorantGaramond_600SemiBold',
+    textAlign: 'center',
+  },
 });
 
 export default AuthPage;

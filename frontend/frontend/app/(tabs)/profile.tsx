@@ -77,11 +77,25 @@ export default function Screen() {
           onPress: async () => {
             try {
               console.log('[Profile] User confirmed logout');
+              
+              // Clear all local state first
+              setProfileData(null);
+              setAsyncStorageEmail(null);
+              
+              // Then logout via AuthContext
               await logout();
+              
               console.log('[Profile] Logout completed via AuthContext');
+              
+              // Force navigation to login (as backup)
+              // The AuthContext should handle this, but let's ensure it works
+              import('expo-router').then(({ router }) => {
+                router.replace('/(auth)/login');
+              });
+              
             } catch (error) {
               console.error('[Profile] Error during logout:', error);
-              Alert.alert("Hata", "Çıkış yapılırken bir hata oluştu.");
+              Alert.alert("Hata", "Çıkış yapılırken bir hata oluştu: " + error.message);
             }
           }
         }
@@ -310,6 +324,30 @@ export default function Screen() {
           <Pressable style={styles.actionButton} onPress={handleLogout}>
             <Text style={styles.actionIcon}>🚪</Text>
             <Text style={styles.actionText}>Çıkış Yap</Text>
+            <Text style={styles.actionArrow}>›</Text>
+          </Pressable>
+          
+          <Pressable style={[styles.actionButton, { backgroundColor: '#2D1810' }]} onPress={async () => {
+            try {
+              console.log('[Profile] Emergency logout triggered');
+              
+              // Clear everything directly
+              await AsyncStorage.clear();
+              setProfileData(null);
+              setAsyncStorageEmail(null);
+              
+              // Import router and navigate
+              const { router } = await import('expo-router');
+              router.replace('/(auth)/login');
+              
+              Alert.alert("✅ Başarılı", "Çıkış yapıldı");
+            } catch (error) {
+              console.error('[Profile] Emergency logout error:', error);
+              Alert.alert("❌ Hata", "Acil çıkış başarısız: " + error.message);
+            }
+          }}>
+            <Text style={styles.actionIcon}>🔓</Text>
+            <Text style={styles.actionText}>Acil Çıkış (Test)</Text>
             <Text style={styles.actionArrow}>›</Text>
           </Pressable>
         </View>

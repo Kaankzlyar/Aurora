@@ -1,0 +1,111 @@
+Aurora: Bronze banner, auth/navigation & performance improvements
+
+. �� Bronze Banner with Countdown Timer
+Replaced the old hero section with a new BronzeBanner component
+Added dynamic 24-hour countdown timer showing hours, minutes, seconds
+Features:
+Bronze gradient background (#8B4513, #6B3410, #4A2608)
+"SPECIAL FOR TODAY" label with countdown
+"TIMELESS CLASSICS" and "Choices for You" messaging
+Premium bronze styling with shadows and borders
+"EXPLORE" CTA button
+2. 🔧 Text Rendering Issues Fixed
+Problem: Text was being cut off in various components
+Solution: Added layout properties without changing fonts:
+width: '100%' to containers
+flexWrap: 'wrap' to text elements
+paddingHorizontal and minWidth adjustments
+Preserved all original font families as requested
+3. 🔐 Authentication & Token Management
+Created tokenValidator.ts utility:
+validateStoredToken() - checks token validity and expiration
+clearInvalidToken() - removes expired tokens
+isTokenExpiringSoon() - warns before expiration
+Enhanced AuthContext.tsx:
+Automatic token validation on app start
+Redirect to login on token expiration
+refreshUserInfoFromToken() function
+Race condition prevention in login flow
+4. 🚪 Navigation & Routing
+Migrated to Expo Router structure:
+app/(auth)/ for authentication screens
+app/(tabs)/ for main app tabs
+app/index.tsx as root redirector
+Fixed "New to Aurora?" button navigation
+Resolved explore button redirecting to login
+5. ✨ Premium Transition Effects
+Created PremiumTransition.tsx component:
+Multi-layer animations (slide, fade, scale, rotate)
+Bézier curve easing for luxury feel
+Gold glow effects
+Configurable animation types and durations
+Enhanced auth screen transitions:
+Login: fade_from_bottom (1000ms)
+Register: slide_from_right (800ms)
+Premium card presentation style
+6. 🎭 Visual Improvements & Fixes
+Fixed white flash during navigation transitions
+Resolved yellow flash in login-to-register transition
+Added consistent dark background (#000000)
+Enhanced heart icon colors in ProductCard (Aurora gold)
+7. 👤 User Experience Enhancements
+Added welcome message with dynamic greeting:
+"Good morning/afternoon/evening, [Username]"
+Username positioned next to greeting
+"Your Signature Begins Here" subtitle
+Fixed username display issues:
+Resolved "Valued Member" showing instead of actual name
+Added JWT field mapping for .NET backend
+Implemented user info refresh mechanisms
+8. 🛒 Collection Page Fixes
+Resolved "login required" showing when already logged in
+Fixed cart not displaying for authenticated users
+Added proper loading states and token validation
+Enhanced focus effect handling
+9. 🔄 RefreshControl Implementation
+Added pull-to-refresh functionality to home page
+Features:
+Refresh user info from token
+Visual loading indicator
+Aurora gold color theme
+Same pattern as favorites page
+Extensible for future refresh needs
+10. 🎯 Component Refactoring
+Simplified HomeTab structure
+Removed useAuthGuard hook to fix React Hooks order errors
+Merged HomeTabContent back into main component
+Added comprehensive error handling and logging
+11. 🎨 Styling & Layout Improvements
+Adjusted spacing between AuroraHeader and BronzeBanner
+Optimized welcome message margins and padding
+Enhanced font sizes for better readability
+Added responsive text wrapping
+Improved component spacing and alignment
+12. 🐛 Bug Fixes & Error Resolution
+Fixed React Hooks order errors (multiple iterations)
+Resolved logout button not working
+Fixed authentication state inconsistencies
+Resolved async/await issues in token validation
+Fixed navigation conflicts and redirect loops
+13. 📱 Performance Optimizations
+Added useCallback for expensive functions
+Implemented proper cleanup in useEffect hooks
+Optimized re-render cycles
+Added loading states to prevent UI blocking
+14. 🔍 Debugging & Development Tools
+Added comprehensive console logging throughout
+Created temporary debug components for troubleshooting
+Added error boundaries and fallbacks
+Implemented state monitoring and validation
+15. 🎨 UI/UX Polish
+Enhanced button press states and feedback
+Improved shadow and elevation effects
+Added smooth animations and transitions
+Optimized touch targets and accessibility
+📊 Impact Summary:
+✅ User Experience: Significantly improved with premium transitions and better navigation
+✅ Authentication: Robust token management with automatic expiration handling
+✅ Visual Design: Professional bronze banner with dynamic countdown
+✅ Performance: Optimized rendering and state management
+✅ Reliability: Comprehensive error handling and edge case coverage
+✅ Maintainability: Clean, well-structured code with proper separation of concerns
