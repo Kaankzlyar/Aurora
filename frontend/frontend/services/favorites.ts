@@ -13,11 +13,64 @@ export interface FavoriteProduct extends Product {
 }
 
 /**
+ * Token'ı yenile (eğer mümkünse)
+ */
+const refreshTokenIfNeeded = async (): Promise<string | null> => {
+  try {
+    console.log('🔄 [FavoritesService] Token yenileme kontrol ediliyor...');
+    
+    // Mevcut token'ı kontrol et
+    const currentToken = await AsyncStorage.getItem('userToken');
+    if (!currentToken) {
+      console.log('⚠️ [FavoritesService] Mevcut token bulunamadı');
+      return null;
+    }
+    
+    // Token'ın geçerliliğini kontrol et
+    const validation = await validateStoredToken();
+    
+    if (validation.isValid && !validation.isExpired) {
+      console.log('✅ [FavoritesService] Mevcut token geçerli, yenileme gerekmez');
+      return currentToken;
+    }
+    
+    if (validation.isExpired) {
+      console.log('⏰ [FavoritesService] Token expired, yenileme gerekli');
+      // Burada token refresh logic eklenebilir
+      // Şimdilik expired token'ı temizle
+      await clearInvalidToken();
+      return null;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('🚨 [FavoritesService] Token yenileme hatası:', error);
+    return null;
+  }
+};
+
+/**
  * Token'ı AsyncStorage'dan al ve doğrula
  */
 const getToken = async (): Promise<string | null> => {
   try {
+    console.log('🔑 [FavoritesService] Token validation başlatılıyor...');
+    
+    // Önce token yenileme kontrol et
+    const refreshedToken = await refreshTokenIfNeeded();
+    if (refreshedToken) {
+      console.log('✅ [FavoritesService] Refreshed token kullanılıyor');
+      return refreshedToken;
+    }
+    
     const validation = await validateStoredToken();
+    console.log('🔑 [FavoritesService] Token validation sonucu:', {
+      isValid: validation.isValid,
+      isExpired: validation.isExpired,
+      hasToken: validation.hasToken,
+      shouldRedirectToLogin: validation.shouldRedirectToLogin,
+      timeUntilExpiry: validation.timeUntilExpiry
+    });
     
     if (validation.shouldRedirectToLogin) {
       console.log('🚨 [FavoritesService] Token expired/invalid - redirecting to login');
@@ -33,12 +86,15 @@ const getToken = async (): Promise<string | null> => {
     }
     
     if (validation.isValid && validation.hasToken) {
-      return await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('userToken');
+      console.log('🔑 [FavoritesService] Valid token alındı, uzunluk:', token?.length || 0);
+      return token;
     }
     
+    console.log('⚠️ [FavoritesService] Token validation başarısız');
     return null;
   } catch (error) {
-    console.error('Token alma hatası:', error);
+    console.error('🚨 [FavoritesService] Token alma hatası:', error);
     return null;
   }
 };
@@ -151,12 +207,20 @@ const removeFromFavoritesLocal = async (productId: number): Promise<void> => {
  */
 export const getFavorites = async (): Promise<FavoriteProduct[]> => {
   try {
+    console.log('❤️ [FavoritesService] Favoriler getiriliyor...');
+    
     const token = await getToken();
     
     if (!token) {
+      console.log('⚠️ [FavoritesService] Token bulunamadı, local storage\'dan getiriliyor');
       // Token yoksa local storage'dan getir
       return getFavoritesLocal();
     }
+
+    console.log('🌐 [FavoritesService] Backend API\'ye istek gönderiliyor...');
+    console.log('🌐 [FavoritesService] URL:', `${API_BASE_URL}/user/favorites`);
+    console.log('🌐 [FavoritesService] Token uzunluğu:', token.length);
+    console.log('🌐 [FavoritesService] Authorization header:', `Bearer ${token.substring(0, 20)}...`);
 
     const response = await fetch(`${API_BASE_URL}/user/favorites`, {
       method: 'GET',
@@ -166,17 +230,40 @@ export const getFavorites = async (): Promise<FavoriteProduct[]> => {
       },
     });
 
+    console.log('🌐 [FavoritesService] Response status:', response.status, response.statusText);
+    console.log('🌐 [FavoritesService] Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('🚨 [FavoritesService] Backend error response:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorText: errorText
+      });
+      
+      if (response.status === 401) {
+        console.error('🚨 [FavoritesService] 401 Unauthorized - Token geçersiz veya expired');
+        // 401 hatası durumunda token'ı temizle ve local storage'a fallback
+        await clearInvalidToken();
+        console.log('🧹 [FavoritesService] Invalid token temizlendi, local storage\'a fallback');
+      }
+      
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
     const favorites = await response.json();
-    console.log('Favoriler backend\'den geldi:', favorites.length);
+    console.log('✅ [FavoritesService] Favoriler backend\'den geldi:', favorites.length);
     return favorites;
   } catch (error) {
-    console.error('Backend favoriler getirme hatası:', error);
+    console.error('🚨 [FavoritesService] Backend favoriler getirme hatası:', error);
+    console.error('🚨 [FavoritesService] Error details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
+    
     // Backend hatası durumunda local storage'dan getir
+    console.log('🔄 [FavoritesService] Local storage\'a fallback yapılıyor...');
     return getFavoritesLocal();
   }
 };
@@ -191,6 +278,44 @@ const getFavoritesLocal = async (): Promise<FavoriteProduct[]> => {
   } catch (error) {
     console.error('Local favoriler getirme hatası:', error);
     return [];
+  }
+};
+
+/**
+ * Backend bağlantısını test et
+ */
+export const testBackendConnection = async (): Promise<{ success: boolean; message: string }> => {
+  try {
+    console.log('🧪 [FavoritesService] Backend bağlantısı test ediliyor...');
+    
+    const token = await AsyncStorage.getItem('userToken');
+    if (!token) {
+      return { success: false, message: 'Token bulunamadı' };
+    }
+    
+    console.log('🧪 [FavoritesService] Test token uzunluğu:', token.length);
+    
+    const response = await fetch(`${API_BASE_URL}/user/favorites`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    console.log('🧪 [FavoritesService] Test response:', response.status, response.statusText);
+    
+    if (response.ok) {
+      return { success: true, message: 'Backend bağlantısı başarılı' };
+    } else if (response.status === 401) {
+      return { success: false, message: 'Token geçersiz (401 Unauthorized)' };
+    } else {
+      const errorText = await response.text();
+      return { success: false, message: `HTTP ${response.status}: ${errorText}` };
+    }
+  } catch (error) {
+    console.error('🧪 [FavoritesService] Test hatası:', error);
+    return { success: false, message: `Bağlantı hatası: ${error.message}` };
   }
 };
 

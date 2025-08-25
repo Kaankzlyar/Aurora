@@ -1,152 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { testBackendConnection } from '../services/favorites';
+import { validateStoredToken } from '../utils/tokenValidator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getUserInfoFromToken } from '../api/auth';
 
 export default function AuthDebugger() {
-  const [authInfo, setAuthInfo] = useState({
-    hasToken: false,
-    tokenPreview: '',
-    userInfo: null,
-    tokenValid: false,
-    tokenExpired: false,
-  });
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
-  const checkAuthStatus = async () => {
+  const testAuth = async () => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      const userInfo = await AsyncStorage.getItem('userInfo');
+      setDebugInfo('🔍 Test ediliyor...\n');
       
-      let tokenData = null;
-      let isValid = false;
-      let isExpired = false;
+      // 1. Token'ı kontrol et
+      const token = await AsyncStorage.getItem('userToken');
+      setDebugInfo(prev => prev + `Token: ${token ? '✅ Bulundu' : '❌ Bulunamadı'}\n`);
       
       if (token) {
-        try {
-          tokenData = await getUserInfoFromToken(token);
-          
-          if (tokenData && tokenData.exp) {
-            const currentTime = Math.floor(Date.now() / 1000);
-            isExpired = tokenData.exp < currentTime;
-            isValid = !isExpired && tokenData.id;
-          }
-        } catch (error) {
-          console.error('🔍 [AuthDebugger] Error getting token data:', error);
-        }
+        setDebugInfo(prev => prev + `Token uzunluğu: ${token.length}\n`);
+        setDebugInfo(prev => prev + `Token başlangıcı: ${token.substring(0, 50)}...\n`);
       }
       
-      setAuthInfo({
-        hasToken: !!token,
-        tokenPreview: token ? token.substring(0, 50) + '...' : 'No token',
-        userInfo: userInfo ? JSON.parse(userInfo) : null,
-        tokenValid: isValid,
-        tokenExpired: isExpired,
-      });
+      // 2. Token validation
+      setDebugInfo(prev => prev + '\n🔐 Token Validation:\n');
+      const validation = await validateStoredToken();
+      setDebugInfo(prev => prev + `Valid: ${validation.isValid}\n`);
+      setDebugInfo(prev => prev + `Expired: ${validation.isExpired}\n`);
+      setDebugInfo(prev => prev + `Has Token: ${validation.hasToken}\n`);
+      setDebugInfo(prev => prev + `Time Until Expiry: ${validation.timeUntilExpiry} seconds\n`);
       
-      console.log('🔍 [AuthDebugger] Current auth status:', {
-        hasToken: !!token,
-        tokenValid: isValid,
-        tokenExpired: isExpired,
-        userInfo: userInfo ? JSON.parse(userInfo) : null,
-      });
+      // 3. Backend connection test
+      setDebugInfo(prev => prev + '\n🌐 Backend Test:\n');
+      const backendTest = await testBackendConnection();
+      setDebugInfo(prev => prev + `Success: ${backendTest.success}\n`);
+      setDebugInfo(prev => prev + `Message: ${backendTest.message}\n`);
+      
     } catch (error) {
-      console.error('🔍 [AuthDebugger] Error checking auth:', error);
+      setDebugInfo(prev => prev + `\n❌ Hata: ${error.message}\n`);
     }
   };
 
-  const testFavoritesAPI = async () => {
-    try {
-      const token = await AsyncStorage.getItem('userToken');
-      
-      if (!token) {
-        Alert.alert('Debug', 'No token found - user needs to login');
-        return;
-      }
-      
-      console.log('🧪 [AuthDebugger] Testing favorites API with token:', token.substring(0, 50) + '...');
-      
-      const response = await fetch('http://192.168.1.142:5270/api/user/favorites', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      console.log('🧪 [AuthDebugger] Response status:', response.status);
-      console.log('🧪 [AuthDebugger] Response headers:', response.headers);
-      
-      if (response.ok) {
-        const data = await response.json();
-        Alert.alert('Debug', `API Success! Found ${data.length} favorites`);
-      } else {
-        const errorText = await response.text();
-        console.log('🧪 [AuthDebugger] Error response:', errorText);
-        Alert.alert('Debug', `API Error: ${response.status} - ${errorText}`);
-      }
-    } catch (error) {
-      console.error('🧪 [AuthDebugger] API test error:', error);
-      Alert.alert('Debug', `Network Error: ${error.message}`);
-    }
-  };
-
-  const clearAuth = async () => {
+  const clearToken = async () => {
     try {
       await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userInfo');
-      await AsyncStorage.removeItem('userEmail');
-      checkAuthStatus();
-      Alert.alert('Debug', 'Auth data cleared');
+      setDebugInfo('🧹 Token temizlendi\n');
     } catch (error) {
-      console.error('🧪 [AuthDebugger] Clear auth error:', error);
+      setDebugInfo(prev => prev + `❌ Token temizleme hatası: ${error.message}\n`);
     }
   };
-
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🔍 Auth Debugger</Text>
+      <Text style={styles.title}>🔧 Auth Debugger</Text>
       
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Token Status:</Text>
-        <Text style={authInfo.hasToken ? styles.success : styles.error}>
-          {authInfo.hasToken ? '✅ Found' : '❌ Missing'}
-        </Text>
-      </View>
+      <TouchableOpacity style={styles.button} onPress={testAuth}>
+        <Text style={styles.buttonText}>🔍 Test Et</Text>
+      </TouchableOpacity>
       
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Token Valid:</Text>
-        <Text style={authInfo.tokenValid ? styles.success : styles.error}>
-          {authInfo.tokenValid ? '✅ Valid' : '❌ Invalid/Expired'}
-        </Text>
-      </View>
+      <TouchableOpacity style={styles.clearButton} onPress={clearToken}>
+        <Text style={styles.buttonText}>🧹 Token Temizle</Text>
+      </TouchableOpacity>
       
-      {authInfo.tokenExpired && (
-        <Text style={styles.warning}>⚠️ Token is expired - user needs to login again</Text>
-      )}
-      
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>User Info:</Text>
-        <Text style={styles.value}>
-          {authInfo.userInfo ? authInfo.userInfo.name || authInfo.userInfo.email : 'None'}
-        </Text>
-      </View>
-      
-      <View style={styles.buttonRow}>
-        <Pressable style={styles.button} onPress={checkAuthStatus}>
-          <Text style={styles.buttonText}>Refresh</Text>
-        </Pressable>
-        
-        <Pressable style={styles.button} onPress={testFavoritesAPI}>
-          <Text style={styles.buttonText}>Test API</Text>
-        </Pressable>
-        
-        <Pressable style={[styles.button, styles.dangerButton]} onPress={clearAuth}>
-          <Text style={styles.buttonText}>Clear Auth</Text>
-        </Pressable>
+      <View style={styles.debugContainer}>
+        <Text style={styles.debugTitle}>Debug Bilgileri:</Text>
+        <Text style={styles.debugText}>{debugInfo}</Text>
       </View>
     </View>
   );
@@ -154,72 +70,50 @@ export default function AuthDebugger() {
 
 const styles = StyleSheet.create({
   container: {
+    padding: 20,
     backgroundColor: '#1A1A1A',
-    margin: 16,
-    padding: 16,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#333',
+    margin: 16,
   },
   title: {
-    color: '#FFF',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 12,
+    color: '#FFFFFF',
+    marginBottom: 16,
     textAlign: 'center',
-  },
-  infoBox: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-    padding: 8,
-    backgroundColor: '#2A2A2A',
-    borderRadius: 6,
-  },
-  label: {
-    color: '#CCC',
-    fontSize: 14,
-  },
-  value: {
-    color: '#FFF',
-    fontSize: 14,
-    flex: 1,
-    textAlign: 'right',
-  },
-  success: {
-    color: '#4CAF50',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  error: {
-    color: '#F44336',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  warning: {
-    color: '#FF9800',
-    fontSize: 12,
-    textAlign: 'center',
-    marginVertical: 8,
-    fontWeight: 'bold',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 12,
   },
   button: {
-    backgroundColor: '#C48913',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
+    backgroundColor: '#C0C0C0',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
   },
-  dangerButton: {
-    backgroundColor: '#F44336',
+  clearButton: {
+    backgroundColor: '#FF6B6B',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
   },
   buttonText: {
-    color: '#FFF',
-    fontSize: 12,
+    color: '#000000',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  debugContainer: {
+    backgroundColor: '#2A2A2A',
+    padding: 16,
+    borderRadius: 8,
+  },
+  debugTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#C0C0C0',
+    fontFamily: 'monospace',
+    lineHeight: 18,
   },
 });

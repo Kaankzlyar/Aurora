@@ -85,10 +85,9 @@ const s = StyleSheet.create({
     backgroundColor: "#0B0B0B",
   },
   container: {
-    height: 64,
+    height: 50, // Changed from 60 to 50 for more compact header
     backgroundColor: "#0B0B0B",
-    borderBottomColor: "#1A1A1A",
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    // Removed the gray border line
     paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "space-between",
@@ -101,7 +100,7 @@ const s = StyleSheet.create({
     textTransform: "uppercase",
     color: "#C48913",
     fontSize: 25,
-    marginTop: 11.2,
+    marginTop: 8, // Adjusted from 11.2 to 8 for better centering in reduced height
     width: '100%',
     flexWrap: 'wrap',
   },
@@ -154,6 +153,6 @@ const s = StyleSheet.create({
   menuDivider: {
     height: 1,
     backgroundColor: "#333333",
-    marginHorizontal: 16,
+    marginHorizontal: 10,
   },
 });

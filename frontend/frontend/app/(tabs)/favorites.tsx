@@ -17,7 +17,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from "react";
-import { FlatList, View, Alert, RefreshControl, Text, StyleSheet, Pressable } from "react-native";
+import { FlatList, View, RefreshControl, Text, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getFavorites, removeFromFavorites, clearFavorites, FavoriteProduct } from "../../services/favorites";
 import ProductCard from "../../components/ProductCard";
@@ -27,12 +27,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuroraHeader from "../../components/AuroraHeader";
 import { useFocusEffect } from "@react-navigation/native";
 import SilverText from "../../components/SilverText";
+import NotificationAlert from "../../components/NotificationAlert";
+import { useNotification } from "../../hooks/useNotification";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 export default function FavoritesTab() {
   const { isAuthenticated } = useAuth();
   const [currentToken, setCurrentToken] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<FavoriteProduct[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showClearConfirmation, setShowClearConfirmation] = useState(false);
+
+  // Notification hook
+  const { notification, showSuccess, showError, showWarning, showInfo, hideNotification } = useNotification();
 
   // 🔧 TOKEN ALMA FONKSİYONU
   const getTokenFromStorage = async (): Promise<string | null> => {
@@ -68,7 +75,7 @@ export default function FavoritesTab() {
       console.log('[FavoritesTab] Favoriler yüklendi, sayı:', favs.length);
     } catch (error) {
       console.error('[FavoritesTab] Favoriler yüklenemedi:', error);
-      Alert.alert("❌ Hata", "Favoriler yüklenirken hata oluştu.");
+      showError('Hata', 'Favoriler yüklenirken hata oluştu.');
     } finally {
       setLoading(false);
     }
@@ -87,55 +94,49 @@ export default function FavoritesTab() {
       await removeFromFavorites(product.id);
       setFavorites(prev => prev.filter(fav => fav.id !== product.id));
       console.log('[FavoritesTab] Favorilerden çıkarıldı:', product.name);
-      Alert.alert("💔 Favoriler", `"${product.name}" favorilerden çıkarıldı.`);
+      showError('Favorilerden Çıkarıldı', `"${product.name}" favorilerden çıkarıldı.`);
     } catch (error) {
       console.error('[FavoritesTab] Favorilerden çıkarma hatası:', error);
-      Alert.alert("❌ Hata", "Favorilerden çıkarılırken hata oluştu.");
+      showError('Hata', 'Favorilerden çıkarılırken hata oluştu.');
     }
   };
 
   // 🛒 SEPETE EKLEME FONKSİYONU
   const onAdd = async (product: FavoriteProduct) => {
     if (!currentToken) { 
-      Alert.alert(
-        "🔐 Giriş Gerekli", 
-        "Sepete ürün eklemek için giriş yapmanız gerekiyor."
-      ); 
+      showWarning('Giriş Gerekli', 'Sepete ürün eklemek için giriş yapmanız gerekiyor.'); 
       return; 
     }
     
     try {
       await addToCart(currentToken, product.id, 1);
-      Alert.alert("✅ Sepet", `"${product.name}" sepete eklendi!`);
+      showSuccess('Sepete Eklendi', `"${product.name}" sepete eklendi!`);
     } catch (error) {
       console.error('[FavoritesTab] Sepete ekleme hatası:', error);
-      Alert.alert("❌ Hata", "Ürün sepete eklenirken hata oluştu.");
+      showError('Hata', 'Ürün sepete eklenirken hata oluştu.');
     }
   };
 
   // 🧹 TÜM FAVORİLERİ TEMİZLE
   const onClearAllFavorites = () => {
-    Alert.alert(
-      "🗑️ Favorileri Temizle",
-      "Tüm favorilerinizi silmek istediğinizden emin misiniz?",
-      [
-        { text: "İptal", style: "cancel" },
-        { 
-          text: "Evet, Sil", 
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await clearFavorites();
-              setFavorites([]);
-              Alert.alert("✅ Başarılı", "Tüm favoriler temizlendi.");
-            } catch (error) {
-              console.error('[FavoritesTab] Favorileri temizleme hatası:', error);
-              Alert.alert("❌ Hata", "Favoriler temizlenirken hata oluştu.");
-            }
-          }
-        }
-      ]
-    );
+    setShowClearConfirmation(true);
+  };
+
+  const handleConfirmClearFavorites = async () => {
+    try {
+      await clearFavorites();
+      setFavorites([]);
+      showSuccess('Başarılı', 'Tüm favoriler temizlendi.');
+    } catch (error) {
+      console.error('[FavoritesTab] Favorileri temizleme hatası:', error);
+      showError('Hata', 'Favoriler temizlenirken hata oluştu.');
+    } finally {
+      setShowClearConfirmation(false);
+    }
+  };
+
+  const handleCancelClearFavorites = () => {
+    setShowClearConfirmation(false);
   };
 
   // 📄 BOŞ LİSTE KOMPONENTI
@@ -151,6 +152,17 @@ export default function FavoritesTab() {
 
   return (
     <View style={styles.container}>
+      {/* Notification Alert */}
+      <NotificationAlert
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        visible={notification.visible}
+        onClose={hideNotification}
+        autoHide={true}
+        duration={4000}
+      />
+      
       {/* AURORA HEADER */}
       <AuroraHeader />
 
@@ -185,6 +197,18 @@ export default function FavoritesTab() {
           )}
         />
       </View>
+
+      {/* CONFIRMATION DIALOG */}
+      <ConfirmationDialog
+        visible={showClearConfirmation}
+        title="Favorileri Temizle"
+        message="Tüm favorilerinizi silmek istediğinizden emin misiniz?"
+        confirmText="Evet, Sil"
+        cancelText="İptal"
+        onConfirm={handleConfirmClearFavorites}
+        onCancel={handleCancelClearFavorites}
+        type="danger"
+      />
     </View>
   );
 }

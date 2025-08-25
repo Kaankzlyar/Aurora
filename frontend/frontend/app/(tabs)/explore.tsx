@@ -10,6 +10,7 @@ import {
   Alert,
   RefreshControl,
   Pressable,
+  TextInput,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,9 @@ import { getProducts, Product } from '../../services/catalog';
 import { addToCart } from '../../services/cart';
 import { addToFavorites, removeFromFavorites, getFavorites } from '../../services/favorites';
 import { imgUri } from '../../api/http';
+import AuthDebugger from '../../components/AuthDebugger';
+import NotificationAlert from '../../components/NotificationAlert';
+import { useNotification } from '../../hooks/useNotification';
 
 interface ProductCardProps {
   product: Product;
@@ -87,16 +91,27 @@ const ExploreScreen = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Notification hook
+  const { notification, showSuccess, showError, showInfo, hideNotification } = useNotification();
 
   // Unique brands and categories
   const brands = [...new Set(products.map(p => p.brandName))];
   const categories = [...new Set(products.map(p => p.categoryName))];
 
-  // Filtered products
+  // Filtered products - now includes search functionality
   const filteredProducts = products.filter(product => {
     const brandMatch = !selectedBrand || product.brandName === selectedBrand;
     const categoryMatch = !selectedCategory || product.categoryName === selectedCategory;
-    return brandMatch && categoryMatch;
+    
+    // Search functionality - check if product name, brand, or category contains search query
+    const searchMatch = !searchQuery || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.categoryName.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return brandMatch && categoryMatch && searchMatch;
   });
 
   const fetchProducts = async () => {
@@ -156,16 +171,16 @@ const ExploreScreen = () => {
               console.log('[ExploreScreen] Sepete ekleniyor:', product.name);
               const token = await AsyncStorage.getItem('userToken');
               if (!token) {
-                Alert.alert('Hata', 'Sepete eklemek için giriş yapmalısınız.');
+                showError('Giriş Gerekli', 'Sepete eklemek için giriş yapmalısınız.');
                 return;
               }
               
               await addToCart(token, product.id, 1);
               console.log('[ExploreScreen] ✅ Sepete eklendi:', product.name);
-              Alert.alert('Başarılı', `${product.name} sepete eklendi!`);
+              showSuccess('Başarılı!', `${product.name} sepete eklendi!`);
             } catch (error) {
               console.error('[ExploreScreen] Sepete ekleme hatası:', error);
-              Alert.alert('Hata', 'Ürün sepete eklenirken bir hata oluştu.');
+              showError('Hata', 'Ürün sepete eklenirken bir hata oluştu.');
             }
           }
         },
@@ -182,18 +197,18 @@ const ExploreScreen = () => {
         await removeFromFavorites(product.id);
         newFavorites.delete(product.id);
         console.log('[ExploreScreen] Favorilerden çıkarıldı:', product.name);
-        Alert.alert('Favorilerden Çıkarıldı', `${product.name} favorilerden çıkarıldı.`);
+        showInfo('Favorilerden Çıkarıldı', `${product.name} favorilerden çıkarıldı.`);
       } else {
         // Favorilere ekle
         await addToFavorites(product);
         newFavorites.add(product.id);
         console.log('[ExploreScreen] Favorilere eklendi:', product.name);
-        Alert.alert('Favorilere Eklendi', `${product.name} favorilere eklendi.`);
+        showSuccess('Favorilere Eklendi', `${product.name} favorilere eklendi!`);
       }
       setFavorites(newFavorites);
     } catch (error) {
       console.error('[ExploreScreen] Favori işlemi hatası:', error);
-      Alert.alert('Hata', 'Favori işlemi sırasında bir hata oluştu.');
+      showError('Hata', 'Favori işlemi sırasında bir hata oluştu.');
     }
   };
 
@@ -211,8 +226,45 @@ const ExploreScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Notification Alert */}
+      <NotificationAlert
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        visible={notification.visible}
+        onClose={hideNotification}
+        autoHide={true}
+        duration={4000}
+      />
+      
       {/* AuroraHeader - same as other pages */}
       <AuroraHeader />
+      
+      {/* Search Bar Section */}
+      <View style={styles.searchSection}>
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#C0C0C0" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Ürün, marka veya kategori ara..."
+            placeholderTextColor="#666666"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            clearButtonMode="while-editing"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity 
+              style={styles.clearButton}
+              onPress={() => setSearchQuery('')}
+            >
+              <Ionicons name="close-circle" size={20} color="#C0C0C0" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+      
+      {/* Debug Component - Temporary */}
+      
       
       {/* Başlık ve Filtre Kısmı */}
       <View style={styles.titleAndFilterSection}>
@@ -331,7 +383,12 @@ const ExploreScreen = () => {
             <View style={styles.emptyContainer}>
               <Ionicons name="bag-outline" size={64} color="#666666" />
               <Text style={styles.emptyText}>
-                {products.length === 0 ? 'Henüz ürün bulunmuyor.' : 'Bu filtreler için ürün bulunamadı.'}
+                {products.length === 0 
+                  ? 'Henüz ürün bulunmuyor.' 
+                  : searchQuery 
+                    ? `"${searchQuery}" için sonuç bulunamadı.`
+                    : 'Bu filtreler için ürün bulunamadı.'
+                }
               </Text>
               <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
                 <Text style={styles.refreshButtonText}>Yenile</Text>
@@ -368,6 +425,33 @@ const styles = StyleSheet.create({
     color: '#C0C0C0',
     marginTop: 10,
     fontSize: 16,
+  },
+  searchSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    backgroundColor: '#000000', // Changed from '#1A1A1A' to match page background
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#000000', // Changed from '#0B0B0B' to pure black
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#C0C0C0', // Changed from '#333333' to silver
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 16,
+    paddingVertical: 0,
+  },
+  clearButton: {
+    padding: 8,
   },
   titleAndFilterSection: {
     paddingHorizontal: 20,

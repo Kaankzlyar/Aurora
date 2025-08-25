@@ -7,6 +7,7 @@ using System.Text;
 using Swashbuckle.AspNetCore;
 using Microsoft.OpenApi.Models;
 
+
 namespace EcommerceAPI
 {
     public class Program
@@ -14,6 +15,8 @@ namespace EcommerceAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            
 
             // Add services to the container.
             // Listen on all interfaces for mobile access
