@@ -24,6 +24,9 @@ import { imgUri } from '../../api/http';
 import AuthDebugger from '../../components/AuthDebugger';
 import NotificationAlert from '../../components/NotificationAlert';
 import { useNotification } from '../../hooks/useNotification';
+import { BASE_URL } from '../../constants/config';
+import FilterScreen, { FilterOptions } from '../../components/FilterScreen';
+import OrderModal from '../../components/OrderModal';
 
 interface ProductCardProps {
   product: Product;
@@ -88,31 +91,95 @@ const ExploreScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [selectedBrand, setSelectedBrand] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilterScreen, setShowFilterScreen] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [categories, setCategories] = useState<string[]>([]); // Separate state for categories
+  const [showOrderModal, setShowOrderModal] = useState(false);
+
+  // Filter options
+  const [filters, setFilters] = useState<FilterOptions>({
+    selectedBrand: '',
+    selectedCategory: '',
+    selectedSize: '',
+    selectedShoeNumber: '',
+    priceRange: { min: 0, max: 10000 },
+    orderBy: 'newest',
+    orderDirection: 'desc',
+  });
 
   // Notification hook
   const { notification, showSuccess, showError, showInfo, hideNotification } = useNotification();
 
-  // Unique brands and categories
+  // Unique brands from products
   const brands = [...new Set(products.map(p => p.brandName))];
-  const categories = [...new Set(products.map(p => p.categoryName))];
 
-  // Filtered products - now includes search functionality
-  const filteredProducts = products.filter(product => {
-    const brandMatch = !selectedBrand || product.brandName === selectedBrand;
-    const categoryMatch = !selectedCategory || product.categoryName === selectedCategory;
-    
-    // Search functionality - check if product name, brand, or category contains search query
-    const searchMatch = !searchQuery || 
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.categoryName.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return brandMatch && categoryMatch && searchMatch;
-  });
+  // Filtered and sorted products
+  const filteredAndSortedProducts = React.useMemo(() => {
+    let filtered = products.filter(product => {
+      const brandMatch = !filters.selectedBrand || product.brandName === filters.selectedBrand;
+      const categoryMatch = !filters.selectedCategory || product.categoryName === filters.selectedCategory;
+      
+      // Search functionality - check if product name, brand, or category contains search query
+      const searchMatch = !searchQuery || 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.categoryName.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return brandMatch && categoryMatch && searchMatch;
+    });
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (filters.orderBy) {
+        case 'price':
+          const priceA = a.price || 0;
+          const priceB = b.price || 0;
+          return filters.orderDirection === 'asc' ? priceA - priceB : priceB - priceA;
+        
+        case 'alphabetical':
+          const nameA = a.name.toLowerCase();
+          const nameB = b.name.toLowerCase();
+          if (filters.orderDirection === 'asc') {
+            return nameA.localeCompare(nameB);
+          } else {
+            return nameB.localeCompare(nameA);
+          }
+        
+        case 'newest':
+        default:
+          // Assuming products have a createdAt field, fallback to ID for now
+          const idA = a.id;
+          const idB = b.id;
+          return filters.orderDirection === 'asc' ? idA - idB : idB - idA;
+      }
+    });
+
+    return filtered;
+  }, [products, filters, searchQuery]);
+
+  // Fetch categories from backend API
+  const fetchCategories = async () => {
+    try {
+      console.log('[ExploreScreen] Kategoriler API\'den yükleniyor...');
+      // Use the same base URL as other API calls in the app
+      const response = await fetch(`${BASE_URL}/api/categories`);
+      if (response.ok) {
+        const categoriesData = await response.json();
+        const categoryNames = categoriesData.map((cat: any) => cat.name);
+        setCategories(categoryNames);
+        console.log('[ExploreScreen] ✅ Kategoriler yüklendi:', categoryNames);
+        console.log('[ExploreScreen] Kategori sayısı:', categoryNames.length);
+      } else {
+        console.error('[ExploreScreen] ❌ Kategoriler API hatası:', response.status);
+      }
+    } catch (error) {
+      console.error('[ExploreScreen] ❌ Kategoriler yüklenirken hata:', error);
+      // Fallback to categories from products if API fails
+      const fallbackCategories = [...new Set(products.map(p => p.categoryName))];
+      setCategories(fallbackCategories);
+      console.log('[ExploreScreen] 🔄 Fallback kategoriler kullanıldı:', fallbackCategories);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -138,6 +205,7 @@ const ExploreScreen = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories(); // Fetch categories from backend
     loadFavorites(); // Favorileri yükle
   }, []);
 
@@ -157,6 +225,7 @@ const ExploreScreen = () => {
   const handleRefresh = () => {
     setRefreshing(true);
     fetchProducts();
+    fetchCategories(); // Also refresh categories
   };
 
   const handleProductPress = async (product: Product) => {
@@ -237,6 +306,29 @@ const ExploreScreen = () => {
         duration={4000}
       />
       
+      {/* Filter Screen */}
+      <FilterScreen
+        visible={showFilterScreen}
+        onClose={() => setShowFilterScreen(false)}
+        onApplyFilters={(newFilters) => {
+          setFilters(newFilters);
+          setShowFilterScreen(false);
+        }}
+        currentFilters={filters}
+      />
+      
+      {/* Order Modal */}
+      <OrderModal
+        visible={showOrderModal}
+        onClose={() => setShowOrderModal(false)}
+        onApplyOrder={(orderBy, direction) => {
+          setFilters(prev => ({ ...prev, orderBy, orderDirection: direction }));
+          setShowOrderModal(false);
+        }}
+        currentOrderBy={filters.orderBy}
+        currentDirection={filters.orderDirection}
+      />
+      
       {/* AuroraHeader - same as other pages */}
       <AuroraHeader />
       
@@ -270,90 +362,33 @@ const ExploreScreen = () => {
       <View style={styles.titleAndFilterSection}>
           <View style={styles.titleRow}>
             <SilverText style={styles.pageTitle}>Keşfet</SilverText>
-            <TouchableOpacity 
-              style={styles.filterButton}
-              onPress={() => setShowFilters(!showFilters)}
-            >
-              <Ionicons name="options-outline" size={24} color="#C0C0C0" />
-            </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={styles.orderButton}
+               onPress={() => {
+                  console.log('[ExploreScreen] Order button pressed, setting showOrderModal to true');
+                  setShowOrderModal(true);
+                }}
+              >
+                <Ionicons name="swap-vertical" size={24} color="#C0C0C0" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[
+                  styles.filterButton,
+                  (filters.selectedBrand || filters.selectedCategory || filters.selectedSize || filters.selectedShoeNumber) && styles.filterButtonActive
+                ]}
+                onPress={() => setShowFilterScreen(true)}
+              >
+                <Ionicons name="options-outline" size={24} color="#C0C0C0" />
+                {(filters.selectedBrand || filters.selectedCategory || filters.selectedSize || filters.selectedShoeNumber) && (
+                  <View style={styles.filterIndicator} />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
           
           {/* Filtreler */}
-          {showFilters && (
-            <View style={styles.filtersContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {/* Marka Filtreleri */}
-                <TouchableOpacity
-                  style={[
-                    styles.filterChip,
-                    !selectedBrand && styles.filterChipActive
-                  ]}
-                  onPress={() => setSelectedBrand('')}
-                >
-                  <Text style={[
-                    styles.filterChipText,
-                    !selectedBrand && styles.filterChipTextActive
-                  ]}>
-                    Tüm Markalar
-                  </Text>
-                </TouchableOpacity>
-                
-                {brands.map((brand) => (
-                  <TouchableOpacity
-                    key={brand}
-                    style={[
-                      styles.filterChip,
-                      selectedBrand === brand && styles.filterChipActive
-                    ]}
-                    onPress={() => setSelectedBrand(selectedBrand === brand ? '' : brand)}
-                  >
-                    <Text style={[
-                      styles.filterChipText,
-                      selectedBrand === brand && styles.filterChipTextActive
-                    ]}>
-                      {brand}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                
-                <View style={styles.filterSeparator} />
-                
-                {/* Kategori Filtreleri */}
-                <TouchableOpacity
-                  style={[
-                    styles.filterChip,
-                    !selectedCategory && styles.filterChipActive
-                  ]}
-                  onPress={() => setSelectedCategory('')}
-                >
-                  <Text style={[
-                    styles.filterChipText,
-                    !selectedCategory && styles.filterChipTextActive
-                  ]}>
-                    Tüm Kategoriler
-                  </Text>
-                </TouchableOpacity>
-                
-                {categories.map((category) => (
-                  <TouchableOpacity
-                    key={category}
-                    style={[
-                      styles.filterChip,
-                      selectedCategory === category && styles.filterChipActive
-                    ]}
-                    onPress={() => setSelectedCategory(selectedCategory === category ? '' : category)}
-                  >
-                    <Text style={[
-                      styles.filterChipText,
-                      selectedCategory === category && styles.filterChipTextActive
-                    ]}>
-                      {category}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
+          {/* The FilterScreen component is now rendered above the header */}
         </View>
       
       {/* İçerik */}
@@ -367,9 +402,9 @@ const ExploreScreen = () => {
       >
         {/* Ürünler Grid */}
         <View style={styles.productsContainer}>
-          {filteredProducts.length > 0 ? (
+          {filteredAndSortedProducts.length > 0 ? (
             <View style={styles.productsGrid}>
-              {filteredProducts.map((product) => (
+              {filteredAndSortedProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -469,6 +504,28 @@ const styles = StyleSheet.create({
     textAlign: 'left', // Sol tarafa yasla
   },
   filterButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#1A1A1A',
+  },
+  filterButtonActive: {
+    backgroundColor: '#C0C0C0',
+    borderColor: '#C0C0C0',
+  },
+  filterIndicator: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#C48913',
+    borderRadius: 10,
+    width: 10,
+    height: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 10, // Button spacing
+  },
+  orderButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#1A1A1A',
