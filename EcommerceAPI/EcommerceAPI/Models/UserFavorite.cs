@@ -9,9 +9,9 @@ namespace EcommerceAPI.Models
         public int ProductId { get; set; }
 
         [ForeignKey("UserId")]
-        public User User { get; set; }
+        public User User { get; set; } = default!;
 
         [ForeignKey("ProductId")]
-        public Product Product { get; set; }
+        public Product Product { get; set; } = default!;
     }
 }

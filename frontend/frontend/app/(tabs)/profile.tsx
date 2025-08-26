@@ -4,6 +4,7 @@ import { getUserProfile } from "../../api/auth";
 import { useState, useEffect, useMemo } from "react";
 import AuroraHeader from "../../components/AuroraHeader";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from "expo-router";
 
 export default function Screen() {
   const { logout, userInfo, updateUserInfo } = useAuth();
@@ -303,7 +304,10 @@ export default function Screen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Hesap İşlemleri</Text>
           
-          <Pressable style={styles.actionButton}>
+          <Pressable 
+            style={styles.actionButton}
+                            onPress={() => router.push('/orders')}
+          >
             <Text style={styles.actionIcon}>📋</Text>
             <Text style={styles.actionText}>Siparişlerim</Text>
             <Text style={styles.actionArrow}>›</Text>

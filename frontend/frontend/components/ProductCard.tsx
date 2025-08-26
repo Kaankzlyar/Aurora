@@ -11,12 +11,14 @@ export default function ProductCard({
   onAddToFavorites,
   isFavorite = false,
   showFavoriteButton = true,
+  disabled = false,
 }: { 
   item: Product; 
   onAdd?: (p: Product) => void;
   onAddToFavorites?: (p: Product) => void;
   isFavorite?: boolean;
   showFavoriteButton?: boolean;
+  disabled?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
   const uri = imgUri(item.imagePath);
@@ -89,22 +91,25 @@ export default function ProductCard({
       {/* CTA */}
       {onAdd && (
         <Pressable
-          onPress={() => onAdd(item)}
-          style={{ 
+          onPress={disabled ? undefined : () => onAdd(item)}
+          disabled={disabled}
+          style={({ pressed }) => [{ 
             marginTop: 6, 
             borderWidth: 1, 
-            borderColor: "#C48913", 
+            borderColor: disabled ? "#555" : "#C48913", 
             borderRadius: 8, 
             padding: 8, 
-            alignItems: "center" 
-          }}
+            alignItems: "center",
+            backgroundColor: disabled ? "#333" : "transparent",
+            opacity: disabled ? 0.6 : 1,
+          }, pressed && !disabled && { opacity: 0.8 }]}
         >
           <Text style={{ 
-            color: "#C48913", 
+            color: disabled ? "#999" : "#C48913", 
             fontWeight: "600",
             fontSize: 12
           }}>
-            Sepete Ekle
+            {disabled ? "Yükleniyor..." : "Sepete Ekle"}
           </Text>
         </Pressable>
       )}

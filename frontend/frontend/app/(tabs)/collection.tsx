@@ -440,6 +440,23 @@ export default function CollectionTab() {
                 >
                   <Text style={styles.clearCartButtonText}>🗑️ Sepeti Temizle</Text>
                 </Pressable>
+                
+                <Pressable 
+                  style={styles.checkoutButton}
+                  onPress={() => {
+                    if (data && data.items.length > 0) {
+                      router.push({
+                        pathname: '/checkout',
+                        params: { 
+                          subtotal: data.subtotal.toString(),
+                          totalQuantity: data.totalQuantity.toString()
+                        }
+                      });
+                    }
+                  }}
+                >
+                  <Text style={styles.checkoutButtonText}>💳 Ödemeye Geç</Text>
+                </Pressable>
               </View>
             ) : (
               <View style={styles.emptyCart}>
@@ -704,6 +721,20 @@ const styles = StyleSheet.create({
     color: '#FF6B6B',
     fontFamily: 'Montserrat_600SemiBold',
     fontSize: 14,
+  },
+  checkoutButton: {
+    marginTop: 12,
+    backgroundColor: '#D4AF37',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#D4AF37',
+  },
+  checkoutButtonText: {
+    color: '#0B0B0B',
+    fontFamily: 'Montserrat_700Bold',
+    fontSize: 16,
   },
   emptyCart: {
     alignItems: 'center',

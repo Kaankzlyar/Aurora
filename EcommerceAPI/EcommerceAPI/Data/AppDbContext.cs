@@ -12,12 +12,33 @@ namespace EcommerceAPI.Data
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Product> Products => Set<Product>();
         public DbSet<CartItem> CartItems => Set<CartItem>();
+        public DbSet<Address> Addresses => Set<Address>();
+public DbSet<CardOnFile> Cards => Set<CardOnFile>();
+public DbSet<Order> Orders => Set<Order>();
+public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     public DbSet<UserFavorite> UserFavorites => Set<UserFavorite>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {
             base.OnModelCreating(b);
+
+            b.Entity<Address>().HasIndex(a => a.UserId);
+    b.Entity<CardOnFile>().HasIndex(c => c.UserId);
+    b.Entity<CardOnFile>().Property(c => c.Last4).HasMaxLength(4).IsRequired();
+    b.Entity<CardOnFile>().Property(c => c.Brand).HasMaxLength(20).IsRequired();
+
+     b.Entity<Order>()
+        .HasMany(o => o.Items)
+        .WithOne()
+        .HasForeignKey(i => i.OrderId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+    b.Entity<OrderItem>().Property(i => i.UnitPrice).HasColumnType("decimal(18,2)");
+    b.Entity<OrderItem>().Property(i => i.LineTotal).HasColumnType("decimal(18,2)");
+    b.Entity<Order>().Property(o => o.Subtotal).HasColumnType("decimal(18,2)");
+    b.Entity<Order>().Property(o => o.ShippingFee).HasColumnType("decimal(18,2)");
+    b.Entity<Order>().Property(o => o.GrandTotal).HasColumnType("decimal(18,2)");
 
             b.Entity<Category>()
                 .Property(c => c.Name).HasMaxLength(60).IsRequired();

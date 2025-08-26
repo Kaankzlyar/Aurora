@@ -26,6 +26,7 @@ interface AuthContextType {
   checkAuthStatus: () => Promise<void>;
   updateUserInfo: (info: UserInfo) => void;
   refreshUserInfoFromToken: () => Promise<void>;
+  getCurrentToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -160,6 +161,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  const getCurrentToken = useCallback(async (): Promise<string | null> => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      return token;
+    } catch (error) {
+      console.error('[AuthContext] Error getting current token:', error);
+      return null;
+    }
+  }, []);
+
   const login = async (email?: string) => {
     console.log('[AuthContext] User logged in with email:', email);
     
@@ -168,12 +179,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await AsyncStorage.setItem('userEmail', email);
     }
     
-    // Immediately refresh user info from the new token
-    await refreshUserInfoFromToken();
+    // Small delay to ensure token is properly stored by login screen
+    await new Promise(resolve => setTimeout(resolve, 100));
     
-    // Set authentication to true AFTER we've confirmed we have user info
-    setIsAuthenticated(true);
-    console.log('[AuthContext] ✅ Authentication state set to true');
+    // Get the token that was just stored by the login screen
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('[AuthContext] Token from storage after login:', token ? '✅ Found' : '❌ Not found');
+    
+    if (token) {
+      // Set authentication to true immediately since we have a token
+      setIsAuthenticated(true);
+      console.log('[AuthContext] ✅ Authentication state set to true');
+      
+      // Refresh user info from the token
+      try {
+        const userData = await getUserInfoFromToken(token);
+        if (userData) {
+          setUserInfo(userData);
+          await AsyncStorage.setItem('userInfo', JSON.stringify(userData));
+          console.log('[AuthContext] ✅ User info set from token:', userData);
+        }
+      } catch (error) {
+        console.error('[AuthContext] Error getting user info from token:', error);
+        // Even if we can't get user info, we still have a valid token
+        // so authentication should remain true
+      }
+    } else {
+      console.log('[AuthContext] ❌ No token found after login, this is unexpected');
+      // If no token found, this is an error condition
+      setIsAuthenticated(false);
+      setUserInfo(null);
+    }
     
     // Don't call checkAuthStatus here as it might override our state
     // The component will naturally re-render with the new state
@@ -223,6 +259,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuthStatus,
     updateUserInfo,
     refreshUserInfoFromToken,
+    getCurrentToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

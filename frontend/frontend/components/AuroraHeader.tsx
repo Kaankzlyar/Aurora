@@ -61,7 +61,7 @@ export default function AuroraHeader() {
             
             <Pressable style={s.menuItem} onPress={() => {
               setShowProfileMenu(false);
-              // Siparişlerim sayfası henüz yok, daha sonra eklenebilir
+              router.push("/orders");
             }}>
               <Text style={s.menuIcon}>📋</Text>
               <Text style={s.menuText}>Siparişlerim</Text>
