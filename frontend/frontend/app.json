@@ -12,6 +12,16 @@
       "supportsTablet": true
     },
     "android": {
+      "backgroundColor": "#0B0B0B",
+      "navigationBar": {
+        "backgroundColor": "#0B0B0B",
+        "barStyle": "light-content"
+      },
+      "statusBar": {
+        "backgroundColor": "#0B0B0B",
+        "barStyle": "light-content"
+      },
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

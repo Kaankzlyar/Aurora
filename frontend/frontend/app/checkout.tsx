@@ -227,7 +227,10 @@ export default function CheckoutScreen() {
         {/* Kart Seçimi */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>💳 Ödeme Kartı</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="card-outline" size={20} color="#D4AF37" />
+            <SilverText style={[styles.sectionTitle, {marginLeft: 8, marginTop: 8}]}>Ödeme Kartı</SilverText>
+            </View>
             <Pressable 
               style={styles.addButton}
               onPress={() => router.push('/add-card')}
