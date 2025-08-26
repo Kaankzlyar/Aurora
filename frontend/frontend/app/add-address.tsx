@@ -6,7 +6,6 @@ import {
   ScrollView,
   Pressable,
   TextInput,
-  Alert,
   ActivityIndicator,
   Modal,
   FlatList,
@@ -21,6 +20,8 @@ import { createAddress } from '../services/addresses';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SilverText from '@/components/SilverText';
 import { Ionicons } from '@expo/vector-icons';
+import { useNotification } from '../hooks/useNotification';
+import NotificationAlert from '../components/NotificationAlert';
 
 // Country and city data
 const COUNTRIES = [
@@ -128,6 +129,7 @@ const COUNTRIES = [
 
 export default function AddAddressScreen() {
   const { isAuthenticated } = useAuth();
+  const { notification, showError, showSuccess, showWarning, hideNotification } = useNotification();
   const [loading, setLoading] = useState(false);
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [showCityModal, setShowCityModal] = useState(false);
@@ -224,7 +226,7 @@ export default function AddAddressScreen() {
     // Basic validation
     if (!formData.title || !formData.city || !formData.district || 
         !formData.neighborhood || !formData.street || !formData.buildingNo) {
-      Alert.alert('Eksik Bilgi', 'Lütfen gerekli alanları doldurun.');
+      showWarning('Eksik Bilgi', 'Lütfen gerekli alanları doldurun.');
       return;
     }
 
@@ -233,25 +235,21 @@ export default function AddAddressScreen() {
       const token = await AsyncStorage.getItem('userToken');
       
       if (!token) {
-        Alert.alert('Hata', 'Oturum bilgisi bulunamadı.');
+        showError('Hata', 'Oturum bilgisi bulunamadı.');
         return;
       }
 
       await createAddress(token, formData);
       
-      Alert.alert(
-        'Başarılı!',
-        'Adres başarıyla eklendi.',
-        [
-          {
-            text: 'Tamam',
-            onPress: () => router.back()
-          }
-        ]
-      );
+      showSuccess('Başarılı!', 'Adres başarıyla eklendi.');
+      
+      // Navigate back after a short delay to let user see the success message
+      setTimeout(() => {
+        router.back();
+      }, 2000);
     } catch (error) {
       console.error('Adres eklenirken hata:', error);
-      Alert.alert('Hata', 'Adres eklenirken hata oluştu. Lütfen tekrar deneyin.');
+      showError('Hata', 'Adres eklenirken hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
     }
@@ -362,7 +360,7 @@ export default function AddAddressScreen() {
             style={styles.input}
             value={formData.neighborhood}
             onChangeText={(value) => handleInputChange('neighborhood', value)}
-            placeholder="Fenerbahçe"
+            placeholder="Kınıklı Mah."
             placeholderTextColor="#666"
           />
         </View>
@@ -374,7 +372,7 @@ export default function AddAddressScreen() {
             style={styles.input}
             value={formData.street}
             onChangeText={(value) => handleInputChange('street', value)}
-            placeholder="Atatürk Caddesi"
+            placeholder="Ulus Caddesi"
             placeholderTextColor="#666"
           />
         </View>
@@ -551,6 +549,13 @@ export default function AddAddressScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+      <NotificationAlert 
+        type={notification.type} 
+        title={notification.title}
+        message={notification.message} 
+        visible={notification.visible}
+        onClose={hideNotification} 
+      />
     </View>
     </KeyboardAvoidingView>
   );

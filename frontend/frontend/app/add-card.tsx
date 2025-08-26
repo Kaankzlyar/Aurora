@@ -6,16 +6,18 @@ import {
   ScrollView,
   Pressable,
   TextInput,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { createCard } from '../services/cards';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNotification } from '../hooks/useNotification';
+import NotificationAlert from '../components/NotificationAlert';
 
 export default function AddCardScreen() {
   const { isAuthenticated } = useAuth();
+  const { notification, showError, showSuccess, showWarning, hideNotification } = useNotification();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -60,22 +62,22 @@ export default function AddCardScreen() {
     // Basic validation
     if (!formData.holderName || !formData.pan || !formData.expMonth || 
         !formData.expYear || !formData.cvv) {
-      Alert.alert('Eksik Bilgi', 'Lütfen tüm alanları doldurun.');
+      showWarning('Eksik Bilgi', 'Lütfen tüm alanları doldurun.');
       return;
     }
 
     if (!validateCardNumber(formData.pan)) {
-      Alert.alert('Geçersiz Kart Numarası', 'Lütfen geçerli bir kart numarası girin.');
+      showWarning('Geçersiz Kart Numarası', 'Lütfen geçerli bir kart numarası girin.');
       return;
     }
 
     if (!validateExpiry(formData.expMonth, formData.expYear)) {
-      Alert.alert('Geçersiz Son Kullanma Tarihi', 'Lütfen geçerli bir son kullanma tarihi girin.');
+      showWarning('Geçersiz Son Kullanma Tarihi', 'Lütfen geçerli bir son kullanma tarihi girin.');
       return;
     }
 
     if (!validateCVV(formData.cvv)) {
-      Alert.alert('Geçersiz CVV', 'CVV 3 veya 4 haneli olmalıdır.');
+      showWarning('Geçersiz CVV', 'CVV 3 veya 4 haneli olmalıdır.');
       return;
     }
 
@@ -84,7 +86,7 @@ export default function AddCardScreen() {
       const token = await AsyncStorage.getItem('userToken');
       
       if (!token) {
-        Alert.alert('Hata', 'Oturum bilgisi bulunamadı.');
+        showError('Hata', 'Oturum bilgisi bulunamadı.');
         return;
       }
 
@@ -96,19 +98,15 @@ export default function AddCardScreen() {
         cvv: formData.cvv
       });
       
-      Alert.alert(
-        'Başarılı!',
-        'Kart başarıyla eklendi.',
-        [
-          {
-            text: 'Tamam',
-            onPress: () => router.back()
-          }
-        ]
-      );
+      showSuccess('Başarılı!', 'Kart başarıyla eklendi.');
+      
+      // Navigate back after a short delay to let user see the success message
+      setTimeout(() => {
+        router.back();
+      }, 2000);
     } catch (error) {
       console.error('Kart eklenirken hata:', error);
-      Alert.alert('Hata', 'Kart eklenirken hata oluştu. Lütfen tekrar deneyin.');
+      showError('Hata', 'Kart eklenirken hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
     }
@@ -248,6 +246,14 @@ export default function AddCardScreen() {
           </Pressable>
         </View>
       </ScrollView>
+      
+      <NotificationAlert 
+        type={notification.type} 
+        title={notification.title}
+        message={notification.message} 
+        visible={notification.visible}
+        onClose={hideNotification} 
+      />
     </View>
   );
 }

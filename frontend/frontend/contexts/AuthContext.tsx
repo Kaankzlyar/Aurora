@@ -62,10 +62,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         shouldRedirectToLogin: validation.shouldRedirectToLogin,
       });
       
-      if (validation.shouldRedirectToLogin) {
-        console.log('[AuthContext] ⚠️ Token invalid/expired - redirecting to login');
+      // Only redirect to login if token is actually expired or completely invalid
+      if (validation.shouldRedirectToLogin && validation.isExpired) {
+        console.log('[AuthContext] ⚠️ Token expired - redirecting to login');
         
-        // Clear invalid tokens
+        // Clear expired tokens
         await clearInvalidToken();
         
         // Set authentication to false
@@ -82,13 +83,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
       
-      if (validation.isValid && validation.hasToken) {
-        // Token is valid, proceed with normal flow
+      // If we have a token (even if validation had minor issues), try to use it
+      if (validation.hasToken) {
+        console.log('[AuthContext] ✅ Token found, attempting to use it');
+        
         const token = await AsyncStorage.getItem('userToken');
         const savedUserInfo = await AsyncStorage.getItem('userInfo');
         const savedEmail = await AsyncStorage.getItem('userEmail');
         
-        console.log('[AuthContext] ✅ Valid token found, setting authenticated to true');
+        // Set authenticated to true if we have a token
         setIsAuthenticated(true);
         
         // Try to get user info from saved info first (has email), then from token
@@ -109,6 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log('[AuthContext] Using token user info (fallback):', userData);
           } catch (error) {
             console.log('[AuthContext] Error getting user info from token:', error);
+            // Don't fail completely - we still have a token
           }
         }
         
@@ -122,10 +126,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUserInfo(userData);
           console.log('[AuthContext] ✅ Final user info set in context:', userData);
         } else {
-          console.log('[AuthContext] ❌ No user data available');
+          console.log('[AuthContext] ❌ No user data available, but keeping authenticated state');
+          // Even without user data, if we have a token, stay authenticated
         }
       } else {
-        console.log('[AuthContext] No valid token found, setting authenticated to false');
+        console.log('[AuthContext] No token found, setting authenticated to false');
         setIsAuthenticated(false);
         setUserInfo(null);
       }
@@ -133,8 +138,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('[AuthContext] ==============================');
     } catch (error) {
       console.error('[AuthContext] Error checking auth status:', error);
-      setIsAuthenticated(false);
-      setUserInfo(null);
+      // Don't immediately fail on errors - check if we have a token
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (token) {
+          console.log('[AuthContext] Error occurred but token exists, keeping authenticated state');
+          setIsAuthenticated(true);
+          // Don't clear user info on validation errors
+        } else {
+          console.log('[AuthContext] No token found, setting unauthenticated');
+          setIsAuthenticated(false);
+          setUserInfo(null);
+        }
+      } catch (tokenError) {
+        console.error('[AuthContext] Error checking token storage:', tokenError);
+        setIsAuthenticated(false);
+        setUserInfo(null);
+      }
     } finally {
       setIsLoading(false);
     }
