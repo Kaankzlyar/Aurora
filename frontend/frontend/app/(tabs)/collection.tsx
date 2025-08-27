@@ -261,13 +261,6 @@ export default function CollectionTab() {
           <SilverText style={styles.pageTitle}>🛒 Sepetim</SilverText>
         </View>
 
-        {/* Loading durumunda küçük bir banner göster - sadece sayfa yüklenirken */}
-        {loading && (
-          <View style={styles.loadingBanner}>
-            <ActivityIndicator size="small" color="#D4AF37" />
-            <Text style={styles.loadingBannerText}>Sepet yükleniyor...</Text>
-          </View>
-        )}
         
         <FlatList
           data={data?.items ?? []}
@@ -593,24 +586,4 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.5)',
     fontSize: 16,
   },
-  loadingBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
-    borderColor: '#D4AF37',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    gap: 8,
-  },
-  loadingBannerText: {
-    color: '#D4AF37',
-    fontSize: 12,
-    fontFamily: 'Montserrat_500Medium',
-  },
-
 });

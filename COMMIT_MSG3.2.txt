@@ -1,7 +1,0 @@
-fix(address-form): make bottom fields visible when keyboard is open
-
-- Added keyboard listeners to calculate dynamic keyboard height
-- Applied keyboardHeight as extra paddingBottom in ScrollView
-- Limited KeyboardAvoidingView behavior to iOS to prevent double offset on Android
-- Ensured bottom button and inputs are scrollable above keyboard
-- Added new styling for checkout page. Some text coverted to SilverText for the App's integrity

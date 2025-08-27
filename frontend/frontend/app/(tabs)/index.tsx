@@ -8,6 +8,7 @@ import GoldText from "../../components/GoldText";
 import { Redirect } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
 import SilverText from "../../components/SilverText";
+import HomeSlider from "../../components/HomeSlider";
 
 
 
@@ -574,18 +575,12 @@ function HomeTabContent() {
             </View>
           )}
           
-          {/* Debug Button */}
-          {/* <Pressable 
-            style={s.debugButton} 
-            onPress={() => {
-              console.log('[HomeTab] Debug - Full userInfo:', userInfo);
-              console.log('[HomeTab] Debug - getUserName result:', getUserName());
-              refreshUserInfoFromToken();
-            }}
-          >
-            <Text style={s.debugButtonText}>🐛 Debug & Refresh</Text>
-          </Pressable> */}
+          
         </View>
+
+        {/* Home Slider */}
+        <HomeSlider />
+
         {/* Bronze Banner with Countdown */}
         <BronzeBanner onPress={() => router.push('/explore')} />
 
