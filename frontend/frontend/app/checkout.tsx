@@ -8,15 +8,20 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { getMyAddresses, Address } from '../services/addresses';
 import { getMyCards, Card } from '../services/cards';
 import { checkout } from '../services/orders';
+import { getCart, CartItem } from '../services/cart';
+import { imgUri } from '../api/http';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from '@expo/vector-icons/build/Ionicons';
-import  SilverText  from '../components/SilverText';
+import SilverText from '../components/SilverText';
+import AuroraHeader from '../components/AuroraHeader';
+import GoldText from '@/components/GoldText';
 
 export default function CheckoutScreen() {
   const { isAuthenticated } = useAuth();
@@ -26,6 +31,7 @@ export default function CheckoutScreen() {
   
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,37 +42,64 @@ export default function CheckoutScreen() {
   const shippingFee = 0; // Ücretsiz kargo
   const grandTotal = subtotal + shippingFee;
 
+  // Number formatting function for Turkish currency
+  const formatCurrency = (amount: number): string => {
+    return amount.toLocaleString('tr-TR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  // 🔧 TOKEN ALMA FONKSİYONU
+  const getTokenFromStorage = async (): Promise<string | null> => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      console.log('[CheckoutScreen] Token alındı:', token ? 'BAŞARILI' : 'BOŞ');
+      return token;
+    } catch (error) {
+      console.error('[CheckoutScreen] Token alınamadı:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const getToken = async () => {
       try {
-        const token = await AsyncStorage.getItem('userToken');
+        console.log('[CheckoutScreen] Token yükleme başlatıldı');
+        console.log('[CheckoutScreen] isAuthenticated:', isAuthenticated);
+        
+        const token = await getTokenFromStorage();
         setCurrentToken(token);
+        console.log('[CheckoutScreen] Token yüklendi:', token ? 'BAŞARILI' : 'BOŞ');
+        
         if (token) {
           loadData(token);
         }
       } catch (error) {
-        console.error('Token alınamadı:', error);
+        console.error('[CheckoutScreen] Token alınamadı:', error);
       }
     };
     getToken();
-  }, []);
+  }, [isAuthenticated]);
 
   const loadData = async (token: string) => {
     try {
       setLoading(true);
-      const [addressesData, cardsData] = await Promise.all([
+      const [addressesData, cardsData, cartData] = await Promise.all([
         getMyAddresses(token),
-        getMyCards(token)
+        getMyCards(token),
+        getCart(token)
       ]);
       
       setAddresses(addressesData);
       setCards(cardsData);
+      setCartItems(cartData.items);
       
       // İlk adres ve kartı seç
       if (addressesData.length > 0) setSelectedAddressId(addressesData[0].id);
       if (cardsData.length > 0) setSelectedCardId(cardsData[0].id);
     } catch (error) {
-      console.error('Veri yüklenirken hata:', error);
+      console.error('[CheckoutScreen] Veri yüklenirken hata:', error);
       Alert.alert('Hata', 'Adres ve kart bilgileri yüklenirken hata oluştu.');
     } finally {
       setLoading(false);
@@ -102,22 +135,58 @@ export default function CheckoutScreen() {
             text: 'Siparişlerimi Gör',
             onPress: () => router.push('/orders')
           },
-                     {
-             text: 'Ana Sayfa',
-             onPress: () => router.push('/(tabs)/index')
-           }
+          {
+            text: 'Ana Sayfa',
+            onPress: () => router.push('/(tabs)/index')
+          }
         ]
       );
     } catch (error) {
-      console.error('Checkout hatası:', error);
+      console.error('[CheckoutScreen] Checkout hatası:', error);
       Alert.alert('Hata', 'Sipariş oluşturulurken hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setCheckoutLoading(false);
     }
   };
 
+  // 🚫 Giriş yapılmamışsa uyarı göster  
+  // Show login screen only if definitely not authenticated AND no token exists
+  if (!isAuthenticated && !currentToken && !loading) {
+    return (
+      <View style={styles.container}>
+        <AuroraHeader />
+        <View style={styles.pageContent}>
+          <View style={styles.titleSection}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Ionicons name="card-outline" size={36} color="#ffffff" />
+              <SilverText style={[styles.pageTitle, {marginLeft: 12, marginTop: 4}]}>Ödeme</SilverText>
+            </View>
+          </View>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>🔐 Giriş Gerekli</Text>
+            <Text style={styles.emptySubtitle}>
+              {!isAuthenticated 
+                ? "Ödeme yapmak için giriş yapın" 
+                : "Token yükleniyor, lütfen bekleyin..."
+              }
+            </Text>
+            {!isAuthenticated && (
+              <Pressable 
+                style={styles.loginButton} 
+                onPress={() => router.push('/(auth)/login')}
+              >
+                <Text style={styles.loginButtonText}>🔑 Giriş Yap</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   if (loading) {
     return (
+      
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#D4AF37" />
         <Text style={styles.loadingText}>Yükleniyor...</Text>
@@ -125,28 +194,55 @@ export default function CheckoutScreen() {
     );
   }
 
+ 
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Geri</Text>
-        </Pressable>
-        <SilverText style={styles.title}>Ödeme</SilverText>
-        <View style={styles.placeholder} />
-      </View>
+      {/* AURORA HEADER */}
+      <AuroraHeader />
+      
+      {/* PAGE CONTENT */}
+      <View style={styles.pageContent}>
+        <View style={styles.titleSection}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="card-outline" size={36} color="#ffffff" />
+            <SilverText style={[styles.pageTitle, {marginLeft: 12, marginTop: 4}]}>Ödeme</SilverText>
+          </View>
+        </View>
 
-      <ScrollView 
-        style={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+        <ScrollView 
+          style={styles.content}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
         {/* Sipariş Özeti */}
         <View style={styles.section}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name="receipt-outline" size={20} color="#D4AF37" />
             <SilverText style={[styles.sectionTitle, {marginLeft: 8}]}>Sipariş Özeti</SilverText>
           </View>
+          
+          {/* Cart Items */}
+          <View style={styles.cartItemsContainer}>
+            {cartItems.map((item) => (
+              <View key={item.productId} style={styles.cartItem}>
+                <Image 
+                  source={{ uri: imgUri(item.imagePath) }} 
+                  style={styles.cartItemImage} 
+                />
+                <View style={styles.cartItemInfo}>
+                  <Text style={styles.cartItemName}>{item.name}</Text>
+                  <Text style={styles.cartItemPrice}>{formatCurrency(item.price)} ₺</Text>
+                  <Text style={styles.cartItemQuantity}>Adet: {item.quantity}</Text>
+                </View>
+                <Text style={styles.cartItemTotal}>
+                  {formatCurrency(item.price * item.quantity)} ₺
+                </Text>
+              </View>
+            ))}
+          </View>
+          
           <View style={styles.summaryContainer}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Ürün Sayısı:</Text>
@@ -154,15 +250,15 @@ export default function CheckoutScreen() {
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Ara Toplam:</Text>
-              <SilverText style={styles.summaryValue}>{subtotal.toFixed(2)} ₺</SilverText>
+              <SilverText style={styles.summaryValue}>{formatCurrency(subtotal)} ₺</SilverText>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Kargo:</Text>
-              <SilverText style={styles.summaryValue}>{shippingFee.toFixed(2)} ₺</SilverText>
+              <SilverText style={styles.summaryValue}>{formatCurrency(shippingFee)} ₺</SilverText>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Toplam:</Text>
-              <SilverText style={styles.totalValue}>{grandTotal.toFixed(2)} ₺</SilverText>
+              <SilverText style={styles.totalValue}>{formatCurrency(grandTotal)} ₺</SilverText>
             </View>
           </View>
         </View>
@@ -294,12 +390,56 @@ export default function CheckoutScreen() {
               <ActivityIndicator size="small" color="#0B0B0B" />
             ) : (
               <Text style={styles.checkoutButtonText}>
-                💳 {grandTotal.toFixed(2)} ₺ Öde
+                💳 {formatCurrency(grandTotal)} ₺ Öde
               </Text>
             )}
           </Pressable>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
+      
+      {/* CUSTOM BOTTOM NAVIGATION */}
+      <View style={styles.bottomNav}>
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => router.push('/(tabs)/index')}
+        >
+          <Ionicons name="home-outline" size={22} color="#666666" />
+          <Text style={styles.navLabel}>Ana Sayfa</Text>
+        </Pressable>
+        
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => router.push('/(tabs)/explore')}
+        >
+          <Ionicons name="search-outline" size={22} color="#666666" />
+          <Text style={styles.navLabel}>Keşfet</Text>
+        </Pressable>
+        
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => router.push('/(tabs)/favorites')}
+        >
+          <Ionicons name="heart-outline" size={22} color="#666666" />
+          <Text style={styles.navLabel}>Favoriler</Text>
+        </Pressable>
+        
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => router.push('/(tabs)/collection')}
+        >
+          <Ionicons name="bag-outline" size={22} color="#D4AF37" />
+          <Text style={[styles.navLabel, styles.activeNavLabel]}>Sepetim</Text>
+        </Pressable>
+        
+        <Pressable 
+          style={styles.navItem} 
+          onPress={() => router.push('/(tabs)/profile')}
+        >
+          <Ionicons name="person-circle-outline" size={22} color="#666666" />
+          <Text style={styles.navLabel}>Profil</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -309,44 +449,54 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0B0B0B',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  pageContent: {
+    flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1A1A1A',
+    paddingTop: 1,
   },
-  backButton: {
-    padding: 8,
+  titleSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 0,
+    minHeight: 40,
   },
-  backButtonText: {
-    color: '#D4AF37',
-    fontSize: 16,
-    fontFamily: 'Montserrat_500Medium',
-  },
-  title: {
-    fontSize: 20,
+  pageTitle: {
+    fontSize: 24,
     fontFamily: 'Montserrat_600SemiBold',
     color: '#FFFFFF',
   },
-  placeholder: {
-    width: 50,
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  debugButtonSmall: {
+    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    borderWidth: 1,
+    borderColor: '#D4AF37',
+    borderRadius: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  debugButtonTextSmall: {
+    color: '#D4AF37',
+    fontSize: 12,
+    fontFamily: 'Montserrat_500Medium',
   },
   content: {
     flex: 1,
-    padding: 16,
   },
   section: {
     marginBottom: 24,
+    paddingHorizontal: 0,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+    paddingHorizontal: 0,
   },
   sectionTitle: {
     fontSize: 18,
@@ -365,6 +515,53 @@ const styles = StyleSheet.create({
     color: '#D4AF37',
     fontSize: 14,
     fontFamily: 'Montserrat_500Medium',
+  },
+  cartItemsContainer: {
+    marginBottom: 12,
+  },
+  cartItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  cartItemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 6,
+    backgroundColor: '#333',
+  },
+  cartItemInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  cartItemName: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    marginBottom: 2,
+  },
+  cartItemPrice: {
+    color: '#D4AF37',
+    fontSize: 12,
+    fontFamily: 'Montserrat_400Regular',
+    marginBottom: 2,
+  },
+  cartItemQuantity: {
+    color: '#CCCCCC',
+    fontSize: 12,
+    fontFamily: 'Montserrat_400Regular',
+  },
+  cartItemTotal: {
+    color: '#D4AF37',
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    textAlign: 'right',
+    minWidth: 80,
   },
   summaryContainer: {
     backgroundColor: '#1A1A1A',
@@ -474,7 +671,7 @@ const styles = StyleSheet.create({
   },
   checkoutSection: {
     marginTop: 32,
-    marginBottom: 32,
+    marginBottom: 100, // Alt menü için extra padding
   },
   checkoutButton: {
     backgroundColor: '#D4AF37',
@@ -501,5 +698,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Montserrat_400Regular',
     marginTop: 16,
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: '#1A1A1A',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+  },
+  navItem: {
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  navLabel: {
+    color: '#666666',
+    fontSize: 12,
+    fontFamily: 'Montserrat_400Regular',
+    marginTop: 4,
+  },
+  activeNavLabel: {
+    color: '#D4AF37',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#D4AF37',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_400Regular',
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  loginButton: {
+    backgroundColor: '#D4AF37',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  loginButtonText: {
+    color: '#0B0B0B',
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    textAlign: 'center',
   },
 });

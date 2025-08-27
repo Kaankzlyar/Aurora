@@ -35,8 +35,8 @@ export default function AddCardScreen() {
   const validateCardNumber = (pan: string) => {
     // Remove spaces and dashes
     const cleanPan = pan.replace(/\s/g, '').replace(/-/g, '');
-    // Check if it's a valid card number (13-19 digits)
-    return /^\d{13,19}$/.test(cleanPan);
+    // Check if it's a valid card number (12-19 digits) - matches backend validation
+    return /^\d{12,19}$/.test(cleanPan);
   };
 
   const validateExpiry = (month: string, year: string) => {
@@ -151,6 +151,14 @@ export default function AddCardScreen() {
         <Text style={styles.description}>
           Ödeme kartınızı ekleyin. Kart bilgileriniz güvenli şekilde şifrelenerek saklanır.
         </Text>
+
+        {/* Test Card Info */}
+        <View style={styles.testCardInfo}>
+          <Text style={styles.testCardTitle}>Test Kartları:</Text>
+          <Text style={styles.testCardText}>Visa: 4111 1111 1111 1111</Text>
+          <Text style={styles.testCardText}>Mastercard: 5555 5555 5555 4444</Text>
+          <Text style={styles.testCardText}>Amex: 3782 822463 10005</Text>
+        </View>
 
         {/* Kart Sahibi */}
         <View style={styles.inputGroup}>
@@ -300,6 +308,26 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  testCardInfo: {
+    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
+  },
+  testCardTitle: {
+    color: '#D4AF37',
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    marginBottom: 8,
+  },
+  testCardText: {
+    color: '#D4AF37',
+    fontSize: 12,
+    fontFamily: 'Montserrat_400Regular',
+    marginBottom: 4,
   },
   inputGroup: {
     marginBottom: 20,

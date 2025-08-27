@@ -12,7 +12,10 @@ import {
 import { router } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { getMyOrders, Order } from '../services/orders';
+import AuroraHeader from '../components/AuroraHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SilverText from '@/components/SilverText';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function OrdersScreen() {
   const { isAuthenticated } = useAuth();
@@ -75,18 +78,24 @@ export default function OrdersScreen() {
     });
   };
 
+  
+
+
   if (!isAuthenticated) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← Geri</Text>
-          </Pressable>
-          <Text style={styles.title}>Siparişlerim</Text>
-          <View style={styles.placeholder} />
-        </View>
-        <View style={styles.content}>
-          <Text style={styles.errorText}>Giriş yapmanız gerekiyor.</Text>
+        <AuroraHeader />
+        <View style={styles.pageContent}>
+          <View style={styles.titleSection}>
+            <Pressable onPress={() => router.back()} style={styles.backButton}>
+              <Text style={styles.backButtonText}>← Geri</Text>
+            </Pressable>
+            <Text style={styles.title}>Siparişlerim</Text>
+            <View style={styles.placeholder} />
+          </View>
+          <View style={styles.content}>
+            <Text style={styles.errorText}>Giriş yapmanız gerekiyor.</Text>
+          </View>
         </View>
       </View>
     );
@@ -95,16 +104,19 @@ export default function OrdersScreen() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← Geri</Text>
-          </Pressable>
-          <Text style={styles.title}>Siparişlerim</Text>
-          <View style={styles.placeholder} />
-        </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#D4AF37" />
-          <Text style={styles.loadingText}>Siparişler yükleniyor...</Text>
+        <AuroraHeader />
+        <View style={styles.pageContent}>
+          <View style={styles.titleSection}>
+            <Pressable onPress={() => router.back()} style={styles.backButton}>
+              <Text style={styles.backButtonText}>← Geri</Text>
+            </Pressable>
+            <Text style={styles.title}>Siparişlerim</Text>
+            <View style={styles.placeholder} />
+          </View>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#D4AF37" />
+            <Text style={styles.loadingText}>Siparişler yükleniyor...</Text>
+          </View>
         </View>
       </View>
     );
@@ -112,24 +124,29 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Geri</Text>
-        </Pressable>
-        <Text style={styles.title}>Siparişlerim</Text>
-        <View style={styles.placeholder} />
-      </View>
+      {/* AURORA HEADER */}
+      <AuroraHeader />
+      
+      {/* PAGE CONTENT */}
+      <View style={styles.pageContent}>
+        <View style={styles.titleSection}>
+          
+          <SilverText style={styles.title}>Siparişlerim</SilverText>
+          <View style={styles.placeholder} />
+        </View>
 
-      <ScrollView 
-        style={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+        <ScrollView 
+          style={styles.content}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
         {orders.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateIcon}>📦</Text>
-            <Text style={styles.emptyStateTitle}>Henüz Sipariş Yok</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Ionicons name="bag-outline" size={64} color="#D4AF37" />
+              <Text style={styles.emptyStateTitle}>Henüz Sipariş Yok</Text>
+            </View>
             <Text style={styles.emptyStateText}>
               İlk siparişinizi vermek için ürünleri keşfedin ve sepete ekleyin.
             </Text>
@@ -192,7 +209,8 @@ export default function OrdersScreen() {
             })}
           </View>
         )}
-      </ScrollView>
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -202,15 +220,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0B0B0B',
   },
-  header: {
+  pageContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 1,
+  },
+  titleSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#1A1A1A',
+    minHeight: 60,
   },
   backButton: {
     padding: 8,
@@ -230,7 +252,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
   },
   loadingContainer: {
     flex: 1,

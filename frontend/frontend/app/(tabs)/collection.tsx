@@ -47,14 +47,20 @@ export default function CollectionTab() {
   const [data, setData] = useState<CartSummary | null>(null);
   const [loading, setLoading] = useState(false);
   
-  // 🔍 Simple filter modal state
-  const [showFilterModal, setShowFilterModal] = useState(false);
+
+
+  // Number formatting function for Turkish currency
+  const formatCurrency = (amount: number): string => {
+    return amount.toLocaleString('tr-TR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
   // 🔧 TOKEN ALMA FONKSİYONU
   const getTokenFromStorage = async (): Promise<string | null> => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      console.log('[CollectionTab] Token alındı:', token ? 'BAŞARILI' : 'BOŞ');
       return token;
     } catch (error) {
       console.error('[CollectionTab] Token alınamadı:', error);
@@ -62,38 +68,20 @@ export default function CollectionTab() {
     }
   };
 
-  // 🔍 TOKEN DEBUG FONKSİYONU
-  const showTokenDebug = () => {
-    Alert.alert(
-      "🔑 Token Debug",
-      `Authentication: ${isAuthenticated ? '✅ Giriş Yapılmış' : '❌ Giriş Yapılmamış'}\n\n` +
-      `Token: ${currentToken ? '✅ Mevcut' : '❌ Yok'}\n\n` +
-      `Token Preview: ${currentToken ? currentToken.substring(0, 30) + '...' : 'null'}\n\n` +
-      `User Info: ${userInfo ? JSON.stringify(userInfo, null, 2) : 'null'}`,
-      [{ text: "Tamam" }]
-    );
-  };
 
-  // 🖥️ SERVER BAĞLANTI TESTİ
-  const testServerConnection = async () => {
-    Alert.alert("🔗 Server Test", "Backend bağlantısı test ediliyor...");
-  };
 
   // 🔄 TOKEN YÜKLEMECini başlat
   useEffect(() => {
     const loadToken = async () => {
-      console.log('[CollectionTab] Token yükleme başlatıldı');
       setLoading(true);
       const token = await getTokenFromStorage();
       setCurrentToken(token);
-      console.log('[CollectionTab] Token yüklendi:', token ? 'BAŞARILI' : 'BOŞ');
       
       // If we have a token, try to load cart data
       if (token) {
         try {
           const result = await getCart(token);
           setData(result);
-          console.log('[CollectionTab] Sepet verisi yüklendi:', result);
         } catch (error) {
           console.error('[CollectionTab] Sepet verisi yüklenemedi:', error);
         }
@@ -108,20 +96,17 @@ export default function CollectionTab() {
   // 🔄 SEPET YENİLEME FONKSİYONU
   const refresh = async () => {
     try {
-      console.log('[CollectionTab] Sepet verisi alınıyor...');
       setLoading(true);
       
       // Get fresh token each time to avoid stale token issues
       const token = await getTokenFromStorage();
       if (!token) {
-        console.log('[CollectionTab] Token bulunamadı');
         Alert.alert("❌ Hata", "Oturum süresi dolmuş, lütfen tekrar giriş yapın.");
         return;
       }
       
       const result = await getCart(token);
       setData(result);
-      console.log('[CollectionTab] Sepet verisi alındı:', result);
     } catch (error) {
       console.error('[CollectionTab] Sepet verisi alınamadı:', error);
       Alert.alert("❌ Hata", "Sepet verisi alınamadı.");
@@ -133,20 +118,13 @@ export default function CollectionTab() {
   // 📱 Sayfa odaklandığında sepeti yenile
   useFocusEffect(
     useCallback(() => {
-      console.log('[CollectionTab] Sayfa odaklandı, koşullar kontrol ediliyor...');
-      console.log('[CollectionTab] isAuthenticated:', isAuthenticated);
-      
       // Add a small delay to ensure AuthContext has updated
       const checkAndRefresh = async () => {
         // Check if we have a token in storage as backup verification
         const token = await getTokenFromStorage();
-        console.log('[CollectionTab] Token check:', token ? 'FOUND' : 'NOT FOUND');
         
         if (isAuthenticated || token) {
-          console.log('[CollectionTab] Auth verified, sepet yenileniyor...');
           refresh();
-        } else {
-          console.log('[CollectionTab] Auth not verified, sepet yenilenmeyecek');
         }
       };
       
@@ -162,11 +140,9 @@ export default function CollectionTab() {
       <View style={styles.container}>
         <AuroraHeader />
         <View style={styles.pageContent}>
-          <View style={styles.titleSection}>
-            <SilverText style={styles.pageTitle}>🛒 Sepetim</SilverText>
-            <Pressable style={styles.debugButtonSmall} onPress={showTokenDebug}>
-              <Text style={styles.debugButtonTextSmall}>?</Text>
-            </Pressable>
+          <View style={[styles.titleSection, { flexDirection: 'row', alignItems: 'center' }]}>
+            <Ionicons name="cart" size={24} color="#ffffffff" />
+            <SilverText style={styles.pageTitle}>Sepetim</SilverText>
           </View>
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyTitle}>🔐 Giriş Gerekli</Text>
@@ -283,20 +259,6 @@ export default function CollectionTab() {
         {/* Başlık ve Controls */}
         <View style={styles.titleSection}>
           <SilverText style={styles.pageTitle}>🛒 Sepetim</SilverText>
-          <View style={styles.headerRight}>
-            <Pressable 
-              onPress={() => setShowFilterModal(true)}
-              style={styles.filterButton}
-            >
-              <Text style={styles.filterButtonText}>🔍</Text>
-            </Pressable>
-            <Pressable style={styles.debugButtonSmall} onPress={showTokenDebug}>
-              <Text style={styles.debugButtonTextSmall}>T</Text>
-            </Pressable>
-            <Pressable style={[styles.debugButtonSmall, styles.serverButtonSmall]} onPress={testServerConnection}>
-              <Text style={styles.debugButtonTextSmall}>S</Text>
-            </Pressable>
-          </View>
         </View>
 
         {/* Loading durumunda küçük bir banner göster - sadece sayfa yüklenirken */}
@@ -321,7 +283,7 @@ export default function CollectionTab() {
                      style={styles.productImage} />
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.productPrice}>{item.price.toFixed(2)} ₺</Text>
+                <Text style={styles.productPrice}>{formatCurrency(item.price)} ₺</Text>
                 <View style={styles.quantityControls}>
                   <Pressable onPress={() => dec(item)} style={styles.quantityButton}>
                     <Text style={styles.quantityButtonText}>-</Text>
@@ -329,53 +291,6 @@ export default function CollectionTab() {
                   <Text style={styles.quantity}>{item.quantity}</Text>
                   <Pressable onPress={() => inc(item)} style={styles.quantityButton}>
                     <Text style={styles.quantityButtonText}>+</Text>
-                  </Pressable>
-                  <Pressable onPress={() => {
-                    // 🚀 Sil butonu sadece 1 azaltır
-                    if (item.quantity > 1) {
-                      // Miktar 1'den fazlaysa sadece azalt
-                      if (data) {
-                        const updatedItems = data.items.map(it => 
-                          it.productId === item.productId 
-                            ? { ...it, quantity: it.quantity - 1 }
-                            : it
-                        );
-                        
-                        const newTotalQuantity = updatedItems.reduce((sum, it) => sum + it.quantity, 0);
-                        const newSubtotal = updatedItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
-                        
-                        setData({
-                          items: updatedItems,
-                          totalQuantity: newTotalQuantity,
-                          subtotal: newSubtotal
-                        });
-                      }
-                      
-                      // Backend'i güncelle
-                      updateCartItem(currentToken!, item.productId, item.quantity - 1).catch(() => {
-                        refresh();
-                      });
-                    } else {
-                      // Miktar 1 ise tamamen sil
-                      if (data) {
-                        const updatedItems = data.items.filter(it => it.productId !== item.productId);
-                        const newTotalQuantity = updatedItems.reduce((sum, it) => sum + it.quantity, 0);
-                        const newSubtotal = updatedItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
-                        
-                        setData({
-                          items: updatedItems,
-                          totalQuantity: newTotalQuantity,
-                          subtotal: newSubtotal
-                        });
-                      }
-                      
-                      // Backend'den sil
-                      removeFromCart(currentToken!, item.productId).catch(() => {
-                        refresh();
-                      });
-                    }
-                  }} style={styles.removeButton}>
-                    <Ionicons name="trash-outline" style={styles.removeButtonText} size={20} />
                   </Pressable>
                 </View>
               </View>
@@ -387,7 +302,7 @@ export default function CollectionTab() {
                            (item.price * item.quantity) > 9999 ? 14 : 16
                 }
               ]}>
-                {(item.price * item.quantity).toFixed(2)} ₺
+                {formatCurrency(item.price * item.quantity)} ₺
               </Text>
             </View>
           )}
@@ -407,7 +322,7 @@ export default function CollectionTab() {
                       fontSize: data.subtotal > 99999 ? 14 : 
                                data.subtotal > 9999 ? 15 : 16
                     }
-                  ]}>{data.subtotal.toFixed(2)} ₺</Text>
+                  ]}>{formatCurrency(data.subtotal)} ₺</Text>
                 </View>
                 <Pressable 
                   style={styles.clearCartButton}
@@ -438,7 +353,10 @@ export default function CollectionTab() {
                     )
                   }
                 >
-                  <Text style={styles.clearCartButtonText}>🗑️ Sepeti Temizle</Text>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Ionicons name="trash-outline" size={20} color="#FF6B6B" />
+                  <Text style={[styles.clearCartButtonText, { marginLeft: 4 }]}>Sepeti Temizle</Text>
+                  </View>
                 </Pressable>
                 
                 <Pressable 
@@ -455,7 +373,11 @@ export default function CollectionTab() {
                     }
                   }}
                 >
-                  <Text style={styles.checkoutButtonText}>💳 Ödemeye Geç</Text>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Ionicons name="card-outline" size={24} color="black" />
+                    <Text style={[styles.checkoutButtonText, { marginLeft: 8 }]}>Ödeme Yap</Text>
+                  </View>
+                  
                 </Pressable>
               </View>
             ) : (
@@ -467,50 +389,7 @@ export default function CollectionTab() {
         />
       </View>
 
-      {/* Simple Filter Modal */}
-      <Modal
-        visible={showFilterModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowFilterModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>🔍 Sepet Filtresi</Text>
-              <Pressable onPress={() => setShowFilterModal(false)} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>✕</Text>
-              </Pressable>
-            </View>
-            
-            <ScrollView style={styles.modalContent}>
-              <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>Fiyat Aralığı</Text>
-                <View style={styles.filterGrid}>
-                  <Pressable style={styles.filterChip}>
-                    <Text style={styles.filterChipText}>0-100 ₺</Text>
-                  </Pressable>
-                  <Pressable style={styles.filterChip}>
-                    <Text style={styles.filterChipText}>100-500 ₺</Text>
-                  </Pressable>
-                  <Pressable style={styles.filterChip}>
-                    <Text style={styles.filterChipText}>500+ ₺</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </ScrollView>
-            
-            <View style={styles.modalActions}>
-              <Pressable onPress={() => setShowFilterModal(false)} style={styles.cancelButton}>
-                <Text style={styles.cancelButtonText}>İptal</Text>
-              </Pressable>
-              <Pressable onPress={() => setShowFilterModal(false)} style={styles.applyButton}>
-                <Text style={styles.applyButtonText}>Uygula</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+
     </View>
   );
 }
@@ -538,27 +417,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: 'Montserrat_600SemiBold',
   },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  debugButtonSmall: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    minWidth: 24,
-    alignItems: 'center',
-  },
-  serverButtonSmall: {
-    backgroundColor: '#4ECDC4',
-  },
-  debugButtonTextSmall: {
-    color: '#0B0B0B',
-    fontSize: 8,
-    fontFamily: 'Montserrat_700Bold',
-  },
+
+
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -652,20 +512,7 @@ const styles = StyleSheet.create({
     minWidth: 30,
     textAlign: 'center',
   },
-  removeButton: {
-    marginLeft: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#FF6B6B',
-    borderRadius: 6,
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
-  },
-  removeButtonText: {
-    color: '#FF6B6B',
-    fontFamily: 'Montserrat_500Medium',
-    fontSize: 16,
-  },
+
   lineTotal: {
     width: 90, // Biraz daha geniş - büyük sayılar için
     textAlign: 'right',
@@ -765,128 +612,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Montserrat_500Medium',
   },
-  // 🔍 Filter Button & Modal Styles
-  filterButton: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    minWidth: 24,
-    alignItems: 'center',
-    marginRight: 4,
-  },
-  filterButtonText: {
-    color: '#0B0B0B',
-    fontSize: 8,
-    fontFamily: 'Montserrat_700Bold',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContainer: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 16,
-    width: '100%',
-    maxHeight: '85%',
-    borderWidth: 2,
-    borderColor: '#D4AF37',
-    shadowColor: '#D4AF37',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    backgroundColor: 'rgba(212, 175, 55, 0.05)',
-  },
-  modalTitle: {
-    color: '#D4AF37',
-    fontSize: 20,
-    fontFamily: 'PlayfairDisplay_700Bold',
-  },
-  closeButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
-  },
-  closeButtonText: {
-    color: '#D4AF37',
-    fontSize: 18,
-    fontFamily: 'Montserrat_700Bold',
-  },
-  modalContent: {
-    paddingHorizontal: 20,
-    maxHeight: 400,
-  },
-  filterSection: {
-    marginVertical: 16,
-  },
-  filterSectionTitle: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
-    marginBottom: 12,
-  },
-  filterGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  filterChip: {
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
-    borderWidth: 1,
-    borderColor: '#D4AF37',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  filterChipText: {
-    color: '#D4AF37',
-    fontSize: 14,
-    fontFamily: 'Montserrat_500Medium',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#333',
-    gap: 12,
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#666',
-  },
-  cancelButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'Montserrat_500Medium',
-  },
-  applyButton: {
-    flex: 1,
-    backgroundColor: '#D4AF37',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  applyButtonText: {
-    color: '#0B0B0B',
-    fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
-  },
+
 });

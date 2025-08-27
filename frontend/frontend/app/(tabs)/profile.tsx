@@ -5,6 +5,8 @@ import { useState, useEffect, useMemo } from "react";
 import AuroraHeader from "../../components/AuroraHeader";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from "expo-router";
+import Ionicons from "@expo/vector-icons/build/Ionicons";
+import SilverText from "@/components/SilverText";
 
 export default function Screen() {
   const { logout, userInfo, updateUserInfo } = useAuth();
@@ -221,12 +223,15 @@ export default function Screen() {
       <AuroraHeader />
       <ScrollView style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>👤 Hesap Bilgileri</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="person-outline" size={24} color={"#FFFFFF"} />
+            <SilverText style={[styles.title, {marginLeft: 8, marginTop: 8}]}>Hesap Bilgileri</SilverText>
+          </View>
           <Text style={styles.subtitle}>Profil ve ayarlarınız</Text>
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Kişisel Bilgiler</Text>
+          <SilverText style={styles.sectionTitle}>Kişisel Bilgiler</SilverText>
           
           {isLoading ? (
             <View style={styles.loadingContainer}>
@@ -367,15 +372,15 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 16,
   },
   header: {
-    marginBottom: 30,
+    marginBottom: 12,
   },
   title: {
     fontSize: 24,
-    fontFamily: "PlayfairDisplay_700Bold",
-    color: "#C48913",
+    fontFamily: "Montserrat_600SemiBold",
+    color: "#D4AF37",
     marginBottom: 8,
   },
   subtitle: {
@@ -387,9 +392,9 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontFamily: "PlayfairDisplay_600SemiBold",
-    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: "Montserrat_600SemiBold",
+    color: "#D4AF37",
     marginBottom: 16,
   },
   infoItem: {

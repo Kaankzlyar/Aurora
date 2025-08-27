@@ -53,8 +53,8 @@ export default function AuroraHeader() {
         >
           <View style={s.profileMenu}>
             <Pressable style={s.menuItem} onPress={navigateToProfile}>
-              <Text style={s.menuIcon}>👤</Text>
-              <Text style={s.menuText}>Hesap Bilgileri</Text>
+              <Ionicons name="person-outline" size={20} color={"#D4AF37"} />
+              <Text style={[s.menuText, {marginLeft: 8}]}>Hesap Bilgileri</Text>
             </Pressable>
             
             <View style={s.menuDivider} />
@@ -63,15 +63,15 @@ export default function AuroraHeader() {
               setShowProfileMenu(false);
               router.push("/orders");
             }}>
-              <Text style={s.menuIcon}>📋</Text>
-              <Text style={s.menuText}>Siparişlerim</Text>
+                <Ionicons name="list-outline" size={20} color={"#D4AF37"} />
+                <Text style={[s.menuText, {marginLeft:8}]}>Siparişlerim</Text>
             </Pressable>
             
             <View style={s.menuDivider} />
             
             <Pressable style={s.menuItem} onPress={navigateToCart}>
               <Ionicons name="bag-outline" size={20} color={"#D4AF37"} />
-              <Text style={s.menuText}>Sepetim</Text>
+              <Text style={[s.menuText, {marginLeft:8}]}>Sepetim</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -112,7 +112,7 @@ const s = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-start",
     alignItems: "flex-end",
-    paddingTop: 100,
+    paddingTop: 50,
     paddingRight: 16,
   },
   profileMenu: {
