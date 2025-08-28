@@ -1,0 +1,58 @@
+Added Gender Filter Option
+File: frontend/frontend/components/FilterScreen.tsx
+Changes:
+Added selectedGender field to FilterOptions interface
+Implemented gender selection with options: "Kadın", "Erkek", "Unisex"
+Added gender filter section at the top of filter modal
+Updated reset functionality to include gender field
+2. Dynamic Price Range System
+Files:
+frontend/frontend/components/FilterScreen.tsx
+frontend/frontend/app/(tabs)/explore.tsx
+Changes:
+Implemented fetchMaxPrice() function to dynamically fetch highest product price from API
+Added number formatting system with Turkish thousand separators (dots)
+Created formatNumber() and parseFormattedNumber() utility functions
+Updated price inputs to show formatted numbers in real-time
+Changed default max price from 10,000 to 1,000,000
+Price inputs now use dynamic max value from actual products
+3. Enhanced Filter UI
+File: frontend/frontend/components/FilterScreen.tsx
+Changes:
+Replaced static price display with interactive TextInput fields
+Added proper number formatting for price inputs
+Improved filter section ordering: Gender → Categories → Brands → Sizes → Price
+Enhanced reset functionality to use dynamic max price
+Added proper state synchronization between parent and child components
+4. Filter State Management
+File: frontend/frontend/app/(tabs)/explore.tsx
+Changes:
+Updated filter state to include selectedGender field
+Enhanced filter button active state to include gender selection
+Updated filter indicator to show when gender filter is active
+Improved filter synchronization between explore screen and filter modal
+🔧 Technical Improvements
+Number Formatting System
+Real-time number formatting with Turkish locale (1.000.000 format)
+Input validation and parsing
+Proper handling of empty values and edge cases
+API Integration
+Dynamic price fetching from products endpoint
+Error handling for API failures
+Fallback mechanisms for missing data
+State Management
+Proper prop synchronization between components
+useEffect hooks for dynamic updates
+Consistent state structure across components
+📱 User Experience Enhancements
+Better Filter Organization: Logical ordering of filter sections
+Dynamic Pricing: Max price automatically adjusts based on available products
+Visual Feedback: Filter button shows active state when any filter is applied
+Number Formatting: User-friendly number display with thousand separators
+Gender Filtering: New filtering option for better product discovery
+🐛 Bug Fixes
+Fixed syntax error in conditional rendering logic
+Resolved max price display issue (was showing 10,000 instead of dynamic value)
+Fixed filter state synchronization between components
+Corrected filter button active state detection
+

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -23,6 +24,7 @@ export interface FilterOptions {
   selectedCategory: string;
   selectedSize: string;
   selectedShoeNumber: string;
+  selectedGender: string;
   priceRange: {
     min: number;
     max: number;
@@ -38,16 +40,40 @@ const FilterScreen: React.FC<FilterScreenProps> = ({
   currentFilters,
 }) => {
   const [filters, setFilters] = useState<FilterOptions>(currentFilters);
+
+  // Update local filters when currentFilters prop changes
+  useEffect(() => {
+    setFilters(currentFilters);
+  }, [currentFilters]);
   const [brands, setBrands] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [sizes, setSizes] = useState<string[]>(['XS', 'S', 'M', 'L', 'XL', 'XXL']);
-  const [shoeNumbers, setShoeNumbers] = useState<string[]>(['36', '37', '38', '39', '40', '41', '42', '43', '44', '45']);
+  const [maxPrice, setMaxPrice] = useState<number>(1000000);
+  const isShoe = currentFilters.selectedCategory === 'Ayakkabı';
+  const isWear = currentFilters.selectedCategory === 'Tişört' || currentFilters.selectedCategory === 'Elbise';
+  const onSelectCategory = (category: string) => {
+    setFilters(prev => ({ 
+      ...prev, 
+      selectedCategory: category,
+      selectedSize: '',
+      selectedShoeNumber: ''
+    }));
+  };
 
-  // Fetch brands and categories from API
+  const genderOptions = ['Kadın', 'Erkek', 'Unisex'];
+  const sizeOptionsByCategory: Record<string, string[]> = {
+    "Shirt": ["XS", "S", "M", "L", "XL", "XXL"],
+    "Dress": ["XS", "S", "M", "L", "XL", "XXL"],
+    "Shoes": ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"],
+  };
+
+  const selectedSizes = sizeOptionsByCategory[filters.selectedCategory] || [];
+
+  // Fetch brands, categories and max price from API
   useEffect(() => {
     if (visible) {
       fetchBrands();
       fetchCategories();
+      fetchMaxPrice();
     }
   }, [visible]);
 
@@ -77,8 +103,37 @@ const FilterScreen: React.FC<FilterScreenProps> = ({
     }
   };
 
+  const fetchMaxPrice = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/products`);
+      if (response.ok) {
+        const productsData = await response.json();
+        if (productsData.length > 0) {
+          const prices = productsData.map((product: any) => product.price || 0);
+          const maxProductPrice = Math.max(...prices);
+          setMaxPrice(maxProductPrice);
+        }
+      }
+    } catch (error) {
+      console.error('[FilterScreen] Max price fetch error:', error);
+    }
+  };
+
   const updateFilter = (key: keyof FilterOptions, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const formatNumber = (value: string): string => {
+    // Remove all non-numeric characters
+    const numericValue = value.replace(/[^0-9]/g, '');
+    // Add thousand separators
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const parseFormattedNumber = (formattedValue: string): number => {
+    // Remove thousand separators and parse
+    const numericValue = formattedValue.replace(/\./g, '');
+    return numericValue ? parseInt(numericValue, 10) : 0;
   };
 
   const handleApply = () => {
@@ -92,7 +147,8 @@ const FilterScreen: React.FC<FilterScreenProps> = ({
       selectedCategory: '',
       selectedSize: '',
       selectedShoeNumber: '',
-      priceRange: { min: 0, max: 10000 },
+      selectedGender: '',
+      priceRange: { min: 0, max: maxPrice },
       orderBy: 'newest',
       orderDirection: 'desc',
     };
@@ -151,6 +207,28 @@ const FilterScreen: React.FC<FilterScreenProps> = ({
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          
+
+          {/* Gender Section */}
+          {renderFilterSection('Cinsiyet', (
+            <View style={styles.chipsContainer}>
+              {renderChip('Tümü', !filters.selectedGender, () => updateFilter('selectedGender', ''), 'category')}
+              {genderOptions.map(gender => 
+                renderChip(gender, filters.selectedGender === gender, () => updateFilter('selectedGender', gender), 'category')
+              )}
+            </View>
+          ))}
+
+          {/* Categories Section */}
+          {renderFilterSection('Kategoriler', (
+            <View style={styles.chipsContainer}>
+              {renderChip('Tüm Kategoriler', !filters.selectedCategory, () => onSelectCategory(''), 'category')}
+              {categories.map(category => 
+                renderChip(category, filters.selectedCategory === category, () => onSelectCategory(category), 'category')
+              )}
+            </View>
+          ))}
+
           {/* Brands Section */}
           {renderFilterSection('Markalar', (
             <View style={styles.chipsContainer}>
@@ -161,44 +239,80 @@ const FilterScreen: React.FC<FilterScreenProps> = ({
             </View>
           ))}
 
-          {/* Categories Section */}
-          {renderFilterSection('Kategoriler', (
-            <View style={styles.chipsContainer}>
-              {renderChip('Tüm Kategoriler', !filters.selectedCategory, () => updateFilter('selectedCategory', ''), 'category')}
-              {categories.map(category => 
-                renderChip(category, filters.selectedCategory === category, () => updateFilter('selectedCategory', category), 'category')
-              )}
-            </View>
-          ))}
+          
 
-          {/* Sizes Section */}
-          {renderFilterSection('Bedenler', (
-            <View style={styles.chipsContainer}>
-              {renderChip('Tüm Bedenler', !filters.selectedSize, () => updateFilter('selectedSize', ''), 'size')}
-              {sizes.map(size => 
-                renderChip(size, filters.selectedSize === size, () => updateFilter('selectedSize', size), 'size')
-              )}
-            </View>
-          ))}
-
-          {/* Shoe Numbers Section */}
-          {renderFilterSection('Ayakkabı Numaraları', (
-            <View style={styles.chipsContainer}>
-              {renderChip('Tüm Numaralar', !filters.selectedShoeNumber, () => updateFilter('selectedShoeNumber', ''), 'shoe')}
-              {shoeNumbers.map(number => 
-                renderChip(number, filters.selectedShoeNumber === number, () => updateFilter('selectedShoeNumber', number), 'shoe')
-              )}
-            </View>
-          ))}
-
+{selectedSizes.length > 0 && (
+  isShoe ? (
+    renderFilterSection('Ayakkabı Numaraları', (
+      <View style={styles.chipsContainer}>
+        {renderChip('Tüm Numaralar', !filters.selectedShoeNumber, () => updateFilter('selectedShoeNumber', ''), 'shoe')}
+        {selectedSizes.map(number => 
+          renderChip(number, filters.selectedShoeNumber === number, () => updateFilter('selectedShoeNumber', number), 'shoe')
+        )}
+      </View>
+    ))
+  ) : (
+    isWear ? (
+      renderFilterSection('Bedenler', (
+        <View style={styles.chipsContainer}>
+          {renderChip('Tüm Bedenler', !filters.selectedSize, () => updateFilter('selectedSize', ''), 'size')}
+          {selectedSizes.map(size => 
+            renderChip(size, filters.selectedSize === size, () => updateFilter('selectedSize', size), 'size')
+          )}
+        </View>
+      ))
+    ) : (
+      renderFilterSection('Bedenler', (
+        <View style={styles.chipsContainer}>
+          {renderChip('Tüm Bedenler', !filters.selectedSize, () => updateFilter('selectedSize', ''), 'size')}
+          {selectedSizes.map(size => 
+            renderChip(size, filters.selectedSize === size, () => updateFilter('selectedSize', size), 'size')
+          )}
+        </View>
+      ))
+    )
+  )
+)}
+          
           {/* Price Range Section */}
           {renderFilterSection('Fiyat Aralığı', (
             <View style={styles.priceSection}>
-              <Text style={styles.priceText}>
-                ₺{filters.priceRange.min} - ₺{filters.priceRange.max}
-              </Text>
+              <View style={styles.priceInputsRow}>
+                                 {/* Min Input */}
+                 <TextInput
+                   style={styles.priceInput}
+                   keyboardType="numeric"
+                   placeholder="Min"
+                   placeholderTextColor="#666666"
+                   value={formatNumber(filters.priceRange.min.toString())}
+                   onChangeText={text => {
+                     const formattedText = formatNumber(text);
+                     const numericValue = parseFormattedNumber(formattedText);
+                     updateFilter('priceRange', {
+                       ...filters.priceRange,
+                       min: numericValue
+                     });
+                   }}
+                 />
+                 {/* Max Input */}
+                 <TextInput
+                   style={styles.priceInput}
+                   keyboardType="numeric"
+                   placeholder="Max"
+                   placeholderTextColor="#666666"
+                   value={formatNumber(filters.priceRange.max.toString())}
+                   onChangeText={text => {
+                     const formattedText = formatNumber(text);
+                     const numericValue = parseFormattedNumber(formattedText);
+                     updateFilter('priceRange', {
+                       ...filters.priceRange,
+                       max: numericValue || maxPrice
+                     });
+                   }}
+                 />
+              </View>
               <Text style={styles.priceNote}>
-                Fiyat aralığı özelliği yakında eklenecek
+                ₺{formatNumber(filters.priceRange.min.toString())} - ₺{formatNumber(filters.priceRange.max.toString())}
               </Text>
             </View>
           ))}
@@ -297,11 +411,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
   },
-  priceText: {
-    fontSize: 18,
-    fontWeight: '600',
+  priceInputsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    gap: 10,
+  },
+  priceInput: {
+    flex: 1,
+    backgroundColor: '#1A1A1A',
+    padding: 10,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     color: '#C0C0C0',
-    marginBottom: 8,
+    fontSize: 16,
+    textAlign: 'center',
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#333333',
+  },
+  priceSeparator: {
+    color: '#666666',
+    fontSize: 16,
+    marginHorizontal: 8,
   },
   priceNote: {
     fontSize: 12,

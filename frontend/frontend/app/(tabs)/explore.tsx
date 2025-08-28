@@ -102,7 +102,8 @@ const ExploreScreen = () => {
     selectedCategory: '',
     selectedSize: '',
     selectedShoeNumber: '',
-    priceRange: { min: 0, max: 10000 },
+    selectedGender: '',
+    priceRange: { min: 0, max: 1000000 },
     orderBy: 'newest',
     orderDirection: 'desc',
   });
@@ -375,12 +376,12 @@ const ExploreScreen = () => {
               <TouchableOpacity 
                 style={[
                   styles.filterButton,
-                  (filters.selectedBrand || filters.selectedCategory || filters.selectedSize || filters.selectedShoeNumber) && styles.filterButtonActive
+                  (filters.selectedBrand || filters.selectedCategory || filters.selectedSize || filters.selectedShoeNumber || filters.selectedGender) && styles.filterButtonActive
                 ]}
                 onPress={() => setShowFilterScreen(true)}
               >
                 <Ionicons name="options-outline" size={24} color="#C0C0C0" />
-                {(filters.selectedBrand || filters.selectedCategory || filters.selectedSize || filters.selectedShoeNumber) && (
+                {(filters.selectedBrand || filters.selectedCategory || filters.selectedSize || filters.selectedShoeNumber || filters.selectedGender) && (
                   <View style={styles.filterIndicator} />
                 )}
               </TouchableOpacity>
@@ -650,7 +651,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   refreshButtonText: {
-    color: '#000000',
+    color: '#C48913',
     fontSize: 16,
     fontWeight: '600',
   },

@@ -15,7 +15,11 @@ import { useRouter } from 'expo-router';
 import SilverText from './SilverText';
 import GoldText from './GoldText';
 
-const { width } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
+
+// Standard slider dimensions
+const SLIDER_WIDTH = screenWidth - 32; // Full width minus padding
+const SLIDER_HEIGHT = 200; // Standard height
 
 const slides = [
   {
@@ -86,8 +90,8 @@ export default function HomeSlider() {
 
   // Memoized item layout
   const getItemLayout = useCallback((_: any, index: number) => ({
-    length: width,
-    offset: width * index,
+    length: SLIDER_WIDTH,
+    offset: SLIDER_WIDTH * index,
     index,
   }), []);
 
@@ -137,7 +141,7 @@ export default function HomeSlider() {
         getItemLayout={getItemLayout}
         // Ultra-smooth scrolling optimizations
         decelerationRate={0.98}
-        snapToInterval={width}
+        snapToInterval={SLIDER_WIDTH}
         snapToAlignment="start"
         disableIntervalMomentum={true}
         bounces={false}
@@ -165,13 +169,19 @@ export default function HomeSlider() {
 const styles = StyleSheet.create({
   wrapper: { 
     marginTop: 16, 
+    marginHorizontal: 16, // Add horizontal margin for centering
     borderRadius: 16, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 5,
     overflow: 'hidden',
     backgroundColor: '#0B0B0B',
+    width: SLIDER_WIDTH,
+    height: SLIDER_HEIGHT,
   },
   slide: {
-    width: width,
-    height: 260,
+    width: SLIDER_WIDTH,
+    height: SLIDER_HEIGHT,
     position: 'relative',
     backgroundColor: '#0B0B0B',
   },

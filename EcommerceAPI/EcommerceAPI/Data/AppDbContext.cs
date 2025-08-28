@@ -40,6 +40,11 @@ public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     b.Entity<Order>().Property(o => o.ShippingFee).HasColumnType("decimal(18,2)");
     b.Entity<Order>().Property(o => o.GrandTotal).HasColumnType("decimal(18,2)");
 
+
+    b.Entity<Product>().Property(p => p.Gender).HasConversion<byte>().HasDefaultValue(Product.GenderType.Unisex);
+
+    b.Entity<Product>().HasIndex(p => p.Gender);
+
             b.Entity<Category>()
                 .Property(c => c.Name).HasMaxLength(60).IsRequired();
 

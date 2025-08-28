@@ -37,6 +37,7 @@ public class ProductsController : ControllerBase
                               p.Id, p.Name, p.Price,
                               p.CategoryId, p.Category.Name,
                               p.BrandId, p.Brand.Name,
+                              p.Gender.ToString(),
                               p.ImagePath))
                           .ToListAsync();
 
@@ -57,6 +58,7 @@ public class ProductsController : ControllerBase
                 p.Id, p.Name, p.Price,
                 p.CategoryId, p.Category.Name,
                 p.BrandId, p.Brand.Name,
+                p.Gender.ToString(),
                 p.ImagePath));
     }
 
@@ -74,6 +76,7 @@ public class ProductsController : ControllerBase
             Price = dto.Price,
             CategoryId = dto.CategoryId,
             BrandId = dto.BrandId,
+            Gender = Enum.Parse<Models.Product.GenderType>(dto.Gender),
             ImagePath = dto.ImagePath
         };
         _db.Products.Add(p);
@@ -105,6 +108,7 @@ public class ProductsController : ControllerBase
         p.Price = dto.Price;
         p.CategoryId = dto.CategoryId;
         p.BrandId = dto.BrandId;
+        p.Gender = Enum.Parse<Models.Product.GenderType>(dto.Gender);
         p.ImagePath = dto.ImagePath;
 
         await _db.SaveChangesAsync();

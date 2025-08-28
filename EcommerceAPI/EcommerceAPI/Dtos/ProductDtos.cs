@@ -8,6 +8,7 @@ public record ProductDto(
     string CategoryName,
     int BrandId,
     string BrandName,
+    string Gender,
     string? ImagePath
 );
 
@@ -16,6 +17,7 @@ public record CreateProductDto(
     decimal Price,
     int CategoryId,
     int BrandId,
+    string Gender,
     string? ImagePath
 );
 
@@ -24,5 +26,6 @@ public record UpdateProductDto(
     decimal Price,
     int CategoryId,
     int BrandId,
+    string Gender,
     string? ImagePath
 );
