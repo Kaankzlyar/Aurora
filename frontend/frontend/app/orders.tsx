@@ -9,7 +9,13 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { router } from 'expo-router';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  Easing 
+} from 'react-native-reanimated';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { getMyOrders, Order } from '../services/orders';
 import AuroraHeader from '../components/AuroraHeader';
@@ -19,15 +25,38 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function OrdersScreen() {
   const { isAuthenticated } = useAuth();
+  const params = useLocalSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
     if (isAuthenticated) {
       loadOrders();
     }
   }, [isAuthenticated]);
+
+  // Smooth fade animasyonu için useEffect - Reanimated ile performans optimizasyonu
+  useEffect(() => {
+    if (params.animation === 'fade') {
+      // Reanimated ile smooth animasyon
+      opacity.value = withTiming(1, {
+        duration: parseInt(params.duration as string) || 150,
+        easing: Easing.out(Easing.quad),
+      });
+    } else {
+      // Normal yükleme için direkt görünür yap
+      opacity.value = 1;
+    }
+  }, [params.animation, params.duration]);
+
+  // Animated style
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+    };
+  });
 
   const loadOrders = async () => {
     try {
@@ -88,9 +117,9 @@ export default function OrdersScreen() {
         <View style={styles.pageContent}>
           <View style={styles.titleSection}>
             <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Text style={styles.backButtonText}>← Geri</Text>
+              <Ionicons name="arrow-back-outline" size={24} color="#ffffff" />
             </Pressable>
-            <Text style={styles.title}>Siparişlerim</Text>
+            <SilverText style={[styles.title, {marginLeft: 8}]}> Siparişlerim</SilverText>
             <View style={styles.placeholder} />
           </View>
           <View style={styles.content}>
@@ -108,9 +137,9 @@ export default function OrdersScreen() {
         <View style={styles.pageContent}>
           <View style={styles.titleSection}>
             <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Text style={styles.backButtonText}>← Geri</Text>
+              <Ionicons name="arrow-back-outline" size={24} color="#ffffff" />
             </Pressable>
-            <Text style={styles.title}>Siparişlerim</Text>
+            <SilverText style={[styles.title, {marginLeft: 8}]}> Siparişlerim</SilverText>
             <View style={styles.placeholder} />
           </View>
           <View style={styles.loadingContainer}>
@@ -123,15 +152,17 @@ export default function OrdersScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, animatedStyle]}>
       {/* AURORA HEADER */}
       <AuroraHeader />
       
       {/* PAGE CONTENT */}
       <View style={styles.pageContent}>
         <View style={styles.titleSection}>
-          
-          <SilverText style={styles.title}>Siparişlerim</SilverText>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="cart-outline" size={24} color="#FFFFFF" />
+            <SilverText style={[styles.title, {marginLeft: 8}]}> Siparişlerim</SilverText>
+          </View>
           <View style={styles.placeholder} />
         </View>
 
@@ -211,7 +242,7 @@ export default function OrdersScreen() {
         )}
         </ScrollView>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

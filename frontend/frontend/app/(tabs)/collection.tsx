@@ -141,7 +141,7 @@ export default function CollectionTab() {
         <AuroraHeader />
         <View style={styles.pageContent}>
           <View style={[styles.titleSection, { flexDirection: 'row', alignItems: 'center' }]}>
-            <Ionicons name="cart" size={24} color="#ffffffff" />
+            <Ionicons name="cart-outline" size={24} color="#ffffff" />
             <SilverText style={styles.pageTitle}>Sepetim</SilverText>
           </View>
           <View style={styles.emptyContainer}>
@@ -258,7 +258,10 @@ export default function CollectionTab() {
       <View style={styles.pageContent}>
         {/* Başlık ve Controls */}
         <View style={styles.titleSection}>
-          <SilverText style={styles.pageTitle}>🛒 Sepetim</SilverText>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="cart-outline" size={24} color="#ffffff" />
+            <SilverText style={[styles.pageTitle, {marginLeft: 8}]}> Sepetim</SilverText>
+          </View>
         </View>
 
         

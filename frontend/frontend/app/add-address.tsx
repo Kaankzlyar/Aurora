@@ -22,6 +22,7 @@ import SilverText from '@/components/SilverText';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
+import AuroraHeader from '../components/AuroraHeader';
 
 // Country and city data
 const COUNTRIES = [
@@ -258,6 +259,7 @@ export default function AddAddressScreen() {
   if (!isAuthenticated) {
     return (
       <View style={styles.container}>
+        <AuroraHeader />
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Text style={styles.backButtonText}>← Geri</Text>
@@ -279,6 +281,7 @@ export default function AddAddressScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? keyboardOffSet : 0}
     >
     <View style={styles.container}>
+      <AuroraHeader />
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Text style={styles.backButtonText}>← Geri</Text>

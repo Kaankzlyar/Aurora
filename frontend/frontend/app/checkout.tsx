@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert,
   ActivityIndicator,
   RefreshControl,
   Image,
@@ -22,9 +21,12 @@ import Ionicons from '@expo/vector-icons/build/Ionicons';
 import SilverText from '../components/SilverText';
 import AuroraHeader from '../components/AuroraHeader';
 import GoldText from '@/components/GoldText';
+import { useNotification } from '../hooks/useNotification';
+import NotificationAlert from '../components/NotificationAlert';
 
 export default function CheckoutScreen() {
   const { isAuthenticated } = useAuth();
+  const { notification, showError, showSuccess, showWarning, hideNotification } = useNotification();
   const params = useLocalSearchParams();
   const subtotal = parseFloat(params.subtotal as string) || 0;
   const totalQuantity = parseInt(params.totalQuantity as string) || 0;
@@ -100,7 +102,7 @@ export default function CheckoutScreen() {
       if (cardsData.length > 0) setSelectedCardId(cardsData[0].id);
     } catch (error) {
       console.error('[CheckoutScreen] Veri yüklenirken hata:', error);
-      Alert.alert('Hata', 'Adres ve kart bilgileri yüklenirken hata oluştu.');
+      showError('Hata', 'Adres ve kart bilgileri yüklenirken hata oluştu.');
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,7 @@ export default function CheckoutScreen() {
 
   const handleCheckout = async () => {
     if (!selectedAddressId || !selectedCardId) {
-      Alert.alert('Uyarı', 'Lütfen bir adres ve kart seçin.');
+      showWarning('Uyarı', 'Lütfen bir adres ve kart seçin.');
       return;
     }
 
@@ -127,23 +129,21 @@ export default function CheckoutScreen() {
         cardId: selectedCardId
       });
       
-      Alert.alert(
-        'Başarılı!', 
-        'Siparişiniz başarıyla oluşturuldu.',
-        [
-          {
-            text: 'Siparişlerimi Gör',
-            onPress: () => router.push('/orders')
-          },
-          {
-            text: 'Ana Sayfa',
-            onPress: () => router.push('/(tabs)/index')
+      showSuccess('Başarılı!', 'Siparişiniz başarıyla oluşturuldu.');
+      
+      // Kısa gecikme sonrası hızlı fade animasyonu ile yönlendir
+      setTimeout(() => {
+        router.replace({
+          pathname: '/orders',
+          params: { 
+            animation: 'fade',
+            duration: 150 
           }
-        ]
-      );
+        });
+      }, 500);
     } catch (error) {
       console.error('[CheckoutScreen] Checkout hatası:', error);
-      Alert.alert('Hata', 'Sipariş oluşturulurken hata oluştu. Lütfen tekrar deneyin.');
+      showError('Hata', 'Sipariş oluşturulurken hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setCheckoutLoading(false);
     }
@@ -389,9 +389,12 @@ export default function CheckoutScreen() {
             {checkoutLoading ? (
               <ActivityIndicator size="small" color="#0B0B0B" />
             ) : (
-              <Text style={styles.checkoutButtonText}>
-                💳 {formatCurrency(grandTotal)} ₺ Öde
-              </Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Ionicons name="card-outline" size={24} color="#0B0B0B" />
+                <Text style={[styles.checkoutButtonText, {marginLeft: 8}]}>
+                  {formatCurrency(grandTotal)} ₺ Öde
+                </Text>
+              </View>
             )}
           </Pressable>
         </View>
@@ -440,6 +443,17 @@ export default function CheckoutScreen() {
           <Text style={styles.navLabel}>Profil</Text>
         </Pressable>
       </View>
+      
+      {/* Notification Alert */}
+      <NotificationAlert
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        visible={notification.visible}
+        onClose={hideNotification}
+        autoHide={true}
+        duration={5000}
+      />
     </View>
   );
 }
@@ -674,7 +688,7 @@ const styles = StyleSheet.create({
     marginBottom: 100, // Alt menü için extra padding
   },
   checkoutButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#C48913',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

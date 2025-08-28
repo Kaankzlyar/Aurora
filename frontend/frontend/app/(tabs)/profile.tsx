@@ -109,14 +109,7 @@ export default function Screen() {
   // Extract display information from userInfo or profileData with useMemo for performance
   const currentUserData = useMemo(() => profileData || userInfo, [profileData, userInfo]);
   
-  // For debugging, log the current user data
-  console.log('[Profile] ===== DEBUG INFO =====');
-  console.log('[Profile] userInfo from context:', userInfo);
-  console.log('[Profile] profileData from API:', profileData);
-  console.log('[Profile] currentUserData (merged):', currentUserData);
-  console.log('[Profile] currentUserData keys:', currentUserData ? Object.keys(currentUserData) : 'null');
-  console.log('[Profile] currentUserData email specifically:', currentUserData?.email);
-  console.log('[Profile] ===========================');
+  
   
   const displayName = useMemo(() => {
     const result = currentUserData?.fullName || 
@@ -148,7 +141,7 @@ export default function Screen() {
   const displayPhone = '+90 555 XXX XX XX (Demo)';
 
   // Debug function to manually trigger profile fetch
-  const manualFetchProfile = async () => {
+  /* const manualFetchProfile = async () => {
     setIsLoading(true);
     try {
       console.log('[Profile] Manual fetch triggered...');
@@ -216,7 +209,7 @@ export default function Screen() {
     } catch (error) {
       Alert.alert("Error", "Failed to read AsyncStorage: " + error);
     }
-  };
+  }; */
 
   return (
     <View style={styles.container}>
@@ -257,7 +250,7 @@ export default function Screen() {
           )}
         </View>
 
-        <View style={styles.section}>
+       {/*  <View style={styles.section}>
           <Text style={styles.sectionTitle}>Debug İşlemleri</Text>
           
           <Pressable style={styles.actionButton} onPress={checkAsyncStorage}>
@@ -304,61 +297,44 @@ export default function Screen() {
             <Text style={styles.actionText}>Email Yenile</Text>
             <Text style={styles.actionArrow}>›</Text>
           </Pressable>
-        </View>
+        </View> */}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Hesap İşlemleri</Text>
+          <SilverText style={styles.sectionTitle}>Hesap İşlemleri</SilverText>
           
           <Pressable 
             style={styles.actionButton}
                             onPress={() => router.push('/orders')}
           >
-            <Text style={styles.actionIcon}>📋</Text>
-            <Text style={styles.actionText}>Siparişlerim</Text>
+            <Ionicons name="cart-outline" size={24} color={"#D4AF37"} />
+            <Text style={[styles.actionText, {marginLeft: 8}]}>Siparişlerim</Text>
             <Text style={styles.actionArrow}>›</Text>
           </Pressable>
           
-          <Pressable style={styles.actionButton}>
-            <Text style={styles.actionIcon}>❤️</Text>
-            <Text style={styles.actionText}>Favorilerim</Text>
+          <Pressable 
+          style={styles.actionButton}
+          onPress={() => router.push('/favorites')}
+          >
+            <Ionicons name="heart-outline" size={24} color={"#D4AF37"} />
+            <Text style={[styles.actionText, {marginLeft: 8}]}>Favorilerim</Text>
             <Text style={styles.actionArrow}>›</Text>
           </Pressable>
           
-          <Pressable style={styles.actionButton}>
-            <Text style={styles.actionIcon}>⚙️</Text>
-            <Text style={styles.actionText}>Ayarlar</Text>
+          <Pressable style={styles.actionButton}
+          onPress={() => router.push('/settings')}
+          >
+            <Ionicons name="settings-outline" size={24} color={"#D4AF37"} />
+            <Text style={[styles.actionText, {marginLeft: 8}]}>Ayarlar</Text>
             <Text style={styles.actionArrow}>›</Text>
           </Pressable>
           
           <Pressable style={styles.actionButton} onPress={handleLogout}>
-            <Text style={styles.actionIcon}>🚪</Text>
-            <Text style={styles.actionText}>Çıkış Yap</Text>
+            <Ionicons name="log-out-outline" size={24} color={"#D4AF37"} />
+            <Text style={[styles.actionText, {marginLeft: 8}]}>Çıkış Yap</Text>
             <Text style={styles.actionArrow}>›</Text>
           </Pressable>
           
-          <Pressable style={[styles.actionButton, { backgroundColor: '#2D1810' }]} onPress={async () => {
-            try {
-              console.log('[Profile] Emergency logout triggered');
-              
-              // Clear everything directly
-              await AsyncStorage.clear();
-              setProfileData(null);
-              setAsyncStorageEmail(null);
-              
-              // Import router and navigate
-              const { router } = await import('expo-router');
-              router.replace('/(auth)/login');
-              
-              Alert.alert("✅ Başarılı", "Çıkış yapıldı");
-            } catch (error) {
-              console.error('[Profile] Emergency logout error:', error);
-              Alert.alert("❌ Hata", "Acil çıkış başarısız: " + error.message);
-            }
-          }}>
-            <Text style={styles.actionIcon}>🔓</Text>
-            <Text style={styles.actionText}>Acil Çıkış (Test)</Text>
-            <Text style={styles.actionArrow}>›</Text>
-          </Pressable>
+          
         </View>
       </ScrollView>
     </View>
