@@ -34,12 +34,97 @@ public class ProductsController : ControllerBase
                           .Skip((page - 1) * pageSize)
                           .Take(pageSize)
                           .Select(p => new ProductDto(
-                              p.Id, p.Name, p.Price,
+                              p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
                               p.CategoryId, p.Category.Name,
                               p.BrandId, p.Brand.Name,
                               p.Gender.ToString(),
-                              p.ImagePath))
+                              p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
                           .ToListAsync();
+
+        return Ok(list);
+    }
+
+    // GET /api/products/special-today - Discounted random products
+    [HttpGet("special-today")]
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetSpecialToday(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var list = await _db.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Where(p => p.IsOnDiscount) // Only discounted products
+            .OrderBy(p => Guid.NewGuid()) // Random order
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new ProductDto(
+                p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
+                p.CategoryId, p.Category.Name,
+                p.BrandId, p.Brand.Name,
+                p.Gender.ToString(),
+                p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
+            .ToListAsync();
+
+        return Ok(list);
+    }
+
+    // GET /api/products/iconic-selections - Jewelry products
+    [HttpGet("iconic-selections")]
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetIconicSelections(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        // Find jewelry category (assuming it's named "Jewelry" or similar)
+        var jewelryCategory = await _db.Categories
+            .FirstOrDefaultAsync(c => c.Name.ToLower().Contains("jewelry") || 
+                                    c.Name.ToLower().Contains("jewellery") ||
+                                    c.Name.ToLower().Contains("mücevher"));
+
+        if (jewelryCategory == null)
+        {
+            return Ok(new List<ProductDto>()); // Return empty list if no jewelry category found
+        }
+
+        var list = await _db.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Where(p => p.CategoryId == jewelryCategory.Id)
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new ProductDto(
+                p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
+                p.CategoryId, p.Category.Name,
+                p.BrandId, p.Brand.Name,
+                p.Gender.ToString(),
+                p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
+            .ToListAsync();
+
+        return Ok(list);
+    }
+
+    // GET /api/products/new-arrivals - Products added in last 5 days
+    [HttpGet("new-arrivals")]
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetNewArrivals(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var fiveDaysAgo = DateTime.UtcNow.AddDays(-5);
+        
+        var list = await _db.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Where(p => p.CreatedAt >= fiveDaysAgo)
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new ProductDto(
+                p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
+                p.CategoryId, p.Category.Name,
+                p.BrandId, p.Brand.Name,
+                p.Gender.ToString(),
+                p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
+            .ToListAsync();
 
         return Ok(list);
     }
@@ -55,11 +140,11 @@ public class ProductsController : ControllerBase
         return p is null
             ? NotFound()
             : Ok(new ProductDto(
-                p.Id, p.Name, p.Price,
+                p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
                 p.CategoryId, p.Category.Name,
                 p.BrandId, p.Brand.Name,
                 p.Gender.ToString(),
-                p.ImagePath));
+                p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival));
     }
 
     [HttpPost]
@@ -74,6 +159,8 @@ public class ProductsController : ControllerBase
         {
             Name = dto.Name.Trim(),
             Price = dto.Price,
+            OriginalPrice = dto.OriginalPrice,
+            DiscountPercentage = dto.DiscountPercentage,
             CategoryId = dto.CategoryId,
             BrandId = dto.BrandId,
             Gender = Enum.Parse<Models.Product.GenderType>(dto.Gender),
@@ -87,10 +174,10 @@ public class ProductsController : ControllerBase
 
         return CreatedAtAction(nameof(Get), new { id = p.Id },
             new ProductDto(
-                p.Id, p.Name, p.Price,
+                p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
                 p.CategoryId, cat!.Name,
                 p.BrandId, br!.Name,
-                p.ImagePath));
+                p.Gender.ToString(), p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival));
     }
 
     [HttpPut("{id:int}")]
@@ -106,6 +193,8 @@ public class ProductsController : ControllerBase
 
         p.Name = dto.Name.Trim();
         p.Price = dto.Price;
+        p.OriginalPrice = dto.OriginalPrice;
+        p.DiscountPercentage = dto.DiscountPercentage;
         p.CategoryId = dto.CategoryId;
         p.BrandId = dto.BrandId;
         p.Gender = Enum.Parse<Models.Product.GenderType>(dto.Gender);

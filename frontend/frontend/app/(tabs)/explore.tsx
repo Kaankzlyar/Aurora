@@ -15,6 +15,7 @@ import {
 
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams } from 'expo-router';
 import AuroraHeader from '../../components/AuroraHeader';
 import SilverText from '../../components/SilverText';
 import { getProducts, Product } from '../../services/catalog';
@@ -43,6 +44,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const imageUrl = imgUri(product.imagePath) || 'https://via.placeholder.com/150';
   
+  // Debug için console log
+  console.log(`[ProductCard] ===== IMAGE DEBUG =====`);
+  console.log(`[ProductCard] Product: ${product.name}`);
+  console.log(`[ProductCard] Raw ImagePath: "${product.imagePath}"`);
+  console.log(`[ProductCard] Final ImageURL: "${imageUrl}"`);
+  console.log(`[ProductCard] ========================`);
+  
   return (
     <Pressable style={styles.productCard} onPress={onPress}>
       {/* Ürün Resmi */}
@@ -52,7 +60,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
           style={styles.productImage}
           resizeMode="cover"
           onError={(error) => {
-            console.log(`[ProductCard] Image error for ${product.name}:`, error.nativeEvent.error);
+            console.log(`[ProductCard] ❌ Image error for ${product.name}:`, error.nativeEvent.error);
+            console.log(`[ProductCard] ❌ Failed URL: ${imageUrl}`);
+            console.log(`[ProductCard] ❌ Original ImagePath: ${product.imagePath}`);
+          }}
+          onLoad={() => {
+            console.log(`[ProductCard] ✅ Image loaded successfully for ${product.name}: ${imageUrl}`);
           }}
         />
         
@@ -78,15 +91,18 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Text style={styles.productName} numberOfLines={2}>
           {product.name}
         </Text>
-        <Text style={styles.productPrice}>
+        <SilverText style={styles.productPrice}>
           ₺{product.price?.toLocaleString('tr-TR')}
-        </Text>
+        </SilverText>
       </View>
     </Pressable>
   );
 };
 
 const ExploreScreen = () => {
+  // Get URL parameters
+  const { preSelectedCategory } = useLocalSearchParams<{ preSelectedCategory?: string }>();
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -96,10 +112,10 @@ const ExploreScreen = () => {
   const [categories, setCategories] = useState<string[]>([]); // Separate state for categories
   const [showOrderModal, setShowOrderModal] = useState(false);
 
-  // Filter options
+  // Filter options - initialize with preSelectedCategory if provided
   const [filters, setFilters] = useState<FilterOptions>({
     selectedBrand: '',
-    selectedCategory: '',
+    selectedCategory: preSelectedCategory || '',
     selectedSize: '',
     selectedShoeNumber: '',
     selectedGender: '',
@@ -189,6 +205,16 @@ const ExploreScreen = () => {
       const data = await getProducts();
       console.log('[ExploreScreen] Yüklenen ürünler:', data);
       console.log('[ExploreScreen] Ürün sayısı:', data?.length || 0);
+      
+      // Her ürünün imagePath'ini kontrol et
+      if (data && data.length > 0) {
+        data.forEach((product, index) => {
+          console.log(`[ExploreScreen] Ürün ${index + 1}: ${product.name}`);
+          console.log(`[ExploreScreen] ImagePath: ${product.imagePath}`);
+          console.log(`[ExploreScreen] Oluşturulan URL: ${imgUri(product.imagePath)}`);
+        });
+      }
+      
       setProducts(data || []);
     } catch (error) {
       console.error('[ExploreScreen] Network error:', error);
@@ -209,6 +235,17 @@ const ExploreScreen = () => {
     fetchCategories(); // Fetch categories from backend
     loadFavorites(); // Favorileri yükle
   }, []);
+
+  // Handle preSelectedCategory parameter changes
+  useEffect(() => {
+    if (preSelectedCategory) {
+      console.log('[ExploreScreen] Pre-selected category from URL:', preSelectedCategory);
+      setFilters(prev => ({
+        ...prev,
+        selectedCategory: preSelectedCategory
+      }));
+    }
+  }, [preSelectedCategory]);
 
   // Load favorites from storage on component mount
   const loadFavorites = async () => {
@@ -630,6 +667,7 @@ const styles = StyleSheet.create({
     color: '#C0C0C0',
     fontSize: 16,
     fontWeight: 'bold',
+    letterSpacing: 0.1,
   },
   emptyContainer: {
     flex: 1,

@@ -84,5 +84,21 @@ export async function http<T>(
   }
 }
 
-export const imgUri = (imagePath?: string | null) =>
-  imagePath ? `${BASE_URL}${imagePath}` : undefined;
+export const imgUri = (imagePath?: string | null) => {
+  if (!imagePath) return undefined;
+  
+  // /wwwroot kısmını kaldır
+  let cleanPath = imagePath;
+  if (cleanPath.startsWith('/wwwroot')) {
+    cleanPath = cleanPath.replace('/wwwroot', '');
+  }
+  
+  // Eğer cleanPath zaten / ile başlıyorsa, direkt kullan
+  // Eğer başlamıyorsa, / ekle
+  const normalizedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+  
+  const fullUrl = `${BASE_URL}${normalizedPath}`;
+  console.log(`[imgUri] Input: ${imagePath} -> Cleaned: ${cleanPath} -> Normalized: ${normalizedPath} -> Final: ${fullUrl}`);
+  
+  return fullUrl;
+};

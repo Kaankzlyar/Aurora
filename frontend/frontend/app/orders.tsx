@@ -160,7 +160,9 @@ export default function OrdersScreen() {
       <View style={styles.pageContent}>
         <View style={styles.titleSection}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Ionicons name="cart-outline" size={24} color="#FFFFFF" />
+            <Pressable onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back-outline" size={24} color="#FFFFFF" />
+            </Pressable>
             <SilverText style={[styles.title, {marginLeft: 8}]}> Siparişlerim</SilverText>
           </View>
           <View style={styles.placeholder} />

@@ -343,6 +343,9 @@ namespace EcommerceAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DiscountPercentage")
+                        .HasColumnType("int");
+
                     b.Property<byte>("Gender")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint")
@@ -355,6 +358,9 @@ namespace EcommerceAPI.Migrations
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
+
+                    b.Property<decimal?>("OriginalPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");

@@ -75,6 +75,26 @@ export default function TabLayout() {
           ),
         }}
       />
+      
+      {/* Hidden category pages - not visible in tab bar */}
+      <Tabs.Screen
+        name="special-today"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="iconic-selections"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="new-arrivals"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
     </Tabs>
   );
 }

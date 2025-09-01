@@ -582,14 +582,14 @@ function HomeTabContent() {
         <HomeSlider />
 
         {/* Bronze Banner with Countdown */}
-        <BronzeBanner onPress={() => router.push('/explore')} />
+        <BronzeBanner onPress={() => router.push('/(tabs)/special-today')} />
 
         {/* Silver Banner */}
-        <IconicBanner onPress={() => router.push('/explore')} />
+        <IconicBanner onPress={() => router.push('/(tabs)/iconic-selections')} />
 
         {/* Featured Banner */}
         <View style={{ marginTop: 24 }}>
-          <FeaturedBanner onPress={() => router.push('/explore')} />
+          <FeaturedBanner onPress={() => router.push('/(tabs)/new-arrivals')} />
         </View>
 
         <View style={{ height: 120 }} />

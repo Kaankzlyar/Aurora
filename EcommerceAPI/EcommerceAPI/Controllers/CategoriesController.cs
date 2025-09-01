@@ -69,14 +69,10 @@ public class CategoriesController : ControllerBase
             .Include(p => p.Brand) // <-- eklendi
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new ProductDto(
-                p.Id,
-                p.Name,
-                p.Price,
-                p.CategoryId,
-                p.Category.Name,
-                p.BrandId,
-                p.Brand.Name,
-                p.ImagePath))
+                p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
+                p.CategoryId, p.Category.Name,
+                p.BrandId, p.Brand.Name,
+                p.Gender.ToString(), p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
             .ToListAsync();
 
         return Ok(list);

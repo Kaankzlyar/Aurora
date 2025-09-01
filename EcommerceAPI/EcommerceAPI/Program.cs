@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Swashbuckle.AspNetCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.FileProviders;
 
 
 namespace EcommerceAPI
@@ -108,7 +109,14 @@ namespace EcommerceAPI
             app.UseCors();
             
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            
+            // Static files konfigürasyonu - wwwroot klasörünü root olarak serve et
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+                RequestPath = ""
+            });
 
             // IMPORTANT: Authentication must come before Authorization
             app.UseAuthentication();

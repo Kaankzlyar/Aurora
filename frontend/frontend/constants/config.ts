@@ -6,7 +6,7 @@ const ANDROID_URL = `http://192.168.1.142:${PORT}`;
 const IOS_URL = `http://localhost:${PORT}`;
 const WEB_URL = `http://192.168.1.142:${PORT}`;
 
-// Platform bazlı URL seçimi
+// Platform bazlı URL seçimi" 
 export const BASE_URL = Platform.select({
   android: ANDROID_URL,
   ios: IOS_URL,
