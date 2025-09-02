@@ -155,7 +155,7 @@ const NotificationAlert: React.FC<NotificationAlertProps> = ({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 80, // Changed from 100 to 80 for less spacing
+    bottom: 12, // Changed from 100 to 80 for less spacing
     left: 16,
     right: 16,
     backgroundColor: '#1A1A1A',

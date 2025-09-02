@@ -21,6 +21,12 @@ import {
   CormorantGaramond_700Bold,
 } from '@expo-google-fonts/cormorant-garamond';
 
+import {
+  Cinzel_400Regular,
+  Cinzel_700Bold,
+  Cinzel_900Black
+} from '@expo-google-fonts/cinzel';
+
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { StatusBar } from "expo-status-bar";
 
@@ -38,7 +44,10 @@ export default function RootLayout() {
     CormorantGaramond_500Medium,
     CormorantGaramond_600SemiBold,
     CormorantGaramond_700Bold,
-    CormorantGaramond_500Medium_Italic
+    CormorantGaramond_500Medium_Italic,
+    Cinzel_400Regular,
+    Cinzel_700Bold,
+    Cinzel_900Black
   });
 
   // Don't render anything until fonts are loaded

@@ -23,6 +23,14 @@ import { Ionicons } from '@expo/vector-icons';
 import NotificationAlert from '../../components/NotificationAlert';
 import { imgUri } from '../../api/http';
 
+// Sayı formatlama fonksiyonu
+const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('tr-TR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(price);
+};
+
 export default function IconicSelectionsScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
@@ -89,6 +97,22 @@ export default function IconicSelectionsScreen() {
     }
   }, [favorites, showSuccess, showError, showInfo]);
 
+  const handleAddToCart = useCallback(async (product: Product) => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        showError('Giriş Gerekli', 'Sepete ürün eklemek için giriş yapmalısınız');
+        return;
+      }
+
+      await addToCart(product.id.toString(), 1);
+      showSuccess('Sepete Eklendi', `${product.name} sepete eklendi`);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showError('Hata', 'Ürün sepete eklenirken hata oluştu');
+    }
+  }, [showSuccess, showError]);
+
   const ProductCard = ({ product }: { product: Product }) => (
     <Pressable 
       style={styles.productCard}
@@ -107,7 +131,7 @@ export default function IconicSelectionsScreen() {
           <Ionicons
             name={favorites.has(product.id) ? "heart" : "heart-outline"}
             size={20}
-            color={favorites.has(product.id) ? "#FF4B6E" : "#FFFFFF"}
+            color={favorites.has(product.id) ? "#C48913" : "#FFFFFF"}
           />
         </TouchableOpacity>
       </View>
@@ -120,11 +144,28 @@ export default function IconicSelectionsScreen() {
           {product.name}
         </Text>
         <Text style={styles.productPrice}>
-          ${product.price}
+          ₺{formatPrice(product.price)}
         </Text>
+        
+        {/* Sepete Ekleme Butonu */}
+        <TouchableOpacity
+          style={styles.addToCartButtonContainer}
+          onPress={() => handleAddToCart(product)}
+        >
+          <LinearGradient
+            colors={['#D4AF37', '#C48913', '#B8860B']}
+            style={styles.addToCartButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name="cart-outline" size={16} color="#000000" />
+            <Text style={styles.addToCartText}>Sepete Ekle</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
     </Pressable>
   );
+
 
   return (
     <View style={styles.container}>
@@ -150,9 +191,41 @@ export default function IconicSelectionsScreen() {
             />
           }
         >
-          <View style={styles.titleSection}>
-            <SilverText style={styles.pageTitle}>Iconic Selections</SilverText>
-            <SilverText style={styles.subtitle}>Curated luxury pieces for discerning taste</SilverText>
+          <View style={ib.wrapper}>
+            {/* arka panel: soğuk gri degrade */}
+            <LinearGradient
+              colors={["#3C3F44", "#2C2F33", "#1C1F22"]}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={ib.panel}
+            >
+              {/* hafif ışık vurgusu */}
+              <View style={StyleSheet.absoluteFill}>
+                <LinearGradient
+                  colors={["rgba(255,255,255,0.10)", "transparent"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0.35, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+              </View>
+              {/* sağ üstten diyagonal karartma */}
+              <View style={StyleSheet.absoluteFill}>
+                <LinearGradient
+                  colors={["transparent", "rgba(0,0,0,0.20)"]}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+              </View>
+      
+              {/* içerik */}
+              <View style={ib.textCol}>
+                <SilverText style={ib.title}>Iconic Selections</SilverText>
+              </View>
+            </LinearGradient>
+      
+            {/* ince gümüş çerçeve */}
+            <View pointerEvents="none" style={ib.stroke} />
           </View>
 
           {loading ? (
@@ -184,6 +257,66 @@ export default function IconicSelectionsScreen() {
     </View>
   );
 }
+
+const ib = StyleSheet.create({
+  wrapper: {
+    borderRadius: 22,
+    overflow: "hidden",
+    marginTop: 5,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 6,
+    alignSelf: 'center',
+    width: '92%',
+    maxWidth: 720,
+  },
+  panel: {
+    padding: 16,
+    minHeight: 80,
+    justifyContent: "center",
+  },
+  stroke: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: "rgba(192, 197, 206, 0.45)", // silver stroke
+  },
+  textCol: { maxWidth: "80%" },
+  overline: {
+    color: "#C9CDD3",
+    letterSpacing: 2,
+    fontSize: 10,
+    textTransform: "uppercase",
+    marginBottom: 8,
+    fontFamily: "Montserrat_500Medium",
+  },
+  title: {
+    fontSize: 22,
+    marginBottom: 6,
+    alignContent: 'center',
+    justifyContent: 'center',
+    fontFamily: "Cinzel_700Bold",
+  },
+  desc: {
+    color: "#D0D3D8",
+    fontSize: 13,
+    marginBottom: 14,
+    fontFamily: "CormorantGaramond_400Regular",
+  },
+  cta: { alignSelf: "flex-start", borderRadius: 10, overflow: "hidden" },
+  ctaBg: { paddingVertical: 10, paddingHorizontal: 16 },
+  ctaPressed: { transform: [{ scale: 0.98 }], opacity: 0.96 },
+  ctaText: {
+    color: "#0F1114",
+    letterSpacing: 1,
+    fontSize: 12,
+    fontFamily: "Montserrat_500Medium",
+    width: '100%',
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -285,7 +418,7 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'PlayfairDisplay_700Bold',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -341,7 +474,7 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     padding: 12,
-    minHeight: 80,
+    minHeight: 100,
   },
   productBrand: {
     color: '#888888',
@@ -363,6 +496,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 0.1,
+    marginBottom: 8,
+  },
+  addToCartButtonContainer: {
+    marginTop: 4,
+  },
+  addToCartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  addToCartText: {
+    color: '#000000',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   emptyContainer: {
     flex: 1,

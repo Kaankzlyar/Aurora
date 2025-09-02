@@ -35,6 +35,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuroraHeader from "../../components/AuroraHeader";
 import SilverText from "../../components/SilverText";
 import { Ionicons } from "@expo/vector-icons";
+import GoldText from "@/components/GoldText";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CollectionTab() {
   // 🔑 TOKEN ALMA SİSTEMİ
@@ -166,6 +168,8 @@ export default function CollectionTab() {
     );
   }
 
+  
+
   // ➕ Ürün miktarını artır - Optimized UI update
   const inc = async (it: CartItem) => { 
     if (!currentToken) return;
@@ -279,7 +283,7 @@ export default function CollectionTab() {
                      style={styles.productImage} />
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.productPrice}>{formatCurrency(item.price)} ₺</Text>
+                <GoldText style={styles.productPrice}>{`${formatCurrency(item.price)} ₺`}</GoldText>
                 <View style={styles.quantityControls}>
                   <Pressable onPress={() => dec(item)} style={styles.quantityButton}>
                     <Text style={styles.quantityButtonText}>-</Text>
@@ -290,16 +294,15 @@ export default function CollectionTab() {
                   </Pressable>
                 </View>
               </View>
-              <Text style={[
-                styles.lineTotal,
-                // Dinamik font size - büyük sayılarda küçülür
-                {
-                  fontSize: (item.price * item.quantity) > 99999 ? 12 : 
-                           (item.price * item.quantity) > 9999 ? 14 : 16
-                }
-              ]}>
-                {formatCurrency(item.price * item.quantity)} ₺
-              </Text>
+              <GoldText style={{
+                ...styles.lineTotal,
+                fontSize: (item.price * item.quantity) > 99999 ? 12 : 
+                         (item.price * item.quantity) > 9999 ? 14 : 16,
+                flexShrink: 0,
+                minWidth: 100
+              }}>
+                {`${formatCurrency(item.price * item.quantity)} ₺`}
+              </GoldText>
             </View>
           )}
           ListFooterComponent={() => 
@@ -309,16 +312,18 @@ export default function CollectionTab() {
                   <Text style={styles.summaryLabel}>Toplam Ürün:</Text>
                   <Text style={styles.summaryValue}>{data.totalQuantity}</Text>
                 </View>
-                <View style={styles.summaryRow}>
+                <View style={[styles.summaryRow, { alignItems: 'center' }]}>
                   <Text style={styles.summaryLabelBold}>Toplam Tutar:</Text>
-                  <Text style={[
-                    styles.summaryValueBold,
-                    // Dinamik font size - büyük toplam fiyatlarda küçülür
-                    {
-                      fontSize: data.subtotal > 99999 ? 14 : 
-                               data.subtotal > 9999 ? 15 : 16
-                    }
-                  ]}>{formatCurrency(data.subtotal)} ₺</Text>
+                  <GoldText style={{
+                    ...styles.summaryValueBold,
+                    fontSize: data.subtotal > 99999 ? 14 : 
+                             data.subtotal > 9999 ? 15 : 16,
+                    flexShrink: 0,
+                    textAlign: 'right',
+                    minWidth: 100
+                  }}>
+                    {`${formatCurrency(data.subtotal)} ₺`}
+                  </GoldText>
                 </View>
                 <Pressable 
                   style={styles.clearCartButton}
@@ -369,11 +374,17 @@ export default function CollectionTab() {
                     }
                   }}
                 >
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Ionicons name="card-outline" size={24} color="black" />
-                    <Text style={[styles.checkoutButtonText, { marginLeft: 8 }]}>Ödeme Yap</Text>
-                  </View>
-                  
+                  <LinearGradient
+                    colors={['#D4AF37', '#C48913', '#B8860B']}
+                    style={styles.checkoutButtonGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <Ionicons name="card-outline" size={24} color="black" />
+                      <Text style={[styles.checkoutButtonText, { marginLeft: 8 }]}>Ödeme Yap</Text>
+                    </View>
+                  </LinearGradient>
                 </Pressable>
               </View>
             ) : (
@@ -451,7 +462,7 @@ const styles = StyleSheet.create({
   cartItem: {
     flexDirection: 'row',
     gap: 12,
-    alignItems: 'center',
+    alignItems: 'flex-start', // Üstten hizala
     backgroundColor: '#1A1A1A',
     padding: 12,
     borderRadius: 8,
@@ -459,6 +470,7 @@ const styles = StyleSheet.create({
     borderColor: '#333333',
     marginHorizontal: 16,
     minHeight: 110, // Sabit minimum yükseklik - layout shifting'i önler
+    flexWrap: 'nowrap', // Tek satırda tut
   },
   productImage: {
     width: 72,
@@ -478,8 +490,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   productPrice: {
-    fontFamily: 'Montserrat_400Regular',
-    color: '#D4AF37',
+    flexDirection:'row',
+    fontFamily: 'Montserrat_700Bold',
     fontSize: 14,
     marginBottom: 8,
   },
@@ -510,12 +522,13 @@ const styles = StyleSheet.create({
   },
 
   lineTotal: {
-    width: 90, // Biraz daha geniş - büyük sayılar için
+    minWidth: 100, // Biraz daha geniş - büyük sayılar için
     textAlign: 'right',
     fontFamily: 'Montserrat_600SemiBold',
     color: '#D4AF37',
     fontSize: 16,
     flexShrink: 0, // Text wrap olmasını önler
+    flexWrap: 'nowrap', // Tek satırda kalmasını sağla
   },
   summary: {
     marginTop: 16,
@@ -529,7 +542,9 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
+    flexWrap: 'nowrap', // Prevent wrapping
   },
   summaryLabel: {
     fontFamily: 'Montserrat_400Regular',
@@ -567,12 +582,21 @@ const styles = StyleSheet.create({
   },
   checkoutButton: {
     marginTop: 12,
-    backgroundColor: '#D4AF37',
     borderRadius: 8,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  checkoutButtonGradient: {
     padding: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D4AF37',
+    justifyContent: 'center',
   },
   checkoutButtonText: {
     color: '#0B0B0B',

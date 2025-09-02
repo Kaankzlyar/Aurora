@@ -4,6 +4,8 @@ import { router } from 'expo-router';
 import { registerUser } from '../../api/auth';
 import { AuthPage } from '../../components/AuthPage';
 import { PremiumTransition } from '../../components/PremiumTransition';
+import NotificationAlert from '../../components/NotificationAlert';
+import { useNotification } from '../../hooks/useNotification';
 
 export default function RegisterScreen() {
   const [formData, setFormData] = useState({
@@ -14,6 +16,9 @@ export default function RegisterScreen() {
     lastName: '',
   });
   const [isVisible, setIsVisible] = useState(false);
+  
+  // Notification hook
+  const { notification, showSuccess, showError, showInfo, hideNotification } = useNotification();
 
   useEffect(() => {
     // Trigger premium entrance animation
@@ -25,7 +30,7 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (formData.password !== formData.confirmPassword) {
-      alert('Şifreler eşleşmiyor');
+      showError('Hata', 'Şifreler eşleşmiyor');
       return;
     }
 
@@ -40,17 +45,20 @@ export default function RegisterScreen() {
       );
 
       if (result.message === 'User registered successfully.') {
-        alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
-        router.replace('/(auth)/login');
+        showSuccess('Başarılı!', 'Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
+        // Wait a bit before navigation to show the success message
+        setTimeout(() => {
+          router.replace('/(auth)/login');
+        }, 2000);
       } else if (result.message && result.message.includes('zaten kayıtlı')) {
         // Handle duplicate email error
-        alert('Bu e-posta adresi zaten kayıtlı. Lütfen farklı bir e-posta adresi kullanın veya giriş yapmayı deneyin.');
+        showError('E-posta Zaten Kayıtlı', 'Bu e-posta adresi zaten kayıtlı. Lütfen farklı bir e-posta adresi kullanın veya giriş yapmayı deneyin.');
       } else {
-        alert(result.message || 'Kayıt sırasında hata oluştu');
+        showError('Kayıt Hatası', result.message || 'Kayıt sırasında hata oluştu');
       }
     } catch (error) {
       console.error('[RegisterScreen] Registration error:', error);
-      alert('Kayıt sırasında hata oluştu');
+      showError('Bağlantı Hatası', 'Kayıt sırasında hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
@@ -60,6 +68,17 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Notification Alert */}
+      <NotificationAlert
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        visible={notification.visible}
+        onClose={hideNotification}
+        autoHide={true}
+        duration={2000}
+      />
+      
       <PremiumTransition isVisible={isVisible} duration={800} disableGlow={true}>
         <AuthPage
           isLogin={false}

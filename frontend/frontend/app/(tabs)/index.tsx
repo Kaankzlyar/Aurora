@@ -9,6 +9,7 @@ import { Redirect } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
 import SilverText from "../../components/SilverText";
 import HomeSlider from "../../components/HomeSlider";
+import { get } from "http";
 
 
 
@@ -466,7 +467,7 @@ function HomeTabContent() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Extract user's name for welcome message
-  const getUserName = useCallback(() => {
+/*   const getUserName = useCallback(() => {
     console.log('[HomeTab] getUserName called with userInfo:', userInfo);
     
     // If we have valid user info, use it
@@ -502,7 +503,49 @@ function HomeTabContent() {
     
     console.log('[HomeTab] No valid user info found, returning Valued Member');
     return 'Valued Member';
-  }, [userInfo, refreshUserInfoFromToken]);
+  }, [userInfo, refreshUserInfoFromToken]); */
+
+  const getUserName = useCallback((info: any): string | null => {
+  if (!info) return null;
+  if (info.fullName && info.fullName !== 'Valued Member') return info.fullName;
+  if (info.firstName && info.firstName !== 'Valued Member') return info.firstName;
+  if (info.name && info.name !== 'Valued Member') return info.name;
+  if (info.username && info.username !== 'Valued Member') return info.username;
+  if (info.email) {
+    const emailName = info.email.split('@')[0];
+    return emailName.charAt(0).toUpperCase() + emailName.slice(1);
+  }
+  return null;
+}, []);
+
+// 2) Local state that drives the UI
+const [displayName, setDisplayName] = useState<string | null>(null);
+const [authLoading, setAuthLoading] = useState<boolean>(true);
+
+// 3) Ensure we have fresh user info once, then keep it in sync
+useEffect(() => {
+  let active = true;
+
+  (async () => {
+    // If nothing useful yet, hydrate from token
+    if (!userInfo || Object.values(userInfo).includes('Valued Member')) {
+      try {
+        await refreshUserInfoFromToken();
+      } catch (e) {
+        console.warn('[HomeTab] refreshUserInfoFromToken error:', e);
+      }
+    }
+
+    // Derive name from the (possibly updated) userInfo
+    const name = getUserName(userInfo);
+    if (active) {
+      setDisplayName(name); // can be null – that's fine
+      setAuthLoading(false);
+    }
+  })();
+
+  return () => { active = false; };
+}, [userInfo, refreshUserInfoFromToken, getUserName]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -563,7 +606,14 @@ function HomeTabContent() {
         <View style={s.welcomeContainer}>
           <View style={s.greetingRow}>
             <SilverText style={s.welcomeText}>{getGreeting()}, </SilverText>
-            <GoldText style={s.userName}>{getUserName()}</GoldText>
+            {authLoading ? (
+      // tiny shimmer/spinner while name loads
+      <ActivityIndicator size="small" color="#C48913" />
+    ) : (
+      <GoldText style={s.userName}>
+        {displayName ?? 'Member'}
+      </GoldText>
+    )}
           </View>
           <SilverText style={s.welcomeText}>Your Signature Begins Here.</SilverText>
           

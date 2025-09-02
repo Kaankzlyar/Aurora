@@ -28,18 +28,29 @@ import { useNotification } from '../../hooks/useNotification';
 import { BASE_URL } from '../../constants/config';
 import FilterScreen, { FilterOptions } from '../../components/FilterScreen';
 import OrderModal from '../../components/OrderModal';
+import { LinearGradient } from 'expo-linear-gradient';
+
+// Sayı formatlama fonksiyonu
+const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('tr-TR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(price);
+};
 
 interface ProductCardProps {
   product: Product;
   onPress: () => void;
   onFavoritePress: (product: Product) => void;
+  onAddToCart: (product: Product) => void;
   isFavorite?: boolean;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ 
   product, 
   onPress, 
-  onFavoritePress, 
+  onFavoritePress,
+  onAddToCart,
   isFavorite = false 
 }) => {
   const imageUrl = imgUri(product.imagePath) || 'https://via.placeholder.com/150';
@@ -92,8 +103,24 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {product.name}
         </Text>
         <SilverText style={styles.productPrice}>
-          ₺{product.price?.toLocaleString('tr-TR')}
+          ₺{formatPrice(product.price)}
         </SilverText>
+        
+        {/* Sepete Ekleme Butonu */}
+        <TouchableOpacity
+          style={styles.addToCartButtonContainer}
+          onPress={() => onAddToCart(product)}
+        >
+          <LinearGradient
+            colors={['#D4AF37', '#C48913', '#B8860B']}
+            style={styles.addToCartButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name="cart-outline" size={16} color="#000000" />
+            <Text style={styles.addToCartText}>Sepete Ekle</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
     </Pressable>
   );
@@ -264,6 +291,24 @@ const ExploreScreen = () => {
     setRefreshing(true);
     fetchProducts();
     fetchCategories(); // Also refresh categories
+  };
+
+  const handleAddToCart = async (product: Product) => {
+    try {
+      console.log('[ExploreScreen] Sepete ekleniyor:', product.name);
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        showError('Giriş Gerekli', 'Sepete eklemek için giriş yapmalısınız.');
+        return;
+      }
+      
+      await addToCart(token, product.id, 1);
+      console.log('[ExploreScreen] ✅ Sepete eklendi:', product.name);
+      showSuccess('Başarılı!', `${product.name} sepete eklendi!`);
+    } catch (error) {
+      console.error('[ExploreScreen] Sepete ekleme hatası:', error);
+      showError('Hata', 'Ürün sepete eklenirken bir hata oluştu.');
+    }
   };
 
   const handleProductPress = async (product: Product) => {
@@ -448,6 +493,7 @@ const ExploreScreen = () => {
                   product={product}
                   onPress={() => handleProductPress(product)}
                   onFavoritePress={handleFavoritePress}
+                  onAddToCart={handleAddToCart}
                   isFavorite={favorites.has(product.id)}
                 />
               ))}
@@ -646,7 +692,7 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     padding: 12,
-    minHeight: 80,
+    minHeight: 100,
   },
   productBrand: {
     color: '#888888',
@@ -668,6 +714,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 0.1,
+    marginBottom: 8,
+  },
+  addToCartButtonContainer: {
+    marginTop: 4,
+  },
+  addToCartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  addToCartText: {
+    color: '#000000',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   emptyContainer: {
     flex: 1,

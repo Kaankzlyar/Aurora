@@ -12,6 +12,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@expo-google-fonts/cinzel": "^0.4.1",
     "@expo-google-fonts/cormorant-garamond": "^0.4.0",
     "@expo-google-fonts/montserrat": "^0.4.1",
     "@expo-google-fonts/playfair-display": "^0.4.1",
