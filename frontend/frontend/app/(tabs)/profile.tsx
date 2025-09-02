@@ -329,7 +329,7 @@ export default function Screen() {
           </Pressable>
           
           <Pressable style={styles.actionButton} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={24} color={"#D4AF37"} />
+            <Ionicons name="log-out-outline" size={24} color={"#FF6B6B"} />
             <Text style={[styles.actionText, {marginLeft: 8}]}>Çıkış Yap</Text>
             <Text style={styles.actionArrow}>›</Text>
           </Pressable>

@@ -272,9 +272,9 @@ export default function CheckoutScreen() {
             </View>
             <Pressable 
               style={styles.addButton}
-              onPress={() => router.push('/add-address')}
+              onPress={() => router.push('/my-addresses')}
             >
-              <Text style={styles.addButtonText}>+ Yeni Adres</Text>
+              <Text style={styles.addButtonText}>Adresi Düzenle</Text>
             </Pressable>
           </View>
           
@@ -283,9 +283,9 @@ export default function CheckoutScreen() {
               <Text style={styles.emptyStateText}>Henüz adres eklenmemiş</Text>
               <Pressable 
                 style={styles.addFirstButton}
-                onPress={() => router.push('/add-address')}
+                onPress={() => router.push('/my-addresses')}
               >
-                <Text style={styles.addFirstButtonText}>İlk Adresinizi Ekleyin</Text>
+                <Text style={styles.addFirstButtonText}>Adreslerimi Yönet</Text>
               </Pressable>
             </View>
           ) : (
@@ -329,9 +329,9 @@ export default function CheckoutScreen() {
             </View>
             <Pressable 
               style={styles.addButton}
-              onPress={() => router.push('/add-card')}
+              onPress={() => router.push('/my-cards')}
             >
-              <Text style={styles.addButtonText}>+ Yeni Kart</Text>
+              <Text style={styles.addButtonText}>Kartları Düzenle</Text>
             </Pressable>
           </View>
           
@@ -340,9 +340,9 @@ export default function CheckoutScreen() {
               <Text style={styles.emptyStateText}>Henüz kart eklenmemiş</Text>
               <Pressable 
                 style={styles.addFirstButton}
-                onPress={() => router.push('/add-card')}
+                onPress={() => router.push('/my-cards')}
               >
-                <Text style={styles.addFirstButtonText}>İlk Kartınızı Ekleyin</Text>
+                <Text style={styles.addFirstButtonText}>Kartlarımı Yönet</Text>
               </Pressable>
             </View>
           ) : (

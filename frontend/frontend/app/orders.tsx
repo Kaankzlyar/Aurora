@@ -114,19 +114,19 @@ export default function OrdersScreen() {
     return (
       <View style={styles.container}>
         <AuroraHeader />
-        <View style={styles.pageContent}>
-          <View style={styles.titleSection}>
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back-outline" size={24} color="#ffffff" />
-            </Pressable>
-            <SilverText style={[styles.title, {marginLeft: 8}]}> Siparişlerim</SilverText>
-            <View style={styles.placeholder} />
-          </View>
+        <View style={styles.header}>
+                <Pressable onPress={() => router.back()} style={styles.backButton}>
+                  <View style={{flexDirection:'row', alignItems:'center'}}>
+                      <Ionicons name="arrow-back-outline" size={24} color="#D4AF37" />
+                    </View>
+                </Pressable>
+                <SilverText style={styles.title}>Siparişlerim</SilverText>
+                <View style={styles.placeholder} />
+              </View>
           <View style={styles.content}>
             <Text style={styles.errorText}>Giriş yapmanız gerekiyor.</Text>
           </View>
-        </View>
-      </View>
+      </View> 
     );
   }
 
@@ -134,20 +134,20 @@ export default function OrdersScreen() {
     return (
       <View style={styles.container}>
         <AuroraHeader />
-        <View style={styles.pageContent}>
-          <View style={styles.titleSection}>
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back-outline" size={24} color="#ffffff" />
-            </Pressable>
-            <SilverText style={[styles.title, {marginLeft: 8}]}> Siparişlerim</SilverText>
-            <View style={styles.placeholder} />
-          </View>
+        <View style={styles.header}>
+                <Pressable onPress={() => router.back()} style={styles.backButton}>
+                  <View style={{flexDirection:'row', alignItems:'center'}}>
+                      <Ionicons name="arrow-back-outline" size={24} color="#D4AF37" />
+                    </View>
+                </Pressable>
+                <SilverText style={styles.title}>Siparişlerim</SilverText>
+                <View style={styles.placeholder} />
+              </View>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#D4AF37" />
-            <Text style={styles.loadingText}>Siparişler yükleniyor...</Text>
+            <Text style={styles.loadingText}>Yükleniyor...</Text>
           </View>
-        </View>
-      </View>
+      </View> 
     );
   }
 
@@ -158,15 +158,15 @@ export default function OrdersScreen() {
       
       {/* PAGE CONTENT */}
       <View style={styles.pageContent}>
-        <View style={styles.titleSection}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back-outline" size={24} color="#FFFFFF" />
-            </Pressable>
-            <SilverText style={[styles.title, {marginLeft: 8}]}> Siparişlerim</SilverText>
-          </View>
-          <View style={styles.placeholder} />
-        </View>
+        <View style={styles.header}>
+              <Pressable onPress={() => router.back()} style={styles.backButton}>
+                <View style={{flexDirection:'row', alignItems:'center'}}>
+                  <Ionicons name="arrow-back" size={24} color="#D4AF37" />
+                </View>
+              </Pressable>
+              <SilverText style={styles.title}>Siparişlerim</SilverText>
+              <View style={styles.placeholder} />
+            </View>
 
         <ScrollView 
           style={styles.content}
@@ -258,6 +258,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 1,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 15,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1A1A1A',
+  },
   titleSection: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -269,6 +279,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 8,
+    marginLeft: 0,
   },
   backButtonText: {
     color: '#D4AF37',
@@ -277,6 +288,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
+    marginTop: 5,
     fontFamily: 'Montserrat_600SemiBold',
     color: '#FFFFFF',
   },

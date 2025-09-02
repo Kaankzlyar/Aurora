@@ -1,0 +1,152 @@
+📋 Değişiklikler Özeti
+🚀 Ana Değişiklikler
+1. Yeni Sayfalar Oluşturuldu
+✅ settings.tsx - Ana ayarlar menüsü
+✅ /my-addresses.tsx - Adres yönetim sayfası
+✅ my-cards.tsx - Kart yönetim sayfası
+2. Checkout Sayfası Güncellemeleri
+❌ "Yeni Adres" → ✅ "Adresi Düzenle"
+❌ "Yeni Kart" → ✅ "Kartları Düzenle"
+🔗 Butonlar artık yönetim sayfalarına yönlendiriyor
+3. Siparişlerim Sayfası Header Düzeltmesi
+🔧 Header layout'u düzeltildi
+⬅️ Geri ok butonu sola alındı
+📝 Başlık metni tüm durumlarda "Siparişlerim" olarak düzeltildi
+4. Authentication (Kimlik Doğrulama) Düzeltmeleri
+🔒 Daha güvenilir authentication kontrolü
+🔄 AsyncStorage token kontrolü eklendi
+⏳ Loading durumları iyileştirildi
+🎯 Kullanıcı deneyimi geliştirildi
+📱 Sayfa Akış Diagramı
+🎨 UI/UX İyileştirmeleri
+Settings Sayfası Özellikleri:
+🏠 Adreslerim: Teslimat adreslerini yönet
+💳 Kartlarım: Ödeme kartlarını yönet
+📦 Siparişlerim: Sipariş geçmişini görüntüle
+👤 Profil Bilgileri: Kişisel bilgileri düzenle
+🔔 Bildirimler: Bildirim tercihleri
+❓ Yardım & Destek: SSS ve iletişim
+ℹ️ Hakkında: Uygulama bilgileri
+🚪 Çıkış Yap: Hesaptan çıkış
+Adreslerim/Kartlarım Sayfası Özellikleri:
+📋 Liste görünümü
+✏️ Düzenleme butonu (geliştiriliyor)
+🗑️ Silme işlemi
+➕ Yeni ekleme butonu
+🔄 Pull-to-refresh
+📱 Responsive tasarım
+🔧 Teknik İyileştirmeler
+Authentication Sistemi:
+State Management:
+✅ Loading durumları
+✅ Token kontrolü
+✅ Error handling
+✅ Notification sistemi
+🎯 Kullanıcı Deneyimi İyileştirmeleri
+1. Daha İyi Navigation
+Checkout → Direkt yönetim sayfalarına
+Profile → Settings → Alt sayfalar
+2. Tutarlı Header Design
+Tüm sayfalarda aynı header layout
+Sol geri butonu, orta başlık, sağ aksiyon
+3. Authentication UX
+Loading göstergesi
+Net hata mesajları
+Giriş yap butonu
+4. Premium Design
+AuroraHeader tüm sayfalarda
+SilverText başlıklar
+Altın renk teması (#D4AF37)
+📊 Sonuç
+✅ Tamamlanan:
+
+3 yeni sayfa oluşturuldu
+Checkout butonları güncellendi
+Header layouts düzeltildi
+Authentication sistem iyileştirildi
+🔄 Geliştiriliyor:
+
+Adres/kart düzenleme özellikleri
+Bildirim ayarları
+Yardım & destek sayfası
+🎯 Hedef: Kullanıcıların adres ve kart bilgilerini kolayca yönetebileceği, tutarlı ve kullanıcı dostu bir deneyim sunmak.
+
+Bu değişiklikler sayesinde uygulama daha profesyonel, organize ve kullanıcı dostu hale geldi! 🚀
+
+cat > COMMIT_MSG5.2.txt << 'EOF'
+📋 Değişiklikler Özeti
+🚀 Ana Değişiklikler
+1. Yeni Sayfalar Oluşturuldu
+✅ settings.tsx - Ana ayarlar menüsü
+✅ /my-addresses.tsx - Adres yönetim sayfası
+✅ my-cards.tsx - Kart yönetim sayfası
+2. Checkout Sayfası Güncellemeleri
+❌ "Yeni Adres" → ✅ "Adresi Düzenle"
+❌ "Yeni Kart" → ✅ "Kartları Düzenle"
+🔗 Butonlar artık yönetim sayfalarına yönlendiriyor
+3. Siparişlerim Sayfası Header Düzeltmesi
+🔧 Header layout'u düzeltildi
+⬅️ Geri ok butonu sola alındı
+📝 Başlık metni tüm durumlarda "Siparişlerim" olarak düzeltildi
+4. Authentication (Kimlik Doğrulama) Düzeltmeleri
+🔒 Daha güvenilir authentication kontrolü
+🔄 AsyncStorage token kontrolü eklendi
+⏳ Loading durumları iyileştirildi
+🎯 Kullanıcı deneyimi geliştirildi
+📱 Sayfa Akış Diagramı
+🎨 UI/UX İyileştirmeleri
+Settings Sayfası Özellikleri:
+🏠 Adreslerim: Teslimat adreslerini yönet
+💳 Kartlarım: Ödeme kartlarını yönet
+📦 Siparişlerim: Sipariş geçmişini görüntüle
+👤 Profil Bilgileri: Kişisel bilgileri düzenle
+🔔 Bildirimler: Bildirim tercihleri
+❓ Yardım & Destek: SSS ve iletişim
+ℹ️ Hakkında: Uygulama bilgileri
+🚪 Çıkış Yap: Hesaptan çıkış
+Adreslerim/Kartlarım Sayfası Özellikleri:
+📋 Liste görünümü
+✏️ Düzenleme butonu (geliştiriliyor)
+🗑️ Silme işlemi
+➕ Yeni ekleme butonu
+🔄 Pull-to-refresh
+📱 Responsive tasarım
+🔧 Teknik İyileştirmeler
+Authentication Sistemi:
+State Management:
+✅ Loading durumları
+✅ Token kontrolü
+✅ Error handling
+✅ Notification sistemi
+🎯 Kullanıcı Deneyimi İyileştirmeleri
+1. Daha İyi Navigation
+Checkout → Direkt yönetim sayfalarına
+Profile → Settings → Alt sayfalar
+2. Tutarlı Header Design
+Tüm sayfalarda aynı header layout
+Sol geri butonu, orta başlık, sağ aksiyon
+3. Authentication UX
+Loading göstergesi
+Net hata mesajları
+Giriş yap butonu
+4. Premium Design
+AuroraHeader tüm sayfalarda
+SilverText başlıklar
+Altın renk teması (#D4AF37)
+📊 Sonuç
+✅ Tamamlanan:
+
+3 yeni sayfa oluşturuldu
+Checkout butonları güncellendi
+Header layouts düzeltildi
+Authentication sistem iyileştirildi
+🔄 Geliştiriliyor:
+
+Adres/kart düzenleme özellikleri
+Bildirim ayarları
+Yardım & destek sayfası
+🎯 Hedef: Kullanıcıların adres ve kart bilgilerini kolayca yönetebileceği, tutarlı ve kullanıcı dostu bir deneyim sunmak.
+
+Bu değişiklikler sayesinde uygulama daha profesyonel, organize ve kullanıcı dostu hale geldi! 🚀
+
+

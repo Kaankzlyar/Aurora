@@ -356,6 +356,8 @@ const styles = StyleSheet.create({
     color: '#C48913',
     fontFamily: 'PlayfairDisplay_700Bold', // font adını projendeki useFonts’a göre ayarla
     letterSpacing: 1,
+    textAlign: 'center',
+    justifyContent: 'center',
   },
   subtitle: {
     color: '#9ca3af',

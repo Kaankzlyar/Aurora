@@ -22,11 +22,14 @@ import { useNotification } from '@/hooks/useNotification';
 import { Ionicons } from '@expo/vector-icons';
 import NotificationAlert from '../../components/NotificationAlert';
 import { imgUri } from '../../api/http';
+import { LinearGradient } from 'expo-linear-gradient';
+import GoldText from '@/components/GoldText';
 
 interface ProductCardProps {
   product: Product;
   onPress: () => void;
   onFavoritePress: (product: Product) => void;
+  onAddToCart: (product: Product) => void;
   isFavorite?: boolean;
 }
 
@@ -34,6 +37,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   product, 
   onPress, 
   onFavoritePress, 
+  onAddToCart,
   isFavorite = false 
 }) => {
   const imageUrl = imgUri(product.imagePath) || 'https://via.placeholder.com/150';
@@ -73,6 +77,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <SilverText style={styles.productPrice}>
           ${product.price?.toLocaleString('en-US')}
         </SilverText>
+
+        <TouchableOpacity
+                  style={styles.addToCartButtonContainer}
+                  onPress={() => onAddToCart(product)}
+                >
+                  <LinearGradient
+                    colors={['#D4AF37', '#C48913', '#B8860B']}
+                    style={styles.addToCartButton}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Ionicons name="cart-outline" size={16} color="#000000" />
+                    <Text style={styles.addToCartText}>Sepete Ekle</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
       </View>
     </Pressable>
   );
@@ -127,6 +146,8 @@ export default function NewArrivalsScreen() {
     setRefreshing(false);
   }, [loadProducts]);
 
+  
+
   const handleProductPress = async (product: Product) => {
     Alert.alert(
       product.name, 
@@ -180,15 +201,32 @@ export default function NewArrivalsScreen() {
     }
   };
 
+  const handleAddToCart = useCallback(async (product: Product) => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        showError('Giriş Gerekli', 'Sepete ürün eklemek için giriş yapmalısınız');
+        return;
+      }
+
+      await addToCart(product.id.toString(), 1);
+      showSuccess('Sepete Eklendi', `${product.name} sepete eklendi`);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showError('Hata', 'Ürün sepete eklenirken hata oluştu');
+    }
+  }, [showSuccess, showError]);
+
   const renderProduct = useCallback(({ item }: { item: Product }) => (
     <ProductCard
       key={item.id}
       product={item}
       onPress={() => handleProductPress(item)}
       onFavoritePress={handleFavoritePress}
+      onAddToCart={handleAddToCart}
       isFavorite={favorites.has(item.id)}
     />
-  ), [favorites, handleFavoritePress]);
+  ), [favorites, handleFavoritePress, handleAddToCart]);
 
   if (loading) {
     return (
@@ -219,11 +257,44 @@ export default function NewArrivalsScreen() {
       <AuroraHeader />
       
       {/* Title Section */}
-      <View style={styles.titleSection}>
-        <SilverText style={styles.pageTitle}>New Arrivals</SilverText>
-        <SilverText style={styles.subtitle}>Discover our latest additions from the past 5 days</SilverText>
+      <View style={styles.headerSection}>
+        <View style={ib.wrapper}>
+          {/* arka panel: altın degrade */}
+          <LinearGradient
+            colors={["#C48913", "#8d680bff", "#553921ff"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={ib.panel}
+          >
+            {/* hafif ışık vurgusu */}
+            <View style={StyleSheet.absoluteFill}>
+              <LinearGradient
+                colors={["rgba(255,255,255,0.10)", "transparent"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0.35, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+            </View>
+            {/* sağ üstten diyagonal karartma */}
+            <View style={StyleSheet.absoluteFill}>
+              <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.20)"]}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+            </View>
+
+            {/* içerik */}
+            <View style={ib.textCol}>
+              <GoldText style={[ib.title,]}>New Arrivals</GoldText>
+            </View>
+          </LinearGradient>
+
+          {/* ince altın çerçeve */}
+          <View pointerEvents="none" style={ib.stroke} />
+        </View>
       </View>
-      
       {/* Content */}
       <ScrollView 
         style={styles.content}
@@ -243,6 +314,7 @@ export default function NewArrivalsScreen() {
                   product={product}
                   onPress={() => handleProductPress(product)}
                   onFavoritePress={handleFavoritePress}
+                  onAddToCart={handleAddToCart}
                   isFavorite={favorites.has(product.id)}
                 />
               ))}
@@ -265,6 +337,66 @@ export default function NewArrivalsScreen() {
   );
 }
 
+const ib = StyleSheet.create({
+  wrapper: {
+    borderRadius: 22,
+    overflow: "hidden",
+    marginTop: 5,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 6,
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 720,
+  },
+  panel: {
+    padding: 16,
+    minHeight: 80,
+    justifyContent: "center",
+  },
+  stroke: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: "rgba(212, 175, 55, 0.45)", // gold stroke
+  },
+  textCol: { maxWidth: "80%" },
+  overline: {
+    color: "#C9CDD3",
+    letterSpacing: 2,
+    fontSize: 10,
+    textTransform: "uppercase",
+    marginBottom: 8,
+    fontFamily: "Montserrat_500Medium",
+  },
+  title: {
+    fontSize: 26,
+    marginBottom: 6,
+    textAlign: 'center',
+    fontFamily: "PlayfairDisplay_700Bold", // Match GoldText font
+  },
+  desc: {
+    color: "#D0D3D8",
+    fontSize: 13,
+    marginBottom: 14,
+    fontFamily: "CormorantGaramond_400Regular",
+  },
+  cta: { alignSelf: "flex-start", borderRadius: 10, overflow: "hidden" },
+  ctaBg: { paddingVertical: 10, paddingHorizontal: 16 },
+  ctaPressed: { transform: [{ scale: 0.98 }], opacity: 0.96 },
+  ctaText: {
+    color: "#0F1114",
+    letterSpacing: 1,
+    fontSize: 12,
+    fontFamily: "Montserrat_500Medium",
+    width: '100%',
+  },
+});
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -286,6 +418,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
   },
+  headerSection: {
+    paddingHorizontal: 16,
+  },
   titleSection: {
     paddingHorizontal: 20,
     paddingBottom: 20,
@@ -301,6 +436,23 @@ const styles = StyleSheet.create({
     fontFamily: 'CormorantGaramond_400Regular',
     textAlign: 'center',
     opacity: 0.8,
+  },
+  addToCartButtonContainer: {
+    marginTop: 4,
+  },
+  addToCartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  addToCartText: {
+    color: '#000000',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   productsContainer: {
     paddingHorizontal: 16,
