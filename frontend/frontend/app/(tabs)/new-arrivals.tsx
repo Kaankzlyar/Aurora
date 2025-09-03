@@ -75,7 +75,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {product.name}
         </Text>
         <SilverText style={styles.productPrice}>
-          ${product.price?.toLocaleString('en-US')}
+          ₺{product.price?.toLocaleString('en-US')}
         </SilverText>
 
         <TouchableOpacity
@@ -287,7 +287,7 @@ export default function NewArrivalsScreen() {
 
             {/* içerik */}
             <View style={ib.textCol}>
-              <GoldText style={[ib.title,]}>New Arrivals</GoldText>
+              <Text style={[ib.title,]}>New Arrivals</Text>
             </View>
           </LinearGradient>
 
@@ -374,9 +374,12 @@ const ib = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    marginBottom: 6,
+    marginBottom: 4,
+    padding: 0,
     textAlign: 'center',
-    fontFamily: "PlayfairDisplay_700Bold", // Match GoldText font
+    justifyContent: 'center',
+    marginLeft: -48,
+    fontFamily: "Cinzel_700Bold", // Match GoldText font
   },
   desc: {
     color: "#D0D3D8",

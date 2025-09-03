@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addToFavorites, removeFromFavorites, getFavorites } from '../../services/favorites';
 import { useNotification } from '@/hooks/useNotification';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import NotificationAlert from '../../components/NotificationAlert';
 import { imgUri } from '../../api/http';
 
@@ -28,13 +29,15 @@ interface ProductCardProps {
   onPress: () => void;
   onFavoritePress: (product: Product) => void;
   isFavorite?: boolean;
+  onAddToCart: (product: Product) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ 
   product, 
   onPress, 
   onFavoritePress, 
-  isFavorite = false 
+  isFavorite = false,
+  onAddToCart 
 }) => {
   const imageUrl = imgUri(product.imagePath) || 'https://via.placeholder.com/150';
   
@@ -47,6 +50,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
           style={styles.productImage}
           resizeMode="cover"
         />
+        
+        {/* Discount Badge */}
+        {product.isOnDiscount && product.discountPercentage && (
+          <View style={styles.discountBadge}>
+            <Text style={styles.discountText}>-{product.discountPercentage}%</Text>
+          </View>
+        )}
         
         {/* Favori Butonu - Sağ Üst Köşe */}
         <TouchableOpacity 
@@ -70,9 +80,38 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Text style={styles.productName} numberOfLines={2}>
           {product.name}
         </Text>
-        <SilverText style={styles.productPrice}>
-          ${product.price?.toLocaleString('en-US')}
-        </SilverText>
+        
+        {/* Price Section with Discount */}
+        <View style={styles.priceContainer}>
+          {product.isOnDiscount && product.originalPrice ? (
+            <>
+              <Text style={styles.originalPrice}>
+                ₺{product.originalPrice.toLocaleString('en-US')}
+              </Text>
+              <SilverText style={styles.discountedPrice}>
+                ₺{product.price?.toLocaleString('en-US')}
+              </SilverText>
+            </>
+          ) : (
+            <SilverText style={styles.productPrice}>
+              ${product.price?.toLocaleString('en-US')}
+            </SilverText>
+          )}
+        </View>
+        <TouchableOpacity
+                  style={styles.addToCartButtonContainer}
+                  onPress={() => onAddToCart(product)}
+                >
+                  <LinearGradient
+                    colors={['#D4AF37', '#C48913', '#B8860B']}
+                    style={styles.addToCartButton}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Ionicons name="cart-outline" size={16} color="#000000" />
+                    <Text style={styles.addToCartText}>Sepete Ekle</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
       </View>
     </Pressable>
   );
@@ -90,6 +129,22 @@ export default function SpecialTodayScreen() {
     showError, 
     showInfo, 
     hideNotification } = useNotification();
+
+  const handleAddToCart = useCallback(async (product: Product) => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        showError('Giriş Gerekli', 'Sepete ürün eklemek için giriş yapmalısınız');
+        return;
+      }
+
+      await addToCart(token, product.id, 1); // Fix: Pass token first, then productId, then quantity
+      showSuccess('Sepete Eklendi', `${product.name} sepete eklendi`);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showError('Hata', 'Ürün sepete eklenirken hata oluştu');
+    }
+  }, [showSuccess, showError]);
 
   const loadProducts = useCallback(async () => {
     try {
@@ -127,9 +182,13 @@ export default function SpecialTodayScreen() {
   }, [loadProducts]);
 
   const handleProductPress = async (product: Product) => {
+    const discountInfo = product.isOnDiscount && product.originalPrice 
+      ? `\nOriginal Price: $${product.originalPrice.toLocaleString('en-US')}\nSPECIAL PRICE: $${product.price?.toLocaleString('en-US')} (${product.discountPercentage}% OFF!)` 
+      : `\nPrice: $${product.price?.toLocaleString('en-US')}`;
+      
     Alert.alert(
-      product.name, 
-      `Brand: ${product.brandName}\nCategory: ${product.categoryName}\nPrice: $${product.price?.toLocaleString('en-US')}`,
+      `🎯 ${product.name}`, 
+      `Brand: ${product.brandName}\nCategory: ${product.categoryName}${discountInfo}`,
       [
         { 
           text: 'Add to Cart', 
@@ -142,7 +201,7 @@ export default function SpecialTodayScreen() {
                 return;
               }
               
-              await addToCart(product.id.toString(), 1);
+              await addToCart(token, product.id, 1); // Fix: Pass token first
               console.log('[SpecialTodayScreen] ✅ Added to cart:', product.name);
               showSuccess('Success!', `${product.name} added to cart!`);
             } catch (error) {
@@ -184,8 +243,8 @@ export default function SpecialTodayScreen() {
       <View style={styles.container}>
         <AuroraHeader />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#C0C0C0" />
-          <Text style={styles.loadingText}>Loading special offers...</Text>
+          <ActivityIndicator size="large" color="#FF4444" />
+          <Text style={styles.loadingText}>Finding today's best deals...</Text>
         </View>
       </View>
     );
@@ -209,8 +268,8 @@ export default function SpecialTodayScreen() {
       
       {/* Title Section */}
       <View style={styles.titleSection}>
-        <SilverText style={styles.pageTitle}>Special for Today</SilverText>
-        <SilverText style={styles.subtitle}>Limited time offers just for you</SilverText>
+        <SilverText style={styles.pageTitle}>🎯 Special for Today</SilverText>
+        <SilverText style={styles.subtitle}>Limited time offers with up to 20% off!</SilverText>
       </View>
       
       {/* Content */}
@@ -232,6 +291,7 @@ export default function SpecialTodayScreen() {
                   product={product}
                   onPress={() => handleProductPress(product)}
                   onFavoritePress={handleFavoritePress}
+                  onAddToCart={handleAddToCart}
                   isFavorite={favorites.has(product.id)}
                 />
               ))}
@@ -291,6 +351,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.8,
   },
+  addToCartButtonContainer: {
+    marginTop: 4,
+  },
+  addToCartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  addToCartText: {
+    color: '#000000',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
   productsContainer: {
     paddingHorizontal: 16,
   },
@@ -318,6 +395,22 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     height: 180,
+  },
+  discountBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: '#FF4444',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    zIndex: 2,
+  },
+  discountText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   productImage: {
     width: '100%',
@@ -356,6 +449,23 @@ const styles = StyleSheet.create({
   },
   productPrice: {
     color: '#C0C0C0',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 0.1,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  originalPrice: {
+    color: '#888888',
+    fontSize: 12,
+    fontFamily: 'Montserrat_400Regular',
+    textDecorationLine: 'line-through',
+  },
+  discountedPrice: {
+    color: '#FF4444',
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 0.1,

@@ -9,6 +9,9 @@ import { Redirect } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
 import SilverText from "../../components/SilverText";
 import HomeSlider from "../../components/HomeSlider";
+import { getCart } from "../../services/cart";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { get } from "http";
 
 
@@ -460,50 +463,53 @@ function HomeTabContent() {
   // Get user info from auth context
   const { userInfo, refreshUserInfoFromToken } = useAuth();
   
-  // Basket count from state/store (example)
-  const basketCount = useMemo(() => 2, []);
+  // Basket count from cart service
+  const [basketCount, setBasketCount] = useState(0);
   
   // Refresh state for pull-to-refresh
   const [refreshing, setRefreshing] = useState(false);
 
-  // Extract user's name for welcome message
-/*   const getUserName = useCallback(() => {
-    console.log('[HomeTab] getUserName called with userInfo:', userInfo);
-    
-    // If we have valid user info, use it
-    if (userInfo?.fullName && userInfo.fullName !== 'Valued Member') {
-      console.log('[HomeTab] Using fullName:', userInfo.fullName);
-      return userInfo.fullName;
+  // Load cart count
+  const loadCartCount = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        setBasketCount(0);
+        return;
+      }
+
+      const cartData = await getCart(token);
+      setBasketCount(cartData.totalQuantity || 0);
+      console.log('[HomeTab] Cart count loaded:', cartData.totalQuantity);
+    } catch (error) {
+      console.error('[HomeTab] Error loading cart count:', error);
+      setBasketCount(0);
     }
-    if (userInfo?.firstName && userInfo.firstName !== 'Valued Member') {
-      console.log('[HomeTab] Using firstName:', userInfo.firstName);
-      return userInfo.firstName;
-    }
-    if (userInfo?.name && userInfo.name !== 'Valued Member') {
-      console.log('[HomeTab] Using name:', userInfo.name);
-      return userInfo.name;
-    }
-    if (userInfo?.username && userInfo.username !== 'Valued Member') {
-      console.log('[HomeTab] Using username:', userInfo.username);
-      return userInfo.username;
-    }
-    if (userInfo?.email) {
-      // Extract name from email (before @)
-      const emailName = userInfo.email.split('@')[0];
-      const emailNameFormatted = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-      console.log('[HomeTab] Using email name:', emailNameFormatted);
-      return emailNameFormatted;
-    }
-    
-    // If we're still getting 'Valued Member', trigger a refresh
-    if (userInfo && Object.values(userInfo).some(val => val === 'Valued Member')) {
-      console.log('[HomeTab] Detected stale data, triggering refresh...');
-      setTimeout(() => refreshUserInfoFromToken(), 100);
-    }
-    
-    console.log('[HomeTab] No valid user info found, returning Valued Member');
-    return 'Valued Member';
-  }, [userInfo, refreshUserInfoFromToken]); */
+  }, []);
+
+  // Load cart count on component mount and when user info changes
+  useEffect(() => {
+    loadCartCount();
+  }, [loadCartCount, userInfo]);
+
+  // Refresh cart count when the tab comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[HomeTab] Tab focused, refreshing cart count');
+      loadCartCount();
+
+      // Set up periodic refresh while tab is focused
+      const interval = setInterval(() => {
+        loadCartCount();
+      }, 30000); // Refresh every 30 seconds
+
+      // Cleanup interval when tab loses focus
+      return () => {
+        clearInterval(interval);
+      };
+    }, [loadCartCount])
+  );
+
 
   const getUserName = useCallback((info: any): string | null => {
   if (!info) return null;
@@ -573,8 +579,10 @@ useEffect(() => {
       // Refresh user info from token
       await refreshUserInfoFromToken();
       
+      // Refresh cart count
+      await loadCartCount();
+      
       // You can add more refresh logic here in the future:
-      // - Refresh cart count
       // - Refresh notifications
       // - Refresh featured products
       // - etc.
@@ -585,7 +593,7 @@ useEffect(() => {
     } finally {
       setRefreshing(false);
     }
-  }, [refreshUserInfoFromToken]);
+  }, [refreshUserInfoFromToken, loadCartCount]);
 
   return (
     <View style={s.container}>
@@ -650,7 +658,9 @@ useEffect(() => {
         <Pressable style={s.collectionFab} accessibilityLabel="Koleksiyonum">
           <Text style={s.collectionText}>MY COLLECTION</Text>
           {basketCount > 0 && (
-            <View style={s.badge}><Text style={s.badgeText}>{basketCount}</Text></View>
+            <View style={s.badge}>
+              <Text style={s.badgeText}>{basketCount > 99 ? '99+' : basketCount}</Text>
+            </View>
           )}
         </Pressable>
       </Link>
@@ -731,7 +741,7 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   collectionText: {
-    fontFamily: "CormorantGaramond_500Medium",
+    fontFamily: "Cinzel_400Regular",
     color: "#FFFFFF",
     letterSpacing: 2,
     textTransform: "uppercase",

@@ -38,34 +38,66 @@ public class ProductsController : ControllerBase
                               p.CategoryId, p.Category.Name,
                               p.BrandId, p.Brand.Name,
                               p.Gender.ToString(),
-                              p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
+                              p.ImagePath, p.CreatedAt, 
+                              // Calculate IsOnDiscount in the projection
+                              p.OriginalPrice.HasValue && p.DiscountPercentage.HasValue && p.DiscountPercentage > 0,
+                              // Calculate IsNewArrival in the projection
+                              EF.Functions.DateDiffDay(p.CreatedAt, DateTime.UtcNow) <= 5))
                           .ToListAsync();
 
         return Ok(list);
     }
 
-    // GET /api/products/special-today - Discounted random products
+    // GET /api/products/special-today - Random products with random discounts (same products for entire day)
     [HttpGet("special-today")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetSpecialToday(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20)
+        [FromQuery] int pageSize = 5) // Default to 5 products for special today
     {
-        var list = await _db.Products
+        // Create a deterministic seed based on today's date
+        // This ensures the same products are special for the entire day
+        var today = DateTime.Today;
+        var dateString = today.ToString("yyyy-MM-dd");
+        var seed = dateString.GetHashCode();
+        var random = new Random(seed);
+
+        // Get all products from database first
+        var allProducts = await _db.Products
             .Include(p => p.Category)
             .Include(p => p.Brand)
-            .Where(p => p.IsOnDiscount) // Only discounted products
-            .OrderBy(p => Guid.NewGuid()) // Random order
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(p => new ProductDto(
-                p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
+            .ToListAsync();
+
+        if (!allProducts.Any())
+        {
+            return Ok(new List<ProductDto>());
+        }
+
+        // Shuffle products using the seeded random generator
+        var shuffledProducts = allProducts.OrderBy(p => random.Next()).Take(pageSize).ToList();
+
+        // Apply random discounts to each product (also seeded for consistency)
+        var specialProducts = shuffledProducts.Select((p, index) =>
+        {
+            // Use a different seed for each product to get different discounts
+            var productSeed = seed + p.Id + index;
+            var productRandom = new Random(productSeed);
+            
+            // Generate random discount between 5% and 20%
+            var discountPercentage = productRandom.Next(5, 21); // 5-20%
+            var originalPrice = p.Price;
+            var discountedPrice = Math.Round(originalPrice * (100 - discountPercentage) / 100, 2);
+
+            return new ProductDto(
+                p.Id, p.Name, discountedPrice, originalPrice, discountPercentage,
                 p.CategoryId, p.Category.Name,
                 p.BrandId, p.Brand.Name,
                 p.Gender.ToString(),
-                p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
-            .ToListAsync();
+                p.ImagePath, p.CreatedAt,
+                true, // IsOnDiscount = true for all special today products
+                (DateTime.UtcNow - p.CreatedAt).TotalDays <= 5); // IsNewArrival calculation
+        }).ToList();
 
-        return Ok(list);
+        return Ok(specialProducts);
     }
 
     // GET /api/products/iconic-selections - Jewelry products
@@ -97,7 +129,11 @@ public class ProductsController : ControllerBase
                 p.CategoryId, p.Category.Name,
                 p.BrandId, p.Brand.Name,
                 p.Gender.ToString(),
-                p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
+                p.ImagePath, p.CreatedAt, 
+                // Calculate IsOnDiscount in the projection
+                p.OriginalPrice.HasValue && p.DiscountPercentage.HasValue && p.DiscountPercentage > 0,
+                // Calculate IsNewArrival in the projection
+                EF.Functions.DateDiffDay(p.CreatedAt, DateTime.UtcNow) <= 5))
             .ToListAsync();
 
         return Ok(list);
@@ -123,7 +159,11 @@ public class ProductsController : ControllerBase
                 p.CategoryId, p.Category.Name,
                 p.BrandId, p.Brand.Name,
                 p.Gender.ToString(),
-                p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival))
+                p.ImagePath, p.CreatedAt, 
+                // Calculate IsOnDiscount in the projection
+                p.OriginalPrice.HasValue && p.DiscountPercentage.HasValue && p.DiscountPercentage > 0,
+                // Calculate IsNewArrival in the projection
+                EF.Functions.DateDiffDay(p.CreatedAt, DateTime.UtcNow) <= 5))
             .ToListAsync();
 
         return Ok(list);
@@ -143,8 +183,11 @@ public class ProductsController : ControllerBase
                 p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
                 p.CategoryId, p.Category.Name,
                 p.BrandId, p.Brand.Name,
-                p.Gender.ToString(),
-                p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival));
+                p.Gender.ToString(), p.ImagePath, p.CreatedAt, 
+                // Calculate IsOnDiscount
+                p.OriginalPrice.HasValue && p.DiscountPercentage.HasValue && p.DiscountPercentage > 0,
+                // Calculate IsNewArrival
+                (DateTime.UtcNow - p.CreatedAt).TotalDays <= 5));
     }
 
     [HttpPost]
@@ -177,7 +220,11 @@ public class ProductsController : ControllerBase
                 p.Id, p.Name, p.Price, p.OriginalPrice, p.DiscountPercentage,
                 p.CategoryId, cat!.Name,
                 p.BrandId, br!.Name,
-                p.Gender.ToString(), p.ImagePath, p.CreatedAt, p.IsOnDiscount, p.IsNewArrival));
+                p.Gender.ToString(), p.ImagePath, p.CreatedAt, 
+                // Calculate IsOnDiscount
+                p.OriginalPrice.HasValue && p.DiscountPercentage.HasValue && p.DiscountPercentage > 0,
+                // Calculate IsNewArrival
+                (DateTime.UtcNow - p.CreatedAt).TotalDays <= 5));
     }
 
     [HttpPut("{id:int}")]
