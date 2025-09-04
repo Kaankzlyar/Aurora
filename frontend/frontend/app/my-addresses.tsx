@@ -14,10 +14,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { getMyAddresses, deleteAddress, Address } from '../services/addresses';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import AuroraHeader from '../components/AuroraHeader';
 import SilverText from '../components/SilverText';
 import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 export default function MyAddressesScreen() {
   const { isAuthenticated } = useAuth();
@@ -27,6 +29,8 @@ export default function MyAddressesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [currentToken, setCurrentToken] = useState<string | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<{id: number, title: string} | null>(null);
 
   useEffect(() => {
     const checkAuthAndLoad = async () => {
@@ -73,36 +77,33 @@ export default function MyAddressesScreen() {
   };
 
   const handleDeleteAddress = async (addressId: number, addressTitle: string) => {
-    Alert.alert(
-      'Adresi Sil',
-      `"${addressTitle}" adresini silmek istediğinizden emin misiniz?`,
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Sil',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setDeletingId(addressId);
-              const token = await AsyncStorage.getItem('userToken');
-              if (!token) {
-                showError('Hata', 'Oturum bilgisi bulunamadı.');
-                return;
-              }
+    setSelectedAddress({ id: addressId, title: addressTitle });
+    setShowDeleteConfirmation(true);
+  };
 
-              await deleteAddress(token, addressId);
-              setAddresses(prev => prev.filter(addr => addr.id !== addressId));
-              showSuccess('Başarılı!', 'Adres başarıyla silindi.');
-            } catch (error) {
-              console.error('Adres silinirken hata:', error);
-              showError('Hata', 'Adres silinirken hata oluştu.');
-            } finally {
-              setDeletingId(null);
-            }
-          }
-        }
-      ]
-    );
+  const confirmDeleteAddress = async () => {
+    if (!selectedAddress || !currentToken) return;
+    
+    try {
+      setDeletingId(selectedAddress.id);
+      await deleteAddress(currentToken, selectedAddress.id);
+      
+      // Remove from local state
+      setAddresses(prev => prev.filter(addr => addr.id !== selectedAddress.id));
+      showSuccess('Başarılı!', 'Adres başarıyla silindi.');
+    } catch (error) {
+      console.error('Adres silinirken hata:', error);
+      showError('Hata', 'Adres silinirken hata oluştu.');
+    } finally {
+      setDeletingId(null);
+      setShowDeleteConfirmation(false);
+      setSelectedAddress(null);
+    }
+  };
+
+  const cancelDeleteAddress = () => {
+    setShowDeleteConfirmation(false);
+    setSelectedAddress(null);
   };
 
   if (!isAuthenticated && !currentToken && !loading) {
@@ -207,7 +208,17 @@ export default function MyAddressesScreen() {
               style={styles.addFirstButton}
               onPress={() => router.push('/add-address')}
             >
-              <Text style={styles.addFirstButtonText}>+ İlk Adresini Ekle</Text>
+              <LinearGradient
+                colors={['#D4AF37', '#C48913', '#B8860B']}
+                style={styles.addFirstButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.addFirstButtonContent}>
+                  <Ionicons name="add-outline" size={20} color="#0B0B0B" />
+                  <Text style={styles.addFirstButtonText}>İlk Adresini Ekle</Text>
+                </View>
+              </LinearGradient>
             </Pressable>
           </View>
         ) : (
@@ -222,10 +233,10 @@ export default function MyAddressesScreen() {
                   <View style={styles.addressActions}>
                     <Pressable
                       style={styles.actionButton}
-                      onPress={() => {
-                        // TODO: Implement edit address
-                        showWarning('Geliştiriliyor', 'Adres düzenleme özelliği yakında eklenecek.');
-                      }}
+                      onPress={() => router.push({
+                        pathname: '/edit-address',
+                        params: { id: address.id }
+                      })}
                     >
                       <Ionicons name="create-outline" size={20} color="#D4AF37" />
                     </Pressable>
@@ -273,6 +284,18 @@ export default function MyAddressesScreen() {
         {/* Bottom spacer */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        visible={showDeleteConfirmation}
+        title="Adresi Sil"
+        message={selectedAddress ? `"${selectedAddress.title}" adresini silmek istediğinizden emin misiniz?` : ''}
+        confirmText="Evet, Sil"
+        cancelText="İptal"
+        onConfirm={confirmDeleteAddress}
+        onCancel={cancelDeleteAddress}
+        type="danger"
+      />
     </View>
   );
 }
@@ -375,6 +398,17 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
+  },
+  addFirstButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  addFirstButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   addressesContainer: {
     gap: 16,

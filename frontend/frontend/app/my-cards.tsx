@@ -14,10 +14,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { getMyCards, deleteCard, Card } from '../services/cards';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import AuroraHeader from '../components/AuroraHeader';
 import SilverText from '../components/SilverText';
 import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
 
 export default function MyCardsScreen() {
   const { isAuthenticated } = useAuth();
@@ -27,6 +29,8 @@ export default function MyCardsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [currentToken, setCurrentToken] = useState<string | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<{id: number, title: string} | null>(null);
 
   useEffect(() => {
     const checkAuthAndLoad = async () => {
@@ -73,37 +77,34 @@ export default function MyCardsScreen() {
   };
 
   const handleDeleteCard = async (cardId: number, cardInfo: string) => {
-    Alert.alert(
-      'Kartı Sil',
-      `"${cardInfo}" kartını silmek istediğinizden emin misiniz?`,
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Sil',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setDeletingId(cardId);
-              const token = await AsyncStorage.getItem('userToken');
-              if (!token) {
-                showError('Hata', 'Oturum bilgisi bulunamadı.');
-                return;
-              }
+        setSelectedCard({ id: cardId, title: cardInfo });
+        setShowDeleteConfirmation(true);
+      };
 
-              await deleteCard(token, cardId);
-              setCards(prev => prev.filter(card => card.id !== cardId));
-              showSuccess('Başarılı!', 'Kart başarıyla silindi.');
-            } catch (error) {
-              console.error('Kart silinirken hata:', error);
-              showError('Hata', 'Kart silinirken hata oluştu.');
-            } finally {
-              setDeletingId(null);
-            }
-          }
+      const confirmDeleteCard = async () => {
+        if (!selectedCard || !currentToken) return;
+
+        try {
+          setDeletingId(selectedCard.id);
+          await deleteCard(currentToken, selectedCard.id);
+
+          // Remove from local state
+          setCards(prev => prev.filter(card => card.id !== selectedCard.id));
+          showSuccess('Başarılı!', 'Kart başarıyla silindi.');
+        } catch (error) {
+          console.error('Kart silinirken hata:', error);
+          showError('Hata', 'Kart silinirken hata oluştu.');
+        } finally {
+          setDeletingId(null);
+          setShowDeleteConfirmation(false);
+          setSelectedCard(null);
         }
-      ]
-    );
-  };
+      };
+
+      const cancelDeleteCard = () => {
+        setShowDeleteConfirmation(false);
+        setSelectedCard(null);
+      };
 
   const getBrandIcon = (brand: string) => {
     switch (brand?.toLowerCase()) {
@@ -221,7 +222,17 @@ export default function MyCardsScreen() {
               style={styles.addFirstButton}
               onPress={() => router.push('/add-card')}
             >
-              <Text style={styles.addFirstButtonText}>+ İlk Kartını Ekle</Text>
+              <LinearGradient
+                colors={['#D4AF37', '#C48913', '#B8860B']}
+                style={styles.addFirstButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.addFirstButtonContent}>
+                  <Ionicons name="add-outline" size={20} color="#0B0B0B" />
+                  <Text style={styles.addFirstButtonText}>İlk Kartını Ekle</Text>
+                </View>
+              </LinearGradient>
             </Pressable>
           </View>
         ) : (
@@ -236,10 +247,10 @@ export default function MyCardsScreen() {
                   <View style={styles.cardActions}>
                     <Pressable
                       style={styles.actionButton}
-                      onPress={() => {
-                        // TODO: Implement edit card
-                        showWarning('Geliştiriliyor', 'Kart düzenleme özelliği yakında eklenecek.');
-                      }}
+                      onPress={() => router.push({
+                        pathname: '/edit-card',
+                        params: { id: card.id }
+                      })}
                     >
                       <Ionicons name="create-outline" size={20} color="#D4AF37" />
                     </Pressable>
@@ -276,6 +287,17 @@ export default function MyCardsScreen() {
         {/* Bottom spacer */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      <ConfirmationDialog
+        visible={showDeleteConfirmation}
+        title="Kartı Sil"
+        message={selectedCard ? `"${selectedCard.title}" kartını silmek istediğinizden emin misiniz?` : ''}
+        confirmText="Evet, Sil"
+        cancelText="İptal"
+        onConfirm={confirmDeleteCard}
+        onCancel={cancelDeleteCard}
+        type="danger"
+      />
     </View>
   );
 }
@@ -376,6 +398,17 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
+  },
+  addFirstButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  addFirstButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   cardsContainer: {
     gap: 16,

@@ -1,9 +1,19 @@
 // components/ProductCard.tsx
 import React, { useState } from "react";
-import { View, Text, Image, Pressable } from "react-native";
+import { View, Text, Image, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Product } from "../services/catalog";
 import { imgUri } from "../api/http";
+import { LinearGradient } from 'expo-linear-gradient';
+import GoldText from "./GoldText";
+import SilverText from "./SilverText";
+
+const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('tr-TR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(price);
+};
 
 export default function ProductCard({
   item,
@@ -72,21 +82,12 @@ export default function ProductCard({
       )}
 
       {/* TEXTS */}
-      <Text style={{ 
-        color: "#fff", 
-        fontWeight: "700", 
-        fontSize: 12,
-        lineHeight: 16
-      }} numberOfLines={2}>
+      <SilverText style={styles.productName} numberOfLines={2}>
         {item.brandName} • {item.name}
-      </Text>
-      <Text style={{ 
-        color: "#C48913", 
-        fontWeight: "600",
-        fontSize: 14
-      }}>
-        {item.price.toFixed(2)} ₺
-      </Text>
+      </SilverText>
+      <GoldText style={styles.productPrice}>
+        {formatPrice(item.price)} ₺
+      </GoldText>
 
       {/* CTA */}
       {onAdd && (
@@ -95,24 +96,64 @@ export default function ProductCard({
           disabled={disabled}
           style={({ pressed }) => [{ 
             marginTop: 6, 
-            borderWidth: 1, 
-            borderColor: disabled ? "#555" : "#C48913", 
-            borderRadius: 8, 
-            padding: 8, 
-            alignItems: "center",
-            backgroundColor: disabled ? "#333" : "transparent",
+            borderRadius: 8,
+            overflow: 'hidden',
             opacity: disabled ? 0.6 : 1,
           }, pressed && !disabled && { opacity: 0.8 }]}
         >
-          <Text style={{ 
-            color: disabled ? "#999" : "#C48913", 
-            fontWeight: "600",
-            fontSize: 12
-          }}>
-            {disabled ? "Yükleniyor..." : "Sepete Ekle"}
-          </Text>
+          {disabled ? (
+            <View style={{
+              borderWidth: 1, 
+              borderColor: "#555", 
+              borderRadius: 8, 
+              padding: 8, 
+              alignItems: "center",
+              backgroundColor: "#333",
+            }}>
+              <Text style={{ 
+                color: "#999", 
+                fontWeight: "600",
+                fontSize: 12
+              }}>
+                Yükleniyor...
+              </Text>
+            </View>
+          ) : (
+            <LinearGradient
+              colors={['#D4AF37', '#C48913', '#B8860B']}
+              style={{
+                padding: 8, 
+                alignItems: "center",
+                borderRadius: 8,
+              }}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={{ 
+                color: "#000000", 
+                fontWeight: "600",
+                fontSize: 12
+              }}>
+                Sepete Ekle
+              </Text>
+            </LinearGradient>
+          )}
         </Pressable>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  productPrice: {
+    flexDirection:'row',
+    fontFamily: 'Montserrat_700Bold',
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  productName: {
+    fontFamily: 'Montserrat_700Bold',
+    fontSize: 12,
+    lineHeight: 16
+  }
+})

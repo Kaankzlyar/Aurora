@@ -28,9 +28,10 @@ type Props = {
   onChange: (field: string, value: string) => void;
   onSubmit: () => void;
   onToggle: () => void;
+  onForgotPassword?: () => void;
 };
 
-export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Props) {
+export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle, onForgotPassword }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -303,20 +304,25 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
                     </View>
                   )}
 
-                  <Button
-                    title={isLogin ? 'Sign In' : 'Sign Up'}
-                    onPress={() => {
-                      console.log('Button clicked in AuthPage');
-                      onSubmit();
-                    }}
-                  />
+                  <View style={styles.buttonContainer}>
+                    <Button
+                      title={isLogin ? 'Sign In' : 'Join Aurora'}
+                      icon={isLogin ? 'log-in-outline' : 'person-add-outline'}
+                      iconSize={22}
+                      onPress={() => {
+                        console.log('Button clicked in AuthPage');
+                        onSubmit();
+                      }}
+                    />
+                  </View>
+      
 
                   <View style={styles.toggleContainer}>
                     <TouchableOpacity onPress={handleToggle} style={styles.toggleButton}>
                       <Text style={styles.toggleText}>
                         {isLogin
-                          ? 'New to Aurora? Begin Your Journey'
-                          : 'Back to Your Collection? Sign In'}
+                          ? 'New to Aurora? Begin your journey'
+                          : 'Already Have Account?'}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -401,24 +407,38 @@ const styles = StyleSheet.create({
   form: { gap: 20 },
   nameRow: { flexDirection: 'row', gap: 16 },
   nameField: { flex: 1 },
-  field: { gap: 4 },
+  field: { gap: 6 },
 
   passwordContainer: { position: 'relative' },
   passwordInput: { paddingRight: 48 },
   eyeButton: { position: 'absolute', right: 12, top: 14 },
 
-  toggleContainer: { alignItems: 'center', marginTop: 16 },
-  toggleButton: {
+  buttonContainer: { marginTop: 5 },
+
+  forgotPasswordContainer: { alignItems: 'center', marginTop: 1, marginBottom: -15 },
+  forgotPasswordButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    borderWidth: 0,
+  },
+  forgotPasswordText: { 
+    color: '#D4AF37',
+    fontSize: 16, 
+    fontFamily: 'Montserrat_400Regular',
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
+
+  toggleContainer: { alignItems: 'center', marginTop: 5 },
+  toggleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 12,
   },
   toggleText: { 
-    color: '#9ca3af',
-    fontSize: 19, 
-    fontFamily: 'CormorantGaramond_600SemiBold',
+    color: '#989898ff',
+    fontSize: 20, 
+    fontFamily: 'CormorantGaramond_400Regular',
     textAlign: 'center',
   },
 });

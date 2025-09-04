@@ -23,6 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
 import AuroraHeader from '../components/AuroraHeader';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Country and city data
 const COUNTRIES = [
@@ -262,10 +263,13 @@ export default function AddAddressScreen() {
         <AuroraHeader />
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← Geri</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="arrow-back" size={20} color="#D4AF37" />
+              <SilverText style={styles.title}>Yeni Adres</SilverText>
+            </View>
           </Pressable>
-          <SilverText style={styles.title}>Yeni Adres</SilverText>
           <View style={styles.placeholder} />
+          
         </View>
         <View style={styles.content}>
           <Text style={styles.errorText}>Giriş yapmanız gerekiyor.</Text>
@@ -283,10 +287,12 @@ export default function AddAddressScreen() {
     <View style={styles.container}>
       <AuroraHeader />
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Geri</Text>
-        </Pressable>
-        <Text style={styles.title}>Yeni Adres</Text>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="arrow-back" size={20} color="#D4AF37" />
+              <SilverText style={styles.title}>Yeni Adres</SilverText>
+            </View>
+          </Pressable>
         <View style={styles.placeholder} />
       </View>
 
@@ -452,7 +458,17 @@ export default function AddAddressScreen() {
             {loading ? (
               <ActivityIndicator size="small" color="#0B0B0B" />
             ) : (
-              <Text style={styles.submitButtonText}>💾 Adresi Kaydet</Text>
+              <LinearGradient
+                colors={['#D4AF37', '#C48913', '#B8860B']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.submitButtonGradient}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Ionicons name="checkmark" size={20} color="#0B0B0B" />
+                  <Text style={styles.submitButtonText}>Adresi Kaydet</Text>
+                </View>
+              </LinearGradient>
             )}
           </Pressable>
         </View>
@@ -574,7 +590,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 12,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#1A1A1A',
@@ -587,9 +603,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Montserrat_500Medium',
   },
+  submitButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
+  },
   title: {
     fontSize: 20,
     fontFamily: 'Montserrat_600SemiBold',
+    textAlign: 'center',
+    justifyContent: 'center',
+    marginLeft: 85,
     color: '#FFFFFF',
   },
   placeholder: {
@@ -597,7 +623,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: 12,
     paddingBottom: 0,
   },
   description: {

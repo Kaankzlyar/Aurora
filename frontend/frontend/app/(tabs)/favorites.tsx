@@ -27,10 +27,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuroraHeader from "../../components/AuroraHeader";
 import { useFocusEffect } from "@react-navigation/native";
 import SilverText from "../../components/SilverText";
+import GoldText from "../../components/GoldText";
 import NotificationAlert from "../../components/NotificationAlert";
 import { useNotification } from "../../hooks/useNotification";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { BASE_URL } from "../../constants/config";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function FavoritesTab() {
   const { isAuthenticated, getCurrentToken } = useAuth();
@@ -224,10 +226,7 @@ export default function FavoritesTab() {
         return;
       }
       
-    /*   console.log('[FavoritesTab] ✅ Token available and valid, calling addToCart...');
-      console.log('[FavoritesTab] Token preview:', currentToken.substring(0, 50) + '...');
-      console.log('[FavoritesTab] Product ID:', product.id);
-      console.log('[FavoritesTab] Quantity: 1'); */
+    
       
       await addToCart(currentToken, product.id, 1);
       console.log('[FavoritesTab] ✅ addToCart successful!');
@@ -310,9 +309,16 @@ export default function FavoritesTab() {
           <View style={styles.titleRightSection}>
             {/* Token loading indicator removed as per new_code */}
             {favorites.length > 0 && (
-              <Pressable style={styles.clearButton} onPress={onClearAllFavorites}>
-                <Ionicons name="trash-outline" size={20} color="#C48913" />
-                <Text style={styles.clearButtonText}>Temizle</Text>
+              <Pressable style={styles.clearButtonContainer} onPress={onClearAllFavorites}>
+                <LinearGradient
+                  colors={['#D4AF37', '#C48913', '#B8860B']}
+                  style={styles.clearButton}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Ionicons name="trash-outline" size={20} color="#000000" />
+                  <Text style={styles.clearButtonText}>Temizle</Text>
+                </LinearGradient>
               </Pressable>
             )}
           </View>
@@ -377,22 +383,23 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: 'Montserrat_600SemiBold',
   },
+  clearButtonContainer: {
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
   clearButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(196, 137, 19, 0.1)',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#C48913',
   },
   clearButtonText: {
-    color: '#C48913',
+    color: '#000000',
     fontSize: 12,
     paddingBottom: 2,
     fontFamily: 'Montserrat_500Medium',
+    fontWeight: '600',
   },
   emptyContainer: {
     flex: 1,
@@ -435,21 +442,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_400Regular',
     textAlign: 'center',
   },
+  testButtonContainer: {
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
   testButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(196, 137, 19, 0.1)',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#C48913',
   },
   testButtonText: {
-    color: '#C48913',
+    color: '#000000',
     fontSize: 12,
     paddingBottom: 2,
     fontFamily: 'Montserrat_500Medium',
+    fontWeight: '600',
   },
 });

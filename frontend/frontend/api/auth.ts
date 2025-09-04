@@ -395,6 +395,90 @@ export const getUserProfile = async () => {
   }
 };
 
+// Şifremi unuttum
+export const forgotPassword = async (email: string) => {
+  try {
+    const trimmedEmail = email?.trim()?.toLowerCase();
+    
+    console.log("[forgotPassword] ===== PASSWORD RESET REQUEST =====");
+    console.log("[forgotPassword] Email:", JSON.stringify(trimmedEmail));
+    
+    // Validate email
+    if (!trimmedEmail || trimmedEmail.length === 0) {
+      throw new Error("E-posta adresi boş olamaz");
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      throw new Error("Geçersiz e-posta formatı");
+    }
+    
+    const payload = {
+      email: trimmedEmail,
+    };
+
+    console.log("[forgotPassword] Sending to:", `${BASE_URL}/forgot-password`);
+    console.log("[forgotPassword] Request payload:", JSON.stringify(payload));
+    
+    const response = await fetchWithTimeout(`${BASE_URL}/forgot-password`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json; charset=utf-8",
+        "Accept": "application/json",
+        "User-Agent": "Expo-Mobile-App"
+      },
+      body: JSON.stringify(payload),
+      timeoutMs: 15000,
+    });
+
+    console.log("[forgotPassword] Response status:", response.status, response.statusText);
+
+    const contentType = response.headers.get("content-type") || "";
+    let body: any = null;
+    
+    try {
+      const responseText = await response.text();
+      if (responseText.trim().length > 0) {
+        body = contentType.includes("application/json") 
+          ? JSON.parse(responseText) 
+          : { message: responseText };
+      }
+    } catch (parseError) {
+      console.log("[forgotPassword] Response parse error:", parseError);
+    }
+
+    if (!response.ok) {
+      console.log("[forgotPassword] ===== PASSWORD RESET FAILED =====");
+      console.log("[forgotPassword] Error body:", body);
+      
+      let errorMsg = "Şifre sıfırlama talebi başarısız";
+      if (body?.message) {
+        errorMsg = body.message;
+      } else if (typeof body === 'string') {
+        errorMsg = body;
+      }
+      
+      throw new Error(errorMsg);
+    }
+
+    console.log("[forgotPassword] ===== PASSWORD RESET SUCCESS =====");
+    console.log("[forgotPassword] Success body:", body);
+    
+    return body || { message: "Şifre sıfırlama bağlantısı gönderildi" };
+  } catch (error: any) {
+    console.log("[forgotPassword] ===== ERROR =====");
+    console.log("[forgotPassword] Error:", error?.message || error);
+    
+    if (error?.name === "AbortError") {
+      throw new Error("İstek zaman aşımına uğradı");
+    } else if (error?.message?.includes('Network request failed')) {
+      throw new Error("Ağ bağlantısı başarısız");
+    } else {
+      throw error;
+    }
+  }
+};
+
 // Extract user information from JWT token
 export const getUserInfoFromToken = async (token: string) => {
   try {

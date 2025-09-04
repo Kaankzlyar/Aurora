@@ -148,5 +148,71 @@
             Console.WriteLine($"✅ User saved to database with ID: {user.Id}");
             return Ok(new { message = "User registered successfully." });
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
+        {
+            try
+            {
+                Console.WriteLine($"🔍 FORGOT PASSWORD REQUEST:");
+                Console.WriteLine($"Email: '{request.Email}'");
+
+                if (!ModelState.IsValid)
+                {
+                    Console.WriteLine("❌ ModelState is invalid");
+                    return BadRequest(ModelState);
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Email))
+                {
+                    Console.WriteLine("❌ Email is null or empty");
+                    return BadRequest(new { message = "E-posta adresi gerekli." });
+                }
+
+                // Normalize email
+                string normalizedEmail = request.Email.Trim().ToLower();
+                Console.WriteLine($"Normalized email: '{normalizedEmail}'");
+
+                // Find user
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+                if (user == null)
+                {
+                    Console.WriteLine($"❌ User not found for email: {normalizedEmail}");
+                    // For security reasons, we don't reveal if the email exists or not
+                    // Always return success message
+                    return Ok(new { message = "Eğer bu e-posta adresi sistemde kayıtlı ise, şifre sıfırlama bağlantısı gönderilecektir." });
+                }
+
+                Console.WriteLine($"✅ User found: {user.Name} ({user.Email})");
+
+                // Generate password reset token (in a real application, this should be a secure random token)
+                var resetToken = Guid.NewGuid().ToString();
+                var resetTokenExpiry = DateTime.UtcNow.AddHours(1); // Token expires in 1 hour
+
+                // TODO: Store reset token in database (add PasswordResetToken and PasswordResetTokenExpiry fields to User model)
+                user.PasswordResetToken = resetToken;
+                user.PasswordResetTokenExpiry = resetTokenExpiry;
+                await _context.SaveChangesAsync();
+
+                // TODO: Send email with reset link
+                // In a real application, you would send an email here
+                // For now, we'll just log the token for testing purposes
+                
+                Console.WriteLine($"✅ Password reset token generated: {resetToken}");
+                Console.WriteLine($"✅ Token expires at: {resetTokenExpiry}");
+
+                // TODO: Replace with actual email sending logic
+                // await _emailService.SendPasswordResetEmail(user.Email, resetToken);
+
+                return Ok(new { message = "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ FORGOT PASSWORD ERROR: {ex.Message}");
+                return BadRequest(new { message = "Şifre sıfırlama talebi işlenirken hata oluştu." });
+            }
+        }
     }
 }

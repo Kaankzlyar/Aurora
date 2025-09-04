@@ -14,6 +14,8 @@ import { createCard } from '../services/cards';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AddCardScreen() {
   const { isAuthenticated } = useAuth();
@@ -249,7 +251,17 @@ export default function AddCardScreen() {
             {loading ? (
               <ActivityIndicator size="small" color="#0B0B0B" />
             ) : (
-              <Text style={styles.submitButtonText}>💳 Kartı Kaydet</Text>
+              <LinearGradient
+                colors={['#D4AF37', '#C48913', '#B8860B']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.submitButtonGradient}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Ionicons name="card" size={20} color="#0B0B0B" />
+                  <Text style={styles.submitButtonText}>Kartı Kaydet</Text>
+                </View>
+              </LinearGradient>
             )}
           </Pressable>
         </View>
@@ -388,6 +400,13 @@ const styles = StyleSheet.create({
     color: '#0B0B0B',
     fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
+  },
+  submitButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
   },
   errorText: {
     color: '#FF6B6B',

@@ -68,30 +68,33 @@ const ProductCard: React.FC<ProductCardProps> = ({
       
       {/* Ürün Bilgileri */}
       <View style={styles.productInfo}>
-        <Text style={styles.productBrand} numberOfLines={1}>
-          {product.brandName}
-        </Text>
-        <Text style={styles.productName} numberOfLines={2}>
-          {product.name}
-        </Text>
-        <SilverText style={styles.productPrice}>
-          ₺{product.price?.toLocaleString('en-US')}
-        </SilverText>
+        <View style={styles.productContent}>
+          <Text style={styles.productBrand} numberOfLines={1}>
+            {product.brandName}
+          </Text>
+          <Text style={styles.productName} numberOfLines={2}>
+            {product.name}
+          </Text>
+          <Text style={styles.productPrice}>
+            ₺{product.price?.toLocaleString('en-US')}
+          </Text>
+        </View>
 
+        {/* Sepete Ekle Butonu - Sabit pozisyon */}
         <TouchableOpacity
-                  style={styles.addToCartButtonContainer}
-                  onPress={() => onAddToCart(product)}
-                >
-                  <LinearGradient
-                    colors={['#D4AF37', '#C48913', '#B8860B']}
-                    style={styles.addToCartButton}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <Ionicons name="cart-outline" size={16} color="#000000" />
-                    <Text style={styles.addToCartText}>Sepete Ekle</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+          style={styles.addToCartButtonContainer}
+          onPress={() => onAddToCart(product)}
+        >
+          <LinearGradient
+            colors={['#D4AF37', '#C48913', '#B8860B']}
+            style={styles.addToCartButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name="cart-outline" size={16} color="#000000" />
+            <Text style={styles.addToCartText}>Sepete Ekle</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
     </Pressable>
   );
@@ -186,18 +189,18 @@ export default function NewArrivalsScreen() {
         await removeFromFavorites(product.id);
         newFavorites.delete(product.id);
         console.log('[NewArrivalsScreen] Favorilerden çıkarıldı:', product.name);
-        showInfo('Removed from Favorites', `${product.name} removed from favorites.`);
+        showInfo('Favorilerden Kaldırıldı', `${product.name} favorilerden kaldırıldı.`);
       } else {
         // Favorilere ekle
         await addToFavorites(product);
         newFavorites.add(product.id);
         console.log('[NewArrivalsScreen] Favorilere eklendi:', product.name);
-        showSuccess('Added to Favorites', `${product.name} added to favorites!`);
+        showSuccess('Favorilere Eklendi', `${product.name} favorilere eklendi.`);
       }
       setFavorites(newFavorites);
     } catch (error) {
       console.error('[NewArrivalsScreen] Favori işlemi hatası:', error);
-      showError('Error', 'An error occurred during the favorite operation.');
+      showError('Hata', 'Favori işlemi sırasında bir hata oluştu.');
     }
   };
 
@@ -256,45 +259,6 @@ export default function NewArrivalsScreen() {
       {/* AuroraHeader - same as other pages */}
       <AuroraHeader />
       
-      {/* Title Section */}
-      <View style={styles.headerSection}>
-        <View style={ib.wrapper}>
-          {/* arka panel: altın degrade */}
-          <LinearGradient
-            colors={["#C48913", "#8d680bff", "#553921ff"]}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={ib.panel}
-          >
-            {/* hafif ışık vurgusu */}
-            <View style={StyleSheet.absoluteFill}>
-              <LinearGradient
-                colors={["rgba(255,255,255,0.10)", "transparent"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0.35, y: 1 }}
-                style={StyleSheet.absoluteFill}
-              />
-            </View>
-            {/* sağ üstten diyagonal karartma */}
-            <View style={StyleSheet.absoluteFill}>
-              <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.20)"]}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
-              />
-            </View>
-
-            {/* içerik */}
-            <View style={ib.textCol}>
-              <Text style={[ib.title,]}>New Arrivals</Text>
-            </View>
-          </LinearGradient>
-
-          {/* ince altın çerçeve */}
-          <View pointerEvents="none" style={ib.stroke} />
-        </View>
-      </View>
       {/* Content */}
       <ScrollView 
         style={styles.content}
@@ -304,6 +268,45 @@ export default function NewArrivalsScreen() {
         }
         showsVerticalScrollIndicator={false}
       >
+        {/* Title Section - Now inside ScrollView to hide on scroll */}
+        <View style={styles.headerSection}>
+          <View style={ib.wrapper}>
+            {/* arka panel: altın degrade */}
+            <LinearGradient
+              colors={["#C48913", "#8d680bff", "#553921ff"]}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={ib.panel}
+            >
+              {/* hafif ışık vurgusu */}
+              <View style={StyleSheet.absoluteFill}>
+                <LinearGradient
+                  colors={["rgba(255,255,255,0.10)", "transparent"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0.35, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+              </View>
+              {/* sağ üstten diyagonal karartma */}
+              <View style={StyleSheet.absoluteFill}>
+                <LinearGradient
+                  colors={["transparent", "rgba(0,0,0,0.20)"]}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+              </View>
+
+              {/* içerik */}
+              <View style={ib.textCol}>
+                <Text style={[ib.title,]}>New Arrivals</Text>
+              </View>
+            </LinearGradient>
+
+            {/* ince altın çerçeve */}
+            <View pointerEvents="none" style={ib.stroke} />
+          </View>
+        </View>
         {/* Products Grid */}
         <View style={styles.productsContainer}>
           {products.length > 0 ? (
@@ -441,7 +444,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   addToCartButtonContainer: {
-    marginTop: 4,
+    // Buton için yer ayrıldı, margin kaldırıldı
   },
   addToCartButton: {
     flexDirection: 'row',
@@ -503,7 +506,13 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     padding: 12,
-    minHeight: 80,
+    height: 140, // Arttırıldı - fiyat için daha fazla yer
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  productContent: {
+    flex: 1,
+    justifyContent: 'flex-start',
   },
   productBrand: {
     color: '#888888',
@@ -518,13 +527,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
     lineHeight: 18,
-    flex: 1,
   },
   productPrice: {
     color: '#C0C0C0',
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 0.1,
+    marginBottom: 16, // Artırıldı - daha iyi boşluk için
   },
   emptyContainer: {
     flex: 1,

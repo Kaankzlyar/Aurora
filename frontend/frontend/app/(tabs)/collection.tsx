@@ -59,6 +59,18 @@ export default function CollectionTab() {
     });
   };
 
+  // KDV hesaplama fonksiyonu (%18 - Türkiye standart KDV oranı)
+  const calculateVAT = (totalWithVAT: number) => {
+    const vatRate = 0.18;
+    const subtotalWithoutVat = totalWithVAT / (1 + vatRate);
+    const vatAmount = totalWithVAT - subtotalWithoutVat;
+    return {
+      subtotalWithoutVat,
+      vatAmount,
+      vatRate
+    };
+  };
+
   // 🔧 TOKEN ALMA FONKSİYONU
   const getTokenFromStorage = async (): Promise<string | null> => {
     try {
@@ -312,8 +324,20 @@ export default function CollectionTab() {
                   <Text style={styles.summaryLabel}>Toplam Ürün:</Text>
                   <Text style={styles.summaryValue}>{data.totalQuantity}</Text>
                 </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Ara Toplam (KDV Hariç):</Text>
+                  <Text style={styles.summaryValue}>
+                    {formatCurrency(calculateVAT(data.subtotal).subtotalWithoutVat)} ₺
+                  </Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>KDV (%18):</Text>
+                  <Text style={styles.summaryValue}>
+                    {formatCurrency(calculateVAT(data.subtotal).vatAmount)} ₺
+                  </Text>
+                </View>
                 <View style={[styles.summaryRow, { alignItems: 'center' }]}>
-                  <Text style={styles.summaryLabelBold}>Toplam Tutar:</Text>
+                  <Text style={styles.summaryLabelBold}>Toplam (KDV Dahil):</Text>
                   <GoldText style={{
                     ...styles.summaryValueBold,
                     fontSize: data.subtotal > 99999 ? 14 : 

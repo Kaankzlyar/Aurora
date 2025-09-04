@@ -17,3 +17,9 @@ public record CardDto(
     int ExpMonth,
     int ExpYear
 );
+
+public record UpdateCardDto(
+    string HolderName,
+    int ExpMonth,
+    int ExpYear
+);

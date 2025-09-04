@@ -56,6 +56,26 @@ public class CardsController : ControllerBase
         return CreatedAtAction(nameof(GetMy), new { id = c.Id }, res);
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, UpdateCardDto dto)
+    {
+        int userid = User.GetUserId();
+        var c = await _db.Cards.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userid);
+        if (c is null) return NotFound();
+
+        // Validasyon
+        if (dto.ExpMonth < 1 || dto.ExpMonth > 12) return BadRequest("SKT ay geçersiz.");
+        if (dto.ExpYear < DateTime.UtcNow.Year || dto.ExpYear > DateTime.UtcNow.Year + 20) return BadRequest("SKT yıl geçersiz.");
+
+        // Sadece güncellenebilir alanları güncelle
+        c.HolderName = dto.HolderName.Trim();
+        c.ExpMonth = dto.ExpMonth;
+        c.ExpYear = dto.ExpYear;
+
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

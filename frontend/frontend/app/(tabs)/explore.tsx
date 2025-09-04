@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  Pressable,
   TextInput,
 } from 'react-native';
 
@@ -63,7 +62,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   console.log(`[ProductCard] ========================`);
   
   return (
-    <Pressable style={styles.productCard} onPress={onPress}>
+    <View style={styles.productCard}>
       {/* Ürün Resmi */}
       <View style={styles.imageContainer}>
         <Image
@@ -122,7 +121,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </LinearGradient>
         </TouchableOpacity>
       </View>
-    </Pressable>
+    </View>
   );
 };
 

@@ -25,6 +25,12 @@ export default function AuroraHeader() {
     router.push("/(tabs)/collection");
   };
 
+  const navigateToSettings = () => {
+    console.log("[AuroraHeader] Navigating to settings...");
+    setShowProfileMenu(false);
+    router.push("/settings");
+  }
+
   return (
     <>
       <SafeAreaView style={s.safeArea}>
@@ -73,6 +79,13 @@ export default function AuroraHeader() {
               <Ionicons name="bag-outline" size={20} color={"#D4AF37"} />
               <Text style={[s.menuText, {marginLeft:8}]}>Sepetim</Text>
             </Pressable>
+
+            <View style ={s.menuDivider}/>
+            <Pressable style={s.menuItem} onPress={navigateToSettings}>
+              <Ionicons name="settings-outline" size={20} color={"#D4AF37"} />
+              <Text style={[s.menuText, {marginLeft:8}]}>Ayarlar</Text>
+            </Pressable>
+            
           </View>
         </Pressable>
       </Modal>

@@ -17,6 +17,7 @@ import { checkout } from '../services/orders';
 import { getCart, CartItem } from '../services/cart';
 import { imgUri } from '../api/http';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import SilverText from '../components/SilverText';
 import AuroraHeader from '../components/AuroraHeader';
@@ -42,6 +43,11 @@ export default function CheckoutScreen() {
   const [currentToken, setCurrentToken] = useState<string | null>(null);
 
   const shippingFee = 0; // Ücretsiz kargo
+  
+  // KDV hesaplaması (%18 - Türkiye standart KDV oranı)
+  const vatRate = 0.18;
+  const subtotalWithoutVat = subtotal / (1 + vatRate); // KDV hariç tutar
+  const vatAmount = subtotal - subtotalWithoutVat; // KDV tutarı
   const grandTotal = subtotal + shippingFee;
 
   // Number formatting function for Turkish currency
@@ -220,7 +226,7 @@ export default function CheckoutScreen() {
         <View style={styles.section}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name="receipt-outline" size={20} color="#D4AF37" />
-            <SilverText style={[styles.sectionTitle, {marginLeft: 8}]}>Sipariş Özeti</SilverText>
+            <SilverText style={[styles.sectionTitle, {marginLeft: 8, marginBottom: 8}]}>Sipariş Özeti</SilverText>
           </View>
           
           {/* Cart Items */}
@@ -233,12 +239,12 @@ export default function CheckoutScreen() {
                 />
                 <View style={styles.cartItemInfo}>
                   <Text style={styles.cartItemName}>{item.name}</Text>
-                  <Text style={styles.cartItemPrice}>{formatCurrency(item.price)} ₺</Text>
+                  <GoldText style={styles.cartItemPrice}> {`${formatCurrency(item.price)} ₺`}</GoldText>
                   <Text style={styles.cartItemQuantity}>Adet: {item.quantity}</Text>
                 </View>
-                <Text style={styles.cartItemTotal}>
+                <GoldText style={styles.cartItemTotal}>
                   {formatCurrency(item.price * item.quantity)} ₺
-                </Text>
+                </GoldText>
               </View>
             ))}
           </View>
@@ -249,15 +255,21 @@ export default function CheckoutScreen() {
               <SilverText style={styles.summaryValue}>{totalQuantity} adet</SilverText>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Ara Toplam:</Text>
-              <SilverText style={styles.summaryValue}>{formatCurrency(subtotal)} ₺</SilverText>
+              <Text style={styles.summaryLabel}>Ara Toplam (KDV Hariç):</Text>
+              <SilverText style={styles.summaryValue}>{formatCurrency(subtotalWithoutVat)} ₺</SilverText>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>KDV (%18):</Text>
+              <SilverText style={styles.summaryValue}>{formatCurrency(vatAmount)} ₺</SilverText>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Kargo:</Text>
-              <SilverText style={styles.summaryValue}>{formatCurrency(shippingFee)} ₺</SilverText>
+              <SilverText style={styles.summaryValue}>
+                <Text style={styles.freeShipping}>ÜCRETSİZ</Text>
+              </SilverText>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>Toplam:</Text>
+              <GoldText style={styles.totalLabel}>Toplam (KDV Dahil):</GoldText>
               <SilverText style={styles.totalValue}>{formatCurrency(grandTotal)} ₺</SilverText>
             </View>
           </View>
@@ -285,7 +297,17 @@ export default function CheckoutScreen() {
                 style={styles.addFirstButton}
                 onPress={() => router.push('/my-addresses')}
               >
-                <Text style={styles.addFirstButtonText}>Adreslerimi Yönet</Text>
+                <LinearGradient
+                  colors={['#D4AF37', '#C48913', '#B8860B']}
+                  style={styles.addFirstButtonGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={styles.addFirstButtonContent}>
+                    <Ionicons name="location-outline" size={20} color="#0B0B0B" />
+                    <Text style={styles.addFirstButtonText}>Adreslerimi Yönet</Text>
+                  </View>
+                </LinearGradient>
               </Pressable>
             </View>
           ) : (
@@ -342,7 +364,17 @@ export default function CheckoutScreen() {
                 style={styles.addFirstButton}
                 onPress={() => router.push('/my-cards')}
               >
-                <Text style={styles.addFirstButtonText}>Kartlarımı Yönet</Text>
+                <LinearGradient
+                  colors={['#D4AF37', '#C48913', '#B8860B']}
+                  style={styles.addFirstButtonGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={styles.addFirstButtonContent}>
+                    <Ionicons name="card-outline" size={20} color="#0B0B0B" />
+                    <Text style={styles.addFirstButtonText}>Kartlarımı Yönet</Text>
+                  </View>
+                </LinearGradient>
               </Pressable>
             </View>
           ) : (
@@ -379,22 +411,29 @@ export default function CheckoutScreen() {
         {/* Ödeme Butonu */}
         <View style={styles.checkoutSection}>
           <Pressable
+            onPress={handleCheckout}
+            disabled={!selectedAddressId || !selectedCardId || checkoutLoading}
             style={[
               styles.checkoutButton,
               (!selectedAddressId || !selectedCardId || checkoutLoading) && styles.checkoutButtonDisabled
             ]}
-            onPress={handleCheckout}
-            disabled={!selectedAddressId || !selectedCardId || checkoutLoading}
           >
             {checkoutLoading ? (
               <ActivityIndicator size="small" color="#0B0B0B" />
             ) : (
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Ionicons name="card-outline" size={24} color="#0B0B0B" />
-                <Text style={[styles.checkoutButtonText, {marginLeft: 8}]}>
-                  {formatCurrency(grandTotal)} ₺ Öde
-                </Text>
-              </View>
+              <LinearGradient
+                colors={['#D4AF37', '#C48913', '#B8860B']}
+                style={styles.checkoutButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.checkoutButtonContent}>
+                  <Ionicons name="card-outline" size={24} color="#0B0B0B" />
+                  <Text style={styles.checkoutButtonText}>
+                    {formatCurrency(grandTotal)} ₺ Öde
+                  </Text>
+                </View>
+              </LinearGradient>
             )}
           </Pressable>
         </View>
@@ -560,9 +599,8 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   cartItemPrice: {
-    color: '#D4AF37',
     fontSize: 12,
-    fontFamily: 'Montserrat_400Regular',
+    fontFamily: 'Montserrat_500Medium',
     marginBottom: 2,
   },
   cartItemQuantity: {
@@ -571,7 +609,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_400Regular',
   },
   cartItemTotal: {
-    color: '#D4AF37',
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'right',
@@ -598,6 +635,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Montserrat_500Medium',
   },
+  freeShipping: {
+    color: '#4ADE80',
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+  },
   totalRow: {
     borderTopWidth: 1,
     borderTopColor: '#333',
@@ -606,11 +648,11 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     color: '#D4AF37',
-    fontSize: 18,
+    fontSize: 15,
+    marginTop: 4,
     fontFamily: 'Montserrat_600SemiBold',
   },
   totalValue: {
-    color: '#D4AF37',
     fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
   },
@@ -673,33 +715,54 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addFirstButton: {
-    backgroundColor: '#D4AF37',
-    borderRadius: 20,
-    paddingHorizontal: 20,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  addFirstButtonGradient: {
     paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addFirstButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addFirstButtonText: {
     color: '#0B0B0B',
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
+    marginLeft: 8,
   },
   checkoutSection: {
     marginTop: 32,
     marginBottom: 100, // Alt menü için extra padding
   },
   checkoutButton: {
-    backgroundColor: '#C48913',
     borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
+    overflow: 'hidden',
+    marginBottom: 16,
   },
   checkoutButtonDisabled: {
-    backgroundColor: '#666',
+    opacity: 0.5,
+  },
+  checkoutButtonGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkoutButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   checkoutButtonText: {
     color: '#0B0B0B',
     fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
+    marginLeft: 8,
   },
   loadingContainer: {
     flex: 1,

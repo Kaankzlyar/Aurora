@@ -42,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const imageUrl = imgUri(product.imagePath) || 'https://via.placeholder.com/150';
   
   return (
-    <Pressable style={styles.productCard} onPress={onPress}>
+    <View style={styles.productCard}>
       {/* Ürün Resmi */}
       <View style={styles.imageContainer}>
         <Image
@@ -74,46 +74,50 @@ const ProductCard: React.FC<ProductCardProps> = ({
       
       {/* Ürün Bilgileri */}
       <View style={styles.productInfo}>
-        <Text style={styles.productBrand} numberOfLines={1}>
-          {product.brandName}
-        </Text>
-        <Text style={styles.productName} numberOfLines={2}>
-          {product.name}
-        </Text>
-        
-        {/* Price Section with Discount */}
-        <View style={styles.priceContainer}>
-          {product.isOnDiscount && product.originalPrice ? (
-            <>
-              <Text style={styles.originalPrice}>
-                ₺{product.originalPrice.toLocaleString('en-US')}
-              </Text>
-              <SilverText style={styles.discountedPrice}>
-                ₺{product.price?.toLocaleString('en-US')}
+        <View style={styles.productContent}>
+          <Text style={styles.productBrand} numberOfLines={1}>
+            {product.brandName}
+          </Text>
+          <Text style={styles.productName} numberOfLines={2}>
+            {product.name}
+          </Text>
+          
+          {/* Price Section with Discount */}
+          <View style={styles.priceContainer}>
+            {product.isOnDiscount && product.originalPrice ? (
+              <>
+                <Text style={styles.originalPrice}>
+                  ₺{product.originalPrice.toLocaleString('en-US')}
+                </Text>
+                <SilverText style={styles.discountedPrice}>
+                  ₺{product.price?.toLocaleString('en-US')}
+                </SilverText>
+              </>
+            ) : (
+              <SilverText style={styles.productPrice}>
+                ${product.price?.toLocaleString('en-US')}
               </SilverText>
-            </>
-          ) : (
-            <SilverText style={styles.productPrice}>
-              ${product.price?.toLocaleString('en-US')}
-            </SilverText>
-          )}
+            )}
+          </View>
         </View>
+        
+        {/* Sepete Ekle Butonu - Sabit pozisyon */}
         <TouchableOpacity
-                  style={styles.addToCartButtonContainer}
-                  onPress={() => onAddToCart(product)}
-                >
-                  <LinearGradient
-                    colors={['#D4AF37', '#C48913', '#B8860B']}
-                    style={styles.addToCartButton}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <Ionicons name="cart-outline" size={16} color="#000000" />
-                    <Text style={styles.addToCartText}>Sepete Ekle</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+          style={styles.addToCartButtonContainer}
+          onPress={() => onAddToCart(product)}
+        >
+          <LinearGradient
+            colors={['#D4AF37', '#C48913', '#B8860B']}
+            style={styles.addToCartButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name="cart-outline" size={16} color="#000000" />
+            <Text style={styles.addToCartText}>Sepete Ekle</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
-    </Pressable>
+    </View>
   );
 };
 
@@ -145,6 +149,33 @@ export default function SpecialTodayScreen() {
       showError('Hata', 'Ürün sepete eklenirken hata oluştu');
     }
   }, [showSuccess, showError]);
+
+  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+
+  const calculateTimeLeft = useCallback(() => {
+    const now = new Date();
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const difference = endOfDay.getTime() - now.getTime();
+    
+    if (difference > 0) {
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+      
+      setTimeLeft({ hours, minutes, seconds });
+    } else {
+      setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
+    }
+  }, []);
+
+  useEffect(() => {
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [calculateTimeLeft]);
 
   const loadProducts = useCallback(async () => {
     try {
@@ -266,12 +297,6 @@ export default function SpecialTodayScreen() {
       {/* AuroraHeader - same as other pages */}
       <AuroraHeader />
       
-      {/* Title Section */}
-      <View style={styles.titleSection}>
-        <SilverText style={styles.pageTitle}>🎯 Special for Today</SilverText>
-        <SilverText style={styles.subtitle}>Limited time offers with up to 20% off!</SilverText>
-      </View>
-      
       {/* Content */}
       <ScrollView 
         style={styles.content}
@@ -281,6 +306,75 @@ export default function SpecialTodayScreen() {
         }
         showsVerticalScrollIndicator={false}
       >
+        {/* Title Section - Now inside ScrollView to hide on scroll */}
+        <View style={bb.wrapper}>
+                    {/* arka panel: bronz degrade */}
+                    <LinearGradient
+                      colors={["#8B4513", "#6B3410", "#4A2608"]}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={bb.panel}
+                    >
+                      {/* hafif ışık vurgusu */}
+                      <View style={StyleSheet.absoluteFill}>
+                        <LinearGradient
+                          colors={["rgba(255,255,255,0.10)", "transparent"]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 0.35, y: 1 }}
+                          style={StyleSheet.absoluteFill}
+                        />
+                      </View>
+                      {/* sağ üstten diyagonal karartma */}
+                      <View style={StyleSheet.absoluteFill}>
+                        <LinearGradient
+                          colors={["transparent", "rgba(0,0,0,0.20)"]}
+                          start={{ x: 0.5, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          style={StyleSheet.absoluteFill}
+                        />
+                      </View>
+              
+                      {/* içerik */}
+                      <View style={bb.content}>
+                        {/* Countdown Timer */}
+                        <View style={bb.timerContainer}>
+                          <Text style={bb.timerLabel}>SPECIAL FOR TODAY</Text>
+                          <View style={bb.timerRow}>
+                            <View style={bb.timeUnit}>
+                              <Text style={bb.timeNumber}>{timeLeft.hours.toString().padStart(2, '0')}</Text>
+                              <Text style={bb.timeLabel}>H</Text>
+                            </View>
+                            <Text style={bb.timeSeparator}>:</Text>
+                            <View style={bb.timeUnit}>
+                              <Text style={bb.timeNumber}>{timeLeft.minutes.toString().padStart(2, '0')}</Text>
+                              <Text style={bb.timeLabel}>M</Text>
+                            </View>
+                            <Text style={bb.timeSeparator}>:</Text>
+                            <View style={bb.timeUnit}>
+                              <Text style={bb.timeNumber}>{timeLeft.seconds.toString().padStart(2, '0')}</Text>
+                              <Text style={bb.timeLabel}>S</Text>
+                            </View>
+                          </View>
+                        </View>
+
+                        {/* Main Title with Bronze Gradient */}
+                        <View style={bb.titleContainer}>
+                          <LinearGradient
+                            colors={["#D2B48C", "#CD853F", "#A0522D"]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={bb.titleGradient}
+                          >
+                            <Text style={bb.title}>Curated Icons</Text>
+                            <Text style={bb.subtitle}>Today with Privilege</Text>
+                          </LinearGradient>
+                        </View>
+                      </View>
+                    </LinearGradient>
+              
+                    {/* ince gümüş çerçeve */}
+                    <View pointerEvents="none" style={bb.stroke} />
+                  </View>
         {/* Products Grid */}
         <View style={styles.productsContainer}>
           {products.length > 0 ? (
@@ -313,6 +407,132 @@ export default function SpecialTodayScreen() {
     </View>
   );
 }
+
+const bb = StyleSheet.create({
+  wrapper: {
+    borderRadius: 26,
+    overflow: "hidden",
+    marginTop: 5,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 6,
+    alignSelf: 'center',
+    width: '92%',
+    maxWidth: 720,
+  },
+  panel: {
+    padding: 20,
+    minHeight: 180,
+    justifyContent: "center",
+  },
+  stroke: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: "rgba(210, 180, 140, 0.5)",
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+  },
+  timerContainer: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  timerLabel: {
+    color: "#D2B48C",
+    fontSize: 10,
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
+    marginBottom: 4,
+    marginTop: 4,
+    fontFamily: "Montserrat_500Medium",
+  },
+  timerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timeUnit: {
+    alignItems: 'center',
+    marginHorizontal: 6,
+    minWidth: 35,
+  },
+  timeNumber: {
+    color: "#F5DEB3",
+    fontSize: 20,
+    fontFamily: "PlayfairDisplay_700Bold",
+    lineHeight: 24,
+  },
+  timeLabel: {
+    color: "#D2B48C",
+    fontSize: 9,
+    letterSpacing: 1,
+    fontFamily: "Montserrat_500Medium",
+    marginTop: 1,
+  },
+  timeSeparator: {
+    color: "#D2B48C",
+    fontSize: 18,
+    fontFamily: "PlayfairDisplay_700Bold",
+    marginHorizontal: 2,
+  },
+  titleContainer: {
+    alignItems: 'center',
+    borderRadius: 12,
+    overflow: 'hidden',
+    paddingVertical: 2,
+  },
+  titleGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  textCol: { maxWidth: "80%" },
+  overline: {
+    color: "#C9CDD3",
+    letterSpacing: 2,
+    fontSize: 10,
+    textTransform: "uppercase",
+    marginBottom: 8,
+    fontFamily: "Montserrat_500Medium",
+  },
+  title: {
+    fontSize: 18,
+    marginBottom: 0,
+    textAlign: 'center',
+    fontFamily: "Cinzel_700Bold",
+    color: "#62392aff",
+    letterSpacing: 1,
+  },
+  subtitle:{
+    color: "#635543ff",
+    fontSize: 12,
+    marginBottom: 4,
+    textAlign: 'center',
+    fontFamily: "Cinzel_400Regular",
+  },
+  desc: {
+    color: "#D0D3D8",
+    fontSize: 13,
+    marginBottom: 14,
+    fontFamily: "CormorantGaramond_400Regular",
+  },
+  cta: { alignSelf: "flex-start", borderRadius: 10, overflow: "hidden" },
+  ctaBg: { paddingVertical: 10, paddingHorizontal: 16 },
+  ctaPressed: { transform: [{ scale: 0.98 }], opacity: 0.96 },
+  ctaText: {
+    color: "#0F1114",
+    letterSpacing: 1,
+    fontSize: 12,
+    fontFamily: "Montserrat_500Medium",
+    width: '100%',
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -352,7 +572,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   addToCartButtonContainer: {
-    marginTop: 4,
+    // Buton için yer ayrıldı, margin kaldırıldı
   },
   addToCartButton: {
     flexDirection: 'row',
@@ -430,7 +650,13 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     padding: 12,
-    minHeight: 80,
+    height: 170, // Increased for better spacing with discount prices
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  productContent: {
+    flex: 1,
+    justifyContent: 'flex-start',
   },
   productBrand: {
     color: '#888888',
@@ -445,7 +671,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
     lineHeight: 18,
-    flex: 1,
   },
   productPrice: {
     color: '#C0C0C0',
@@ -456,6 +681,7 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 8, // Azaltıldı - daha iyi boşluk için
     gap: 8,
   },
   originalPrice: {

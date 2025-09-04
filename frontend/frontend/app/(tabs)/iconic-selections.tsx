@@ -114,10 +114,8 @@ export default function IconicSelectionsScreen() {
   }, [showSuccess, showError]);
 
   const ProductCard = ({ product }: { product: Product }) => (
-    <Pressable 
-      style={styles.productCard}
-      onPress={() => router.push(`/product/${product.id}`)}
-    >
+    <View
+      style={styles.productCard}>
       <View style={styles.imageContainer}>
         <Image 
           source={{ uri: imgUri(product.imagePath) }}
@@ -137,17 +135,19 @@ export default function IconicSelectionsScreen() {
       </View>
       
       <View style={styles.productInfo}>
-        <Text style={styles.productBrand} numberOfLines={1}>
-          {product.brandName}
-        </Text>
-        <Text style={styles.productName} numberOfLines={2}>
-          {product.name}
-        </Text>
-        <Text style={styles.productPrice}>
-          ₺{formatPrice(product.price)}
-        </Text>
+        <View style={styles.productContent}>
+          <Text style={styles.productBrand} numberOfLines={1}>
+            {product.brandName}
+          </Text>
+          <Text style={styles.productName} numberOfLines={2}>
+            {product.name}
+          </Text>
+          <Text style={styles.productPrice}>
+            ₺{formatPrice(product.price)}
+          </Text>
+        </View>
         
-        {/* Sepete Ekleme Butonu */}
+        {/* Sepete Ekleme Butonu - Sabit pozisyon */}
         <TouchableOpacity
           style={styles.addToCartButtonContainer}
           onPress={() => handleAddToCart(product)}
@@ -163,7 +163,7 @@ export default function IconicSelectionsScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-    </Pressable>
+    </View>
   );
 
 
@@ -474,7 +474,13 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     padding: 12,
-    minHeight: 100,
+    height: 150, // Increased height for more spacing
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  productContent: {
+    flex: 1,
+    justifyContent: 'flex-start',
   },
   productBrand: {
     color: '#888888',
@@ -489,17 +495,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
     lineHeight: 18,
-    flex: 1,
   },
   productPrice: {
     color: '#C0C0C0',
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 0.1,
-    marginBottom: 8,
+    marginBottom: 4, // Minimal bottom margin
   },
   addToCartButtonContainer: {
-    marginTop: 4,
+    marginTop: 20, // Increased top margin for more spacing
   },
   addToCartButton: {
     flexDirection: 'row',
