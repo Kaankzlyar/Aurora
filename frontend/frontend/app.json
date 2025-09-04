@@ -1,18 +1,34 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Aurora",
+    "slug": "aurora",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
+    "icon": "./assets/images/aurora_Logo.png",
+    "scheme": "aurora",
+    "backgroundColor": "#0B0B0B",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "splash": {
+        "image": "./assets/images/aurora_Logo.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#0B0B0B"
+      }
+    },
+    "splash": {
+      "image": "./assets/images/aurora_Logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0B0B"
     },
     "android": {
       "backgroundColor": "#0B0B0B",
+      "splash": {
+      "image": "./assets/images/aurora_Logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0B0B"
+    },
       "navigationBar": {
         "backgroundColor": "#0B0B0B",
         "barStyle": "light-content"
@@ -23,25 +39,26 @@
       },
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/aurora_Logo.png",
+        "backgroundColor": "#0B0B0B"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.frontend"
     },
+    
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/aurora_Logo.png"
     },
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/aurora_Logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#0B0B0B"
         }
       ],
       "expo-font"

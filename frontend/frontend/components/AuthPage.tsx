@@ -28,10 +28,9 @@ type Props = {
   onChange: (field: string, value: string) => void;
   onSubmit: () => void;
   onToggle: () => void;
-  onForgotPassword?: () => void;
 };
 
-export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle, onForgotPassword }: Props) {
+export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);

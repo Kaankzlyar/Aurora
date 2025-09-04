@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,11 +16,14 @@ import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import SilverText from '@/components/SilverText';
 
 export default function AddCardScreen() {
   const { isAuthenticated } = useAuth();
   const { notification, showError, showSuccess, showWarning, hideNotification } = useNotification();
   const [loading, setLoading] = useState(false);
+  const [currentToken, setCurrentToken] = useState<string | null>(null);
+  const [tokenLoading, setTokenLoading] = useState(true);
   
   const [formData, setFormData] = useState({
     holderName: '',
@@ -29,6 +32,21 @@ export default function AddCardScreen() {
     expYear: '',
     cvv: '',
   });
+
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        setCurrentToken(token);
+        console.log('[AddCard] Token checked:', token ? 'FOUND' : 'NOT_FOUND');
+      } catch (error) {
+        console.error('[AddCard] Error checking token:', error);
+      } finally {
+        setTokenLoading(false);
+      }
+    };
+    checkToken();
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -85,7 +103,7 @@ export default function AddCardScreen() {
 
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('userToken');
+      const token = currentToken || await AsyncStorage.getItem('userToken');
       
       if (!token) {
         showError('Hata', 'Oturum bilgisi bulunamadı.');
@@ -122,18 +140,43 @@ export default function AddCardScreen() {
     return formatted;
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !currentToken && !tokenLoading) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← Geri</Text>
+            <Ionicons name="arrow-back" size={24} color="#D4AF37" />
           </Pressable>
-          <Text style={styles.title}>Yeni Kart</Text>
+          <SilverText style={styles.title}>Yeni Kart</SilverText>
           <View style={styles.placeholder} />
         </View>
         <View style={styles.content}>
-          <Text style={styles.errorText}>Giriş yapmanız gerekiyor.</Text>
+          <Text style={styles.errorText}>🔐 Giriş Gerekli</Text>
+          <Text style={styles.errorSubtext}>Kart eklemek için giriş yapmanız gerekiyor.</Text>
+          <Pressable 
+            style={styles.loginButton} 
+            onPress={() => router.push('/(auth)/login')}
+          >
+            <Text style={styles.loginButtonText}>🔑 Giriş Yap</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  if (tokenLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#D4AF37" />
+          </Pressable>
+          <SilverText style={styles.title}>Yeni Kart</SilverText>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#D4AF37" />
+          <Text style={styles.loadingText}>Yükleniyor...</Text>
         </View>
       </View>
     );
@@ -143,13 +186,13 @@ export default function AddCardScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Geri</Text>
+          <Ionicons name="arrow-back" size={24} color="#D4AF37" />
         </Pressable>
-        <Text style={styles.title}>Yeni Kart</Text>
+        <SilverText style={styles.title}>Yeni Kart</SilverText>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.scrollContent}>
         <Text style={styles.description}>
           Ödeme kartınızı ekleyin. Kart bilgileriniz güvenli şekilde şifrelenerek saklanır.
         </Text>
@@ -257,10 +300,8 @@ export default function AddCardScreen() {
                 end={{ x: 1, y: 1 }}
                 style={styles.submitButtonGradient}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Ionicons name="card" size={20} color="#0B0B0B" />
-                  <Text style={styles.submitButtonText}>Kartı Kaydet</Text>
-                </View>
+                <Ionicons name="card" size={20} color="#0B0B0B" />
+                <Text style={styles.submitButtonText}>Kartı Kaydet</Text>
               </LinearGradient>
             )}
           </Pressable>
@@ -303,6 +344,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
+    marginTop: 8,
     fontFamily: 'Montserrat_600SemiBold',
     color: '#FFFFFF',
   },
@@ -310,6 +352,12 @@ const styles = StyleSheet.create({
     width: 50,
   },
   content: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollContent: {
     flex: 1,
     padding: 16,
   },
@@ -384,35 +432,66 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   submitSection: {
-    marginTop: 32,
+    marginTop: 12,
     marginBottom: 32,
   },
   submitButton: {
-    backgroundColor: '#D4AF37',
     borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
+    overflow: 'hidden',
   },
   submitButtonDisabled: {
-    backgroundColor: '#666',
-  },
-  submitButtonText: {
-    color: '#0B0B0B',
-    fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
+    opacity: 0.6,
   },
   submitButtonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  submitButtonText: {
+    color: '#0B0B0B',
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
   },
   errorText: {
-    color: '#FF6B6B',
-    fontSize: 18,
-    fontFamily: 'Montserrat_500Medium',
+    color: '#D4AF37',
+    fontSize: 24,
+    fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'center',
-    marginTop: 100,
+    marginBottom: 8,
+  },
+  errorSubtext: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 16,
+    fontFamily: 'Montserrat_400Regular',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  loginButton: {
+    backgroundColor: '#D4AF37',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  loginButtonText: {
+    color: '#0B0B0B',
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    textAlign: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Montserrat_400Regular',
+    marginTop: 16,
   },
 });

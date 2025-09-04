@@ -36,16 +36,6 @@ export default function AuthLayout() {
             presentation: 'card',
           }} 
         />
-        <Stack.Screen 
-          name="forgot-password" 
-          options={{ 
-            headerShown: false,
-            animation: 'slide_from_bottom',
-            animationDuration: 600,
-            contentStyle: { backgroundColor: '#000000' },
-            presentation: 'modal',
-          }} 
-        />
       </Stack>
     </View>
   );

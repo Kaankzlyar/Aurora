@@ -242,62 +242,13 @@ export default function Screen() {
                 <Text style={styles.infoValue}>{displayEmail}</Text>
               </View>
              
-              <View style={styles.infoItem}>
+              {/* <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Telefon</Text>
                 <Text style={styles.infoValue}>{displayPhone}</Text>
-              </View>
+              </View> */}
             </>
           )}
         </View>
-
-       {/*  <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Debug İşlemleri</Text>
-          
-          <Pressable style={styles.actionButton} onPress={checkAsyncStorage}>
-            <Text style={styles.actionIcon}>🔍</Text>
-            <Text style={styles.actionText}>AsyncStorage Kontrol Et</Text>
-            <Text style={styles.actionArrow}>›</Text>
-          </Pressable>
-          
-          <Pressable style={styles.actionButton} onPress={manualFetchProfile}>
-            <Text style={styles.actionIcon}>📡</Text>
-            <Text style={styles.actionText}>Manual Profile Fetch</Text>
-            <Text style={styles.actionArrow}>›</Text>
-          </Pressable>
-          
-          <Pressable style={styles.actionButton} onPress={async () => {
-            try {
-              const freshEmail = await AsyncStorage.getItem('userEmail');
-              const freshUserInfo = await AsyncStorage.getItem('userInfo');
-              
-              console.log('[Profile] Email yenileme - Fresh email:', freshEmail);
-              console.log('[Profile] Email yenileme - Fresh userInfo:', freshUserInfo);
-              
-              setAsyncStorageEmail(freshEmail);
-              
-              if (freshUserInfo) {
-                try {
-                  const parsed = JSON.parse(freshUserInfo);
-                  updateUserInfo(parsed);
-                  console.log('[Profile] UserInfo context güncellendi:', parsed);
-                } catch (e) {
-                  console.log('[Profile] UserInfo parse hatası:', e);
-                }
-              }
-              
-              Alert.alert(
-                "📧 Email Yenilendi", 
-                `Yeni email: ${freshEmail || 'Bulunamadı'}\n\nDisplayEmail: ${freshEmail || asyncStorageEmail || 'Hala boş'}`
-              );
-            } catch (error) {
-              Alert.alert("❌ Hata", "Email yenilenemedi: " + error);
-            }
-          }}>
-            <Text style={styles.actionIcon}>📧</Text>
-            <Text style={styles.actionText}>Email Yenile</Text>
-            <Text style={styles.actionArrow}>›</Text>
-          </Pressable>
-        </View> */}
 
         <View style={styles.section}>
           <SilverText style={styles.sectionTitle}>Hesap İşlemleri</SilverText>
