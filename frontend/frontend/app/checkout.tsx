@@ -239,12 +239,12 @@ export default function CheckoutScreen() {
                 />
                 <View style={styles.cartItemInfo}>
                   <Text style={styles.cartItemName}>{item.name}</Text>
-                  <GoldText style={styles.cartItemPrice}> {`${formatCurrency(item.price)} ₺`}</GoldText>
+                  <GoldText style={styles.cartItemPrice}>{formatCurrency(item.price)} ₺</GoldText>
                   <Text style={styles.cartItemQuantity}>Adet: {item.quantity}</Text>
                 </View>
-                <GoldText style={styles.cartItemTotal}>
+                <Text style={styles.cartItemTotal}>
                   {formatCurrency(item.price * item.quantity)} ₺
-                </GoldText>
+                </Text>
               </View>
             ))}
           </View>
@@ -609,6 +609,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_400Regular',
   },
   cartItemTotal: {
+    color: '#D4AF37',
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'right',
@@ -653,6 +654,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
   },
   totalValue: {
+    color: '#D4AF37',
     fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
   },

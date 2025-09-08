@@ -28,6 +28,7 @@ import {
 } from '@expo-google-fonts/cinzel';
 
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { CartProvider } from '../contexts/CartContext';
 import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
@@ -61,12 +62,14 @@ export default function RootLayout() {
       <StatusBar style="light" translucent />
 
       <AuthProvider>
-        {/* NavigationContainer'ı expo-router yönetir. */}
-                <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <CartProvider>
+          {/* NavigationContainer'ı expo-router yönetir. */}
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </CartProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import { Text } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import CartTabIcon from "../../components/CartTabIcon";
 
 
 
@@ -62,7 +63,7 @@ export default function TabLayout() {
         options={{
           title: "Sepetim",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="bag-outline" size={22} color={color} />
+            <CartTabIcon color={color} />
           ),
         }}
       />

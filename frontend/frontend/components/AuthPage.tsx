@@ -28,9 +28,10 @@ type Props = {
   onChange: (field: string, value: string) => void;
   onSubmit: () => void;
   onToggle: () => void;
+  onForgotPassword?: () => void;
 };
 
-export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Props) {
+export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle, onForgotPassword }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -314,7 +315,8 @@ export function AuthPage({ isLogin, formData, onChange, onSubmit, onToggle }: Pr
                       }}
                     />
                   </View>
-      
+
+  
 
                   <View style={styles.toggleContainer}>
                     <TouchableOpacity onPress={handleToggle} style={styles.toggleButton}>
@@ -416,13 +418,12 @@ const styles = StyleSheet.create({
 
   forgotPasswordContainer: { alignItems: 'center', marginTop: 1, marginBottom: -15 },
   forgotPasswordButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
   },
   forgotPasswordText: { 
     color: '#D4AF37',
-    fontSize: 16, 
+    fontSize: 14, 
     fontFamily: 'Montserrat_400Regular',
     textAlign: 'center',
     textDecorationLine: 'underline',

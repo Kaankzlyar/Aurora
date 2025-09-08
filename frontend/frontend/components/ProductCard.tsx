@@ -7,6 +7,7 @@ import { imgUri } from "../api/http";
 import { LinearGradient } from 'expo-linear-gradient';
 import GoldText from "./GoldText";
 import SilverText from "./SilverText";
+import { useCart } from "../contexts/CartContext";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('tr-TR', {
@@ -31,7 +32,16 @@ export default function ProductCard({
   disabled?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
+  const { updateCartCount } = useCart();
   const uri = imgUri(item.imagePath);
+
+  const handleAddToCart = async (product: Product) => {
+    if (onAdd) {
+      await onAdd(product);
+      // 🔄 Cart count'u güncelle
+      setTimeout(() => updateCartCount(), 500); // API çağrısı tamamlandıktan sonra güncelle
+    }
+  };
 
   return (
     <View style={{ 
@@ -92,7 +102,7 @@ export default function ProductCard({
       {/* CTA */}
       {onAdd && (
         <Pressable
-          onPress={disabled ? undefined : () => onAdd(item)}
+          onPress={disabled ? undefined : () => handleAddToCart(item)}
           disabled={disabled}
           style={({ pressed }) => [{ 
             marginTop: 6, 

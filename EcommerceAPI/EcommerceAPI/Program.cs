@@ -4,7 +4,6 @@ using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Swashbuckle.AspNetCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.FileProviders;
 

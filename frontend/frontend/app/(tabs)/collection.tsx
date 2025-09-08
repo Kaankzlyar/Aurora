@@ -25,10 +25,11 @@
  * - Authorization header otomatik eklenir
  */
 
-import React, { useCallback, useState, useEffect } from "react";
-import { View, Text, FlatList, Image, Pressable, ActivityIndicator, Alert, StyleSheet, Modal, ScrollView } from "react-native";
+import React, { useCallback, useRef, useState, useEffect } from "react";
+import { View, Text, FlatList, Image, Pressable, ActivityIndicator, Alert, StyleSheet, Modal, ScrollView, TouchableOpacity, } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
+import { useCart } from "../../contexts/CartContext";
 import { CartItem, CartSummary, getCart, updateCartItem, removeFromCart, clearCart } from "../../services/cart";
 import { imgUri } from "../../api/http";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -43,11 +44,14 @@ export default function CollectionTab() {
   
   // 1. AuthContext'ten authentication durumu al
   const { isAuthenticated, userInfo } = useAuth();
+  const { updateCartCount } = useCart();
   
   // 2. Local state'te token sakla
   const [currentToken, setCurrentToken] = useState<string | null>(null);
   const [data, setData] = useState<CartSummary | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [basketCount, setBasketCount] = useState(0);
   
 
 
@@ -96,6 +100,7 @@ export default function CollectionTab() {
         try {
           const result = await getCart(token);
           setData(result);
+          setBasketCount(result.totalQuantity || 0);
         } catch (error) {
           console.error('[CollectionTab] Sepet verisi yüklenemedi:', error);
         }
@@ -106,6 +111,15 @@ export default function CollectionTab() {
     
     loadToken();
   }, [isAuthenticated]);
+
+  // 🔄 basketCount'u data değiştiğinde güncelle
+  useEffect(() => {
+    if (data) {
+      setBasketCount(data.totalQuantity || 0);
+    } else {
+      setBasketCount(0);
+    }
+  }, [data]);
 
   // 🔄 SEPET YENİLEME FONKSİYONU
   const refresh = async () => {
@@ -121,6 +135,9 @@ export default function CollectionTab() {
       
       const result = await getCart(token);
       setData(result);
+      setBasketCount(result.totalQuantity || 0);
+      // 🔄 Global cart count'u güncelle
+      updateCartCount();
     } catch (error) {
       console.error('[CollectionTab] Sepet verisi alınamadı:', error);
       Alert.alert("❌ Hata", "Sepet verisi alınamadı.");
@@ -147,6 +164,42 @@ export default function CollectionTab() {
     }, [isAuthenticated])
   );
 
+  // 📜 Scroll to bottom functionality
+  const scrollViewRef = useRef<FlatList<CartItem>>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
+  // 🔄 Ürün sayısına göre buton görünürlüğünü güncelle
+  useEffect(() => {
+    const productCount = data?.items?.length || 0;
+    // 4 veya daha fazla ürün varsa buton hemen görünür
+    if (productCount >= 4) {
+      setShowScrollButton(true);
+    } else {
+      setShowScrollButton(false);
+    }
+  }, [data?.items?.length]);
+
+  const handleScroll = (event: any) => {
+    const productCount = data?.items?.length || 0;
+    // 4'ten az ürün varsa scroll position'a göre kontrol et
+    if (productCount < 4) {
+      const y = event.nativeEvent.contentOffset.y;
+      if (y > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
+    }
+    // 4 veya daha fazla ürün varsa buton her zaman görünür kalır
+  };
+
+  const scrollToBottom = () => {
+    if (scrollViewRef.current && data && data.items.length > 0) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
+
   // 🚫 Giriş yapılmamışsa uyarı göster  
   // Show login screen only if definitely not authenticated AND no token exists
   if (!isAuthenticated && !currentToken && !loading) {
@@ -157,6 +210,11 @@ export default function CollectionTab() {
           <View style={[styles.titleSection, { flexDirection: 'row', alignItems: 'center' }]}>
             <Ionicons name="cart-outline" size={24} color="#ffffff" />
             <SilverText style={styles.pageTitle}>Sepetim</SilverText>
+            {basketCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{basketCount > 99 ? '99+' : basketCount}</Text>
+              </View>
+            )}
           </View>
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyTitle}>🔐 Giriş Gerekli</Text>
@@ -203,6 +261,9 @@ export default function CollectionTab() {
           totalQuantity: newTotalQuantity,
           subtotal: newSubtotal
         });
+        setBasketCount(newTotalQuantity);
+        // 🔄 Global cart count'u güncelle
+        updateCartCount();
       }
       
       // Backend'i güncelle (background'da)
@@ -233,6 +294,9 @@ export default function CollectionTab() {
             totalQuantity: newTotalQuantity,
             subtotal: newSubtotal
           });
+          setBasketCount(newTotalQuantity);
+          // 🔄 Global cart count'u güncelle
+          updateCartCount();
         } else {
           // Miktarı azalt
           const updatedItems = data.items.map(item => 
@@ -249,6 +313,9 @@ export default function CollectionTab() {
             totalQuantity: newTotalQuantity,
             subtotal: newSubtotal
           });
+          setBasketCount(newTotalQuantity);
+          // 🔄 Global cart count'u güncelle
+          updateCartCount();
         }
       }
       
@@ -277,17 +344,24 @@ export default function CollectionTab() {
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name="cart-outline" size={24} color="#ffffff" />
             <SilverText style={[styles.pageTitle, {marginLeft: 8}]}> Sepetim</SilverText>
+            {basketCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{basketCount > 99 ? '99+' : basketCount}</Text>
+              </View>
+            )}
           </View>
         </View>
 
-        
         <FlatList
+          ref={scrollViewRef}
           data={data?.items ?? []}
           keyExtractor={(it) => String(it.productId)}
           extraData={data} // Re-render when data changes
           removeClippedSubviews={true} // Performance için
           maxToRenderPerBatch={10} // Batch size küçük tut
           windowSize={5} // Memory usage için
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           ItemSeparatorComponent={() => <View style={{ height:10 }} />}
           renderItem={({ item }) => (
             <View style={styles.cartItem}>
@@ -366,6 +440,9 @@ export default function CollectionTab() {
                               totalQuantity: 0,
                               subtotal: 0
                             });
+                            setBasketCount(0);
+                            // 🔄 Global cart count'u güncelle
+                            updateCartCount();
                             
                             // Backend'i temizle (background'da)
                             clearCart(currentToken!).catch(() => {
@@ -418,14 +495,22 @@ export default function CollectionTab() {
             )
           }
         />
+        
+        {/* Scroll to Bottom Button */}
+        {showScrollButton && data && data.items.length > 0 && (
+          <TouchableOpacity
+            style={styles.scrollToBottomButton}
+            onPress={scrollToBottom}
+          >
+            <Ionicons name="chevron-down" size={24} color="#0B0B0B" />
+            <Text style={styles.scrollToBottomButtonText}>En Alta İn</Text>
+          </TouchableOpacity>
+        )}
       </View>
-
-
     </View>
   );
 }
 
-// 🎨 STYLES
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -447,6 +532,22 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 20,
     fontFamily: 'Montserrat_600SemiBold',
+  },
+  badge: {
+    position: 'absolute',
+    left: 325,
+    marginLeft: 'auto',
+    minWidth: 25, height: 25,
+    borderRadius: 12.5,
+    backgroundColor: "#ffffffff",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 6,
+  },
+  badgeText: {
+    fontFamily: "Montserrat_700Bold",
+    color: "#0B0B0B",
+    fontSize: 12,
   },
 
 
@@ -636,5 +737,28 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_500Medium',
     color: 'rgba(255, 255, 255, 0.5)',
     fontSize: 16,
+  },
+  // Scroll to bottom button styles
+  scrollToBottomButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    backgroundColor: '#D4AF37',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  scrollToBottomButtonText: {
+    color: '#0B0B0B',
+    fontFamily: 'Montserrat_600SemiBold',
+    fontSize: 14,
+    marginLeft: 6,
   },
 });

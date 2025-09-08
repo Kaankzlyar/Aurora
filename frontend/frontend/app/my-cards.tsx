@@ -228,8 +228,10 @@ export default function MyCardsScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="add-outline" size={20} color="#0B0B0B" />
-                <Text style={styles.addFirstButtonText}>İlk Kartını Ekle</Text>
+                <View style={styles.addFirstButtonContent}>
+                  <Ionicons name="add-outline" size={20} color="#0B0B0B" />
+                  <Text style={styles.addFirstButtonText}>İlk Kartını Ekle</Text>
+                </View>
               </LinearGradient>
             </Pressable>
           </View>
@@ -387,21 +389,21 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   addFirstButton: {
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  addFirstButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#D4AF37',
     paddingHorizontal: 24,
-    paddingVertical: 14,
-    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   addFirstButtonText: {
-    color: '#0B0B0B',
+    color: '#000000',
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
+  },
+  addFirstButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   addFirstButtonContent: {
     flexDirection: 'row',

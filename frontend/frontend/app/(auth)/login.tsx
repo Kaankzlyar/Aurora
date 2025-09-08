@@ -86,6 +86,10 @@ export default function LoginScreen() {
     router.push('/(auth)/register');
   };
 
+  const handleForgotPassword = () => {
+    router.push('/(auth)/forgot-password');
+  };
+
   return (
     <View style={styles.container}>
       <PremiumTransition isVisible={isVisible} duration={900} disableGlow={true}>
@@ -95,6 +99,7 @@ export default function LoginScreen() {
           onChange={(key, value) => setFormData(prev => ({ ...prev, [key]: value }))}
           onSubmit={handleLogin}
           onToggle={navigateToRegister}
+          onForgotPassword={handleForgotPassword}
         />
       </PremiumTransition>
     </View>
