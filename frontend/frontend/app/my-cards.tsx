@@ -218,20 +218,15 @@ export default function MyCardsScreen() {
             <Text style={styles.emptySubtitle}>
               İlk kartınızı ekleyerek hızlı ödeme için kaydedin.
             </Text>
-            <Pressable 
-              style={styles.addFirstButton}
-              onPress={() => router.push('/add-card')}
-            >
+            <Pressable onPress={() => router.push('/add-card')}>
               <LinearGradient
                 colors={['#D4AF37', '#C48913', '#B8860B']}
-                style={styles.addFirstButtonGradient}
+                style={styles.addFirstButton}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <View style={styles.addFirstButtonContent}>
-                  <Ionicons name="add-outline" size={20} color="#0B0B0B" />
-                  <Text style={styles.addFirstButtonText}>İlk Kartını Ekle</Text>
-                </View>
+                <Ionicons name="add-outline" size={20} color="#000000" />
+                <Text style={styles.addFirstButtonText}>İlk Kartını Ekle</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -389,26 +384,27 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   addFirstButton: {
-    backgroundColor: '#D4AF37',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
+    shadowColor: '#FFD700',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   addFirstButtonText: {
     color: '#000000',
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
-  },
-  addFirstButtonGradient: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  addFirstButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    fontWeight: '600',
   },
   cardsContainer: {
     gap: 16,

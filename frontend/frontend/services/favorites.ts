@@ -2,10 +2,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Product } from './catalog';
 import { validateStoredToken, clearInvalidToken } from '../utils/tokenValidator';
+import { BASE_URL as CONFIG_BASE } from '../constants/config';
 import { router } from 'expo-router';
 
-// Mevcut backend URL'ini kullan
-const API_BASE_URL = 'http://192.168.1.142:5270/api';
+// Merkezî backend URL'ini kullan
+const API_BASE_URL = `${CONFIG_BASE}/api`;
 const FAVORITES_KEY = 'userFavorites';
 
 export interface FavoriteProduct extends Product {

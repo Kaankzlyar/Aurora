@@ -171,7 +171,7 @@ export default function CollectionTab() {
   // 🔄 Ürün sayısına göre buton görünürlüğünü güncelle
   useEffect(() => {
     const productCount = data?.items?.length || 0;
-    // 4 veya daha fazla ürün varsa buton hemen görünür
+    // 4 veya daha fazla ürün varsa buton başlangıçta görünür
     if (productCount >= 4) {
       setShowScrollButton(true);
     } else {
@@ -180,17 +180,29 @@ export default function CollectionTab() {
   }, [data?.items?.length]);
 
   const handleScroll = (event: any) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
     const productCount = data?.items?.length || 0;
+    
+    // Check if we're at the bottom of the scroll view
+    const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 50; // 50px threshold
+    
+    if (isAtBottom) {
+      setShowScrollButton(false);
+      return;
+    }
+    
     // 4'ten az ürün varsa scroll position'a göre kontrol et
     if (productCount < 4) {
-      const y = event.nativeEvent.contentOffset.y;
+      const y = contentOffset.y;
       if (y > 300) {
         setShowScrollButton(true);
       } else {
         setShowScrollButton(false);
       }
+    } else {
+      // 4 veya daha fazla ürün varsa her zaman görünür (bottom hariç)
+      setShowScrollButton(true);
     }
-    // 4 veya daha fazla ürün varsa buton her zaman görünür kalır
   };
 
   const scrollToBottom = () => {
@@ -503,7 +515,6 @@ export default function CollectionTab() {
             onPress={scrollToBottom}
           >
             <Ionicons name="chevron-down" size={24} color="#0B0B0B" />
-            <Text style={styles.scrollToBottomButtonText}>En Alta İn</Text>
           </TouchableOpacity>
         )}
       </View>

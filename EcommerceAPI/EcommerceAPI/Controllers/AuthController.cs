@@ -89,7 +89,9 @@
                     Subject = new ClaimsIdentity(new[]
                     {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name)
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim("IsAdmin", user.IsAdmin.ToString())
             }),
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -139,6 +141,7 @@
                 LastName = request.LastName,
                 Email = request.Email,
                 PasswordHash = passwordHash,
+                IsAdmin = true, // Admin panelinden kayıt olan kullanıcılar admin olacak
                 CreatedAt = DateTime.UtcNow
             };
 

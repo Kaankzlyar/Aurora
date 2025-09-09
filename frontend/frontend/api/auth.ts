@@ -15,9 +15,9 @@ const isEmulator = Platform.select({
 // - iOS Simulator: localhost
 // - Physical devices: use your machine's IP from expo.extra.API_URL
 const DEFAULT_BASE = Platform.select({
-  android: isEmulator ? "http://10.0.2.2:5270" : "http://192.168.1.142:5270",
-  ios: isEmulator ? "https://localhost:7120" : "http://192.168.1.142:5270",
-  default: "http://192.168.1.142:5270",
+  android: isEmulator ? "http://10.0.2.2:5270" : (Constants.expoConfig as any)?.extra?.API_URL,
+  ios: isEmulator ? "http://localhost:5270" : (Constants.expoConfig as any)?.extra?.API_URL,
+  default: (Constants.expoConfig as any)?.extra?.API_URL,
 });
 
 const API_BASE = (Constants.expoConfig as any)?.extra?.API_URL || DEFAULT_BASE;

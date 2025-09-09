@@ -205,7 +205,6 @@ export default function MyAddressesScreen() {
               İlk adresinizi ekleyerek hızlı teslimat için kaydedin.
             </Text>
             <Pressable 
-              style={styles.addFirstButton}
               onPress={() => router.push('/add-address')}
             >
               <LinearGradient
