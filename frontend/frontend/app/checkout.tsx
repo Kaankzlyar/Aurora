@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,6 +42,11 @@ export default function CheckoutScreen() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentToken, setCurrentToken] = useState<string | null>(null);
+
+  // Scroll to bottom functionality
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [showScrollButton, setShowScrollButton] = useState(true);
+
 
   const shippingFee = 0; // Ücretsiz kargo
   
@@ -155,6 +161,29 @@ export default function CheckoutScreen() {
     }
   };
 
+  // Scroll handling functions
+  const handleScroll = (event: any) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    
+    // Check if we're at the bottom of the scroll view
+    const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 50; // 50px threshold
+    
+    if (isAtBottom) {
+      setShowScrollButton(false);
+      return;
+    }
+    
+    // Always show button unless at bottom (including at top)
+    setShowScrollButton(true);
+  };
+
+  const scrollToBottom = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
+
   // 🚫 Giriş yapılmamışsa uyarı göster  
   // Show login screen only if definitely not authenticated AND no token exists
   if (!isAuthenticated && !currentToken && !loading) {
@@ -217,7 +246,10 @@ export default function CheckoutScreen() {
         </View>
 
         <ScrollView 
+          ref={scrollViewRef}
           style={styles.content}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -286,7 +318,7 @@ export default function CheckoutScreen() {
               style={styles.addButton}
               onPress={() => router.push('/my-addresses')}
             >
-              <Text style={styles.addButtonText}>Adresi Düzenle</Text>
+              <Ionicons name="add-outline" size={20} color="#D4AF37" />
             </Pressable>
           </View>
           
@@ -353,7 +385,7 @@ export default function CheckoutScreen() {
               style={styles.addButton}
               onPress={() => router.push('/my-cards')}
             >
-              <Text style={styles.addButtonText}>Kartları Düzenle</Text>
+              <Ionicons name="add-outline" size={20} color="#D4AF37" />
             </Pressable>
           </View>
           
@@ -438,13 +470,23 @@ export default function CheckoutScreen() {
           </Pressable>
         </View>
         </ScrollView>
+
+        {/* Scroll to Bottom Button */}
+        {showScrollButton && (
+          <TouchableOpacity
+            style={styles.scrollToBottomButton}
+            onPress={scrollToBottom}
+          >
+            <Ionicons name="chevron-down" size={24} color="#0B0B0B" />
+          </TouchableOpacity>
+        )}
       </View>
       
       {/* CUSTOM BOTTOM NAVIGATION */}
       <View style={styles.bottomNav}>
         <Pressable 
           style={styles.navItem} 
-          onPress={() => router.push('/(tabs)/index')}
+          onPress={() => router.replace('/(tabs)/')}
         >
           <Ionicons name="home-outline" size={22} color="#666666" />
           <Text style={styles.navLabel}>Ana Sayfa</Text>
@@ -452,7 +494,7 @@ export default function CheckoutScreen() {
         
         <Pressable 
           style={styles.navItem} 
-          onPress={() => router.push('/(tabs)/explore')}
+          onPress={() => router.replace('/(tabs)/explore')}
         >
           <Ionicons name="search-outline" size={22} color="#666666" />
           <Text style={styles.navLabel}>Keşfet</Text>
@@ -460,7 +502,7 @@ export default function CheckoutScreen() {
         
         <Pressable 
           style={styles.navItem} 
-          onPress={() => router.push('/(tabs)/favorites')}
+          onPress={() => router.replace('/(tabs)/favorites')}
         >
           <Ionicons name="heart-outline" size={22} color="#666666" />
           <Text style={styles.navLabel}>Favoriler</Text>
@@ -468,7 +510,7 @@ export default function CheckoutScreen() {
         
         <Pressable 
           style={styles.navItem} 
-          onPress={() => router.push('/(tabs)/collection')}
+          onPress={() => router.replace('/(tabs)/collection')}
         >
           <Ionicons name="bag-outline" size={22} color="#D4AF37" />
           <Text style={[styles.navLabel, styles.activeNavLabel]}>Sepetim</Text>
@@ -476,7 +518,7 @@ export default function CheckoutScreen() {
         
         <Pressable 
           style={styles.navItem} 
-          onPress={() => router.push('/(tabs)/profile')}
+          onPress={() => router.replace('/(tabs)/profile')}
         >
           <Ionicons name="person-circle-outline" size={22} color="#666666" />
           <Text style={styles.navLabel}>Profil</Text>
@@ -781,7 +823,7 @@ const styles = StyleSheet.create({
   bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#0B0B0B',
     paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: '#333',
@@ -831,5 +873,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'center',
+  },
+  // Scroll to bottom button styles
+  scrollToBottomButton: {
+    position: 'absolute',
+    bottom: 20, // Above the bottom navigation
+    right: 20,
+    backgroundColor: '#D4AF37',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });
