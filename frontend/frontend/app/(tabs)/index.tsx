@@ -654,7 +654,7 @@ useEffect(() => {
       </ScrollView>
 
       {/* Fixed "My Collection" (cart) button */}
-      <Link href="/collection" asChild>
+      {/* <Link href="/collection" asChild>
         <Pressable style={s.collectionFab} accessibilityLabel="Koleksiyonum">
           <Text style={s.collectionText}>MY COLLECTION</Text>
           {basketCount > 0 && (
@@ -663,7 +663,7 @@ useEffect(() => {
             </View>
           )}
         </Pressable>
-      </Link>
+      </Link> */}
     </View>
   );
 }
