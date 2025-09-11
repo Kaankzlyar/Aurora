@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { loginApi, type LoginResponse } from "@/lib/api";
+import { loginApi, registerApi, type LoginResponse, type RegisterRequest } from "@/lib/api";
 import { storage } from "@/lib/storage";
 
 
@@ -10,6 +10,7 @@ type AuthContextType = {
 user: AuthUser;
 loading: boolean;
 login: (p: { email: string; password: string; remember?: boolean }) => Promise<void>;
+register: (userData: RegisterRequest) => Promise<void>;
 logout: () => void;
 };
 
@@ -38,14 +39,18 @@ storage.saveSession(data, remember);
 setUser(data.user);
 };
 
+const register: AuthContextType["register"] = async (userData) => {
+const data = await registerApi(userData);
+storage.saveSession(data, true); // Register edilen kullanıcıları hatırla
+setUser(data.user);
+};
 
 const logout = () => {
 storage.clear();
 setUser(null);
 };
 
-
-const value = useMemo(() => ({ user, loading, login, logout }), [user, loading]);
+const value = useMemo(() => ({ user, loading, login, register, logout }), [user, loading]);
 return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

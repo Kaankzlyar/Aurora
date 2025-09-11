@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -50,6 +53,8 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -61,8 +66,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -102,7 +105,14 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+  html, body, #root {
+  height: 100%;
 }
+:root { --dvh: 100dvh; }  
+
+}
+
+
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

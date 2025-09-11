@@ -102,7 +102,16 @@
 
                 Console.WriteLine($"✅ Login successful - Token generated");
 
-                return Ok(new { token = jwt });
+                return Ok(new { 
+                    accessToken = jwt,
+                    user = new 
+                    {
+                        id = user.Id.ToString(),
+                        name = user.Name,
+                        email = user.Email,
+                        role = user.IsAdmin ? "admin" : "user"
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -115,41 +124,82 @@
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] UserDto request)
         {
-            // Geçici: ne geliyor görelim
-            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(request));
-            string normalizedEmail = request.Email.Trim().ToLower();
-            Console.WriteLine($"Normalized email: '{normalizedEmail}'");
-
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var existingUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
-
-            if (existingUser != null)
+            try
             {
-                Console.WriteLine($"❌ Email already exists: {existingUser.Email} (ID: {existingUser.Id})");
-                return BadRequest(new { message = "Bu e-posta adresi zaten kayıtlı. Lütfen farklı bir e-posta adresi kullanın." });
+                Console.WriteLine($"🔍 REGISTER REQUEST DEBUG:");
+                Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(request));
+                
+                string normalizedEmail = request.Email.Trim().ToLower();
+                Console.WriteLine($"Normalized email: '{normalizedEmail}'");
+
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var existingUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+                if (existingUser != null)
+                {
+                    Console.WriteLine($"❌ Email already exists: {existingUser.Email} (ID: {existingUser.Id})");
+                    return BadRequest(new { message = "Bu e-posta adresi zaten kayıtlı. Lütfen farklı bir e-posta adresi kullanın." });
+                }
+
+                Console.WriteLine($"✅ Email is available");
+
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+                var user = new User
+                {
+                    Name = request.Name,
+                    LastName = request.LastName,
+                    Email = request.Email,
+                    PasswordHash = passwordHash,
+                    IsAdmin = true, // Web admin panelinden kayıt olan kullanıcılar admin olacak
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"✅ User saved to database with ID: {user.Id}");
+
+                // Generate JWT Token for immediate login
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Name, user.Name),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim("IsAdmin", user.IsAdmin.ToString())
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var jwt = tokenHandler.WriteToken(token);
+
+                // Return LoginResponse format
+                return Ok(new 
+                { 
+                    accessToken = jwt,
+                    user = new 
+                    {
+                        id = user.Id.ToString(),
+                        name = user.Name,
+                        email = user.Email,
+                        role = "admin"
+                    }
+                });
             }
-
-            Console.WriteLine($"✅ Email is available");
-
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-            var user = new User
+            catch (Exception ex)
             {
-                Name = request.Name,
-                LastName = request.LastName,
-                Email = request.Email,
-                PasswordHash = passwordHash,
-                IsAdmin = true, // Admin panelinden kayıt olan kullanıcılar admin olacak
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync(); // <-- ADD AWAIT HERE!
-
-            Console.WriteLine($"✅ User saved to database with ID: {user.Id}");
-            return Ok(new { message = "User registered successfully." });
+                Console.WriteLine($"❌ REGISTER ERROR: {ex.Message}");
+                return BadRequest(new { message = "Kayıt sırasında hata oluştu." });
+            }
         }
 
         [HttpPost("forgot-password")]
