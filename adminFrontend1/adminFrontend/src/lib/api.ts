@@ -7,7 +7,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('aurora.accessToken') || sessionStorage.getItem('aurora.accessToken');
     if (token) {
         config.headers = config.headers ?? {};
         config.headers['Authorization'] = `Bearer ${token}`;
@@ -23,6 +23,7 @@ export type LoginResponse = {
         name: string;
         email: string;
         role? : string;
+        isSuperAdmin: boolean;
     }
 }
 
@@ -35,11 +36,14 @@ export type RegisterRequest = {
 }
 
 export async function loginApi(email: string, password: string): Promise<LoginResponse> {
-    const response = await api.post<LoginResponse>('/auth/login', { email, password });
+    const response = await api.post<LoginResponse>('/api/auth/login', { email, password });
     return response.data;
 }
 
 export async function registerApi(userData: RegisterRequest): Promise<LoginResponse> {
+    console.log("🔍 REGISTER API DEBUG:");
+    console.log("Input userData:", userData);
+    
     // Web sitesinden kayıt olan kullanıcılar otomatik admin olacak
     const registerData = {
         ...userData,
@@ -47,6 +51,17 @@ export async function registerApi(userData: RegisterRequest): Promise<LoginRespo
         role: 'admin' // Web admin panelinden kayıt olanlar admin
     };
     
-    const response = await api.post<LoginResponse>('/auth/register', registerData);
-    return response.data;
+    console.log("📤 Sending to API:", registerData);
+    console.log("API URL:", `${BASE_URL}/api/auth/register`);
+    
+    try {
+        const response = await api.post<LoginResponse>('/api/auth/register', registerData);
+        console.log("✅ API Response:", response.data);
+        return response.data;
+    } catch (error: any) {
+        console.error("❌ API Error:", error);
+        console.error("Error response:", error?.response?.data);
+        console.error("Error status:", error?.response?.status);
+        throw error;
+    }
 }

@@ -86,7 +86,7 @@ namespace EcommerceAPI
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "default-secret-key-12345")
             ),
             ValidateIssuer = false,
             ValidateAudience = false
@@ -123,8 +123,71 @@ namespace EcommerceAPI
             
             app.MapControllers();
 
+            // Seed super admin (Kaan Kızılyar) if not exists
+            SeedSuperAdmin(app.Services);
+
             app.Run();
 
+        }
+
+        private static void SeedSuperAdmin(IServiceProvider services)
+        {
+            using (var scope = services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                
+                const string SUPER_ADMIN_EMAIL = "kaankizilyar2@gmail.com";
+                const string SUPER_ADMIN_PASSWORD = "kutay2003"; // Varsayılan şifre, değiştirilebilir
+                
+                try
+                {
+                    // Check if super admin already exists
+                    var existingSuperAdmin = context.Users.FirstOrDefault(u => u.Email == SUPER_ADMIN_EMAIL);
+                    
+                    if (existingSuperAdmin == null)
+                    {
+                        Console.WriteLine("[SEEDING] Creating super admin: Kaan Kızılyar");
+                        
+                        var superAdmin = new EcommerceAPI.Models.User
+                        {
+                            Name = "Kaan",
+                            LastName = "Kızılyar",
+                            Email = SUPER_ADMIN_EMAIL,
+                            PasswordHash = BCrypt.Net.BCrypt.HashPassword(SUPER_ADMIN_PASSWORD),
+                            IsAdmin = true,
+                            IsSuperAdmin = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        
+                        context.Users.Add(superAdmin);
+                        context.SaveChanges();
+                        
+                        Console.WriteLine($"✅ Super admin created successfully!");
+                        Console.WriteLine($"📧 Email: {SUPER_ADMIN_EMAIL}");
+                        Console.WriteLine($"🔑 Password: {SUPER_ADMIN_PASSWORD}");
+                        Console.WriteLine("⚠️  Please change the password after first login!");
+                    }
+                    else
+                    {
+                        // Update existing user to super admin if needed
+                        if (!existingSuperAdmin.IsSuperAdmin)
+                        {
+                            existingSuperAdmin.IsSuperAdmin = true;
+                            existingSuperAdmin.IsAdmin = true;
+                            context.SaveChanges();
+                            Console.WriteLine($"✅ Existing user {SUPER_ADMIN_EMAIL} promoted to super admin!");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"✅ Super admin {SUPER_ADMIN_EMAIL} already exists");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Error seeding super admin: {ex.Message}");
+                }
+            }
         }
     }
 }

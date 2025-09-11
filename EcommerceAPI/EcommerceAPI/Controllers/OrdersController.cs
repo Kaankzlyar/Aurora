@@ -91,9 +91,103 @@ public class OrdersController : ControllerBase
 
         var list = orders.Select(o => new OrderDto(
             o.Id, o.Status, o.Subtotal, o.ShippingFee, o.GrandTotal, o.CreatedAt,
-            o.Items.Select(x => new OrderItemDto(x.ProductId, x.ProductName, x.ProductImagePath, x.UnitPrice, x.Quantity, x.LineTotal))
+            o.Items.Select(x => new OrderItemDto(x.ProductId, x.ProductName, x.ProductImagePath, x.UnitPrice, x.Quantity, x.LineTotal)),
+            o.CancellationReason
         ));
         return Ok(list);
+    }
+
+    // Admin için tüm siparişleri listele
+    [HttpGet("admin/all")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetAllOrders()
+    {
+        // Manual admin check
+        var isAdminClaim = User.FindFirst("IsAdmin")?.Value;
+        var isSuperAdminClaim = User.FindFirst("IsSuperAdmin")?.Value;
+
+        if (isAdminClaim != "True" && isSuperAdminClaim != "True")
+        {
+            return Forbid("Admin access required");
+        }
+
+        Console.WriteLine("🔍 GetAllOrders called by admin");
+        var orders = await _db.Orders
+            .Include(o => o.Items)
+            .Include(o => o.User) // User bilgilerini dahil et
+            .OrderByDescending(o => o.Id)
+            .ToListAsync();
+
+        Console.WriteLine($"📦 Found {orders.Count} orders in database");
+        foreach (var order in orders)
+        {
+            Console.WriteLine($"Order {order.Id}: Status={order.Status}, User={order.User?.Name} {order.User?.LastName}, Items={order.Items.Count}");
+        }
+
+        var list = orders.Select(o => new OrderDto(
+            o.Id, o.Status, o.Subtotal, o.ShippingFee, o.GrandTotal, o.CreatedAt,
+            o.Items.Select(x => new OrderItemDto(x.ProductId, x.ProductName, x.ProductImagePath, x.UnitPrice, x.Quantity, x.LineTotal)),
+            o.CancellationReason,
+            o.UserId,
+            o.User?.Name + " " + o.User?.LastName,
+            o.User?.Email
+        ));
+        Console.WriteLine($"📤 Returning {list.Count()} orders to frontend");
+        return Ok(list);
+    }
+
+    // Debug endpoint - veritabanındaki sipariş sayısını kontrol et
+    [HttpGet("debug/count")]
+    [Authorize]
+    public async Task<IActionResult> GetOrderCount()
+    {
+        // Manual admin check
+        var isAdminClaim = User.FindFirst("IsAdmin")?.Value;
+        var isSuperAdminClaim = User.FindFirst("IsSuperAdmin")?.Value;
+
+        if (isAdminClaim != "True" && isSuperAdminClaim != "True")
+        {
+            return Forbid("Admin access required");
+        }
+
+        var count = await _db.Orders.CountAsync();
+        Console.WriteLine($"🔍 Debug: Total orders in database: {count}");
+
+        // Ayrıca tablo yapısını da kontrol edelim
+        var tableExists = await _db.Orders.AnyAsync();
+        Console.WriteLine($"📋 Orders table exists: {tableExists}");
+
+        return Ok(new { count, tableExists });
+    }
+
+    // Debug endpoint - tüm siparişleri listele (sadece admin için)
+    [HttpGet("debug/list")]
+    [Authorize]
+    public async Task<IActionResult> DebugListOrders()
+    {
+        // Manual admin check
+        var isAdminClaim = User.FindFirst("IsAdmin")?.Value;
+        var isSuperAdminClaim = User.FindFirst("IsSuperAdmin")?.Value;
+
+        if (isAdminClaim != "True" && isSuperAdminClaim != "True")
+        {
+            return Forbid("Admin access required");
+        }
+
+        var orders = await _db.Orders.ToListAsync();
+        Console.WriteLine($"🔍 Debug list: Found {orders.Count} orders");
+
+        var result = orders.Select(o => new {
+            Id = o.Id,
+            UserId = o.UserId,
+            Status = o.Status,
+            Subtotal = o.Subtotal,
+            GrandTotal = o.GrandTotal,
+            CreatedAt = o.CreatedAt,
+            CancellationReason = o.CancellationReason
+        });
+
+        return Ok(result);
     }
 
     // Tekil sipariş (detay)
@@ -107,21 +201,63 @@ public class OrdersController : ControllerBase
 
         var dto = new OrderDto(
             o.Id, o.Status, o.Subtotal, o.ShippingFee, o.GrandTotal, o.CreatedAt,
-            o.Items.Select(x => new OrderItemDto(x.ProductId, x.ProductName, x.ProductImagePath, x.UnitPrice, x.Quantity, x.LineTotal))
+            o.Items.Select(x => new OrderItemDto(x.ProductId, x.ProductName, x.ProductImagePath, x.UnitPrice, x.Quantity, x.LineTotal)),
+            o.CancellationReason
         );
         return Ok(dto);
     }
 
     // (Opsiyonel) Admin sipariş durumu güncelleme
     [HttpPost("{id:int}/status")]
-    [Authorize(Roles="Admin")]
+    [Authorize]
     public async Task<IActionResult> SetStatus(int id, OrderStatus status)
     {
+        // Manual admin check
+        var isAdminClaim = User.FindFirst("IsAdmin")?.Value;
+        var isSuperAdminClaim = User.FindFirst("IsSuperAdmin")?.Value;
+
+        if (isAdminClaim != "True" && isSuperAdminClaim != "True")
+        {
+            return Forbid("Admin access required");
+        }
+
         var o = await _db.Orders.FirstOrDefaultAsync(x => x.Id == id);
         if (o is null) return NotFound();
         o.Status = status;
         if (status == OrderStatus.Shipped) o.ShippedAt = DateTime.UtcNow;
         if (status == OrderStatus.Delivered) o.DeliveredAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    // Admin sipariş iptali (iptal sebebi zorunlu)
+    [HttpPost("{id:int}/cancel")]
+    [Authorize]
+    public async Task<IActionResult> CancelOrder(int id, CancelOrderRequest request)
+    {
+        // Manual admin check
+        var isAdminClaim = User.FindFirst("IsAdmin")?.Value;
+        var isSuperAdminClaim = User.FindFirst("IsSuperAdmin")?.Value;
+
+        if (isAdminClaim != "True" && isSuperAdminClaim != "True")
+        {
+            return Forbid("Admin access required");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Reason))
+            return BadRequest("Cancellation reason is required.");
+
+        var o = await _db.Orders.FirstOrDefaultAsync(x => x.Id == id);
+        if (o is null) return NotFound();
+
+        if (o.Status == OrderStatus.Canceled)
+            return BadRequest("Order is already canceled.");
+
+        if (o.Status == OrderStatus.Delivered)
+            return BadRequest("Cannot cancel a delivered order.");
+
+        o.Status = OrderStatus.Canceled;
+        o.CancellationReason = request.Reason;
         await _db.SaveChangesAsync();
         return NoContent();
     }

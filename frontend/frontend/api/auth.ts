@@ -160,7 +160,9 @@ export const registerUser = async (
     
     // Check if the response actually indicates success
     if (body) {
-      if (body.token) {
+      if (body.accessToken) {
+        console.log("[registerUser] ✅ Access Token received - registration confirmed");
+      } else if (body.token) {
         console.log("[registerUser] ✅ Token received - registration confirmed");
       } else if (body.success === true) {
         console.log("[registerUser] ✅ Success flag confirmed");

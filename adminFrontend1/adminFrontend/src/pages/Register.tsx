@@ -37,26 +37,39 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("🔍 REGISTER FORM SUBMIT DEBUG:");
+    console.log("Form data:", formData);
+    
     if (formData.password !== formData.confirmPassword) {
+      console.log("❌ Password mismatch");
       toast.error("Passwords do not match!");
       return;
     }
 
+    console.log("✅ Password validation passed");
     setIsLoading(true);
 
     try {
+      console.log("📤 Calling register function...");
       await register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
       });
+      console.log("✅ Registration successful!");
       toast.success("Registration successful! Welcome Admin!");
       // Kullanıcı otomatik login olacak, dashboard'a yönlendirilecek
-    } catch (error) {
-      console.error("Registration failed:", error);
-      toast.error("Registration failed. Please try again.");
+    } catch (error: any) {
+      console.error("❌ Registration failed:", error);
+      console.error("Error details:", {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+      });
+      toast.error(`Registration failed: ${error?.response?.data?.message || error?.message || 'Unknown error'}`);
     } finally {
+      console.log("🔄 Setting loading to false");
       setIsLoading(false);
     }
   };

@@ -6,6 +6,7 @@ public class Order
 {
     public int Id { get; set; }
     public int UserId { get; set; }
+    public User? User { get; set; } // Navigation property
 
     // Toplamlar
     public decimal Subtotal { get; set; }
@@ -19,6 +20,7 @@ public class Order
     public DateTime? ShippedAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public string? Note { get; set; }
+    public string? CancellationReason { get; set; }
 
     // Gönderim adresi SNAPSHOT (adres sonradan değişirse sipariş etkilenmesin)
     public int AddressId { get; set; } // referans

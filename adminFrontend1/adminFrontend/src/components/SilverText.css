@@ -1,0 +1,58 @@
+/* SilverText component styles */
+.silver-text {
+  background: linear-gradient(135deg, #a3a4a5 0%, #D6DAE0 50%, #d4d5d7 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: inline-block;
+  
+  /* Fallback for browsers that don't support background-clip */
+  color: #F3F4F6;
+}
+
+/* Support for Firefox */
+@supports not (-webkit-background-clip: text) {
+  .silver-text {
+    background: none;
+    color: #D6DAE0;
+    text-shadow: 
+      0 0 2px rgba(163, 164, 165, 0.8),
+      0 0 4px rgba(214, 218, 224, 0.6),
+      0 0 6px rgba(212, 213, 215, 0.4);
+  }
+}
+
+/* Different size variants */
+.silver-text-sm {
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.silver-text-lg {
+  font-size: 24px;
+  letter-spacing: 1.5px;
+}
+
+.silver-text-xl {
+  font-size: 32px;
+  letter-spacing: 2px;
+}
+
+/* Animation variant */
+.silver-text-animated {
+  background: linear-gradient(135deg, #a3a4a5 0%, #D6DAE0 25%, #ffffff 50%, #D6DAE0 75%, #d4d5d7 100%);
+  background-size: 200% 200%;
+  animation: silverShine 3s ease-in-out infinite;
+}
+
+@keyframes silverShine {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}

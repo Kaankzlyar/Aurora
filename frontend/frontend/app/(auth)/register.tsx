@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerUser } from '../../api/auth';
 import { AuthPage } from '../../components/AuthPage';
 import { PremiumTransition } from '../../components/PremiumTransition';
@@ -44,9 +45,24 @@ export default function RegisterScreen() {
         formData.password
       );
 
-      if (result.message === 'User registered successfully.') {
+      console.log('[RegisterScreen] Registration result:', result);
+
+      // Check for successful registration with new response format
+      if (result.accessToken && result.user) {
+        // Save token to AsyncStorage
+        await AsyncStorage.setItem('userToken', result.accessToken);
+        await AsyncStorage.setItem('userData', JSON.stringify(result.user));
+        
+        console.log('[RegisterScreen] ✅ Registration successful, token saved');
+        showSuccess('Başarılı!', `Hoş geldin ${result.user.name}! Kayıt başarılı.`);
+        
+        // Navigate to main app
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 2000);
+      } else if (result.message === 'User registered successfully.') {
+        // Fallback for old response format
         showSuccess('Başarılı!', 'Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
-        // Wait a bit before navigation to show the success message
         setTimeout(() => {
           router.replace('/(auth)/login');
         }, 2000);
