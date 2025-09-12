@@ -20,6 +20,7 @@ import SilverText from '../components/SilverText';
 import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
+import { GoldenButton } from '../components/GoldenButton';
 
 export default function MyCardsScreen() {
   const { isAuthenticated } = useAuth();
@@ -186,17 +187,17 @@ export default function MyCardsScreen() {
       
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <View style={{flexDirection:'row', alignItems:'center'}}>
+          <View style={{flexDirection:'column', alignItems:'center'}}>
             <Ionicons name="arrow-back" size={24} color="#D4AF37" />
           </View>
         </Pressable>
         <SilverText style={styles.title}>Kartlarım</SilverText>
         <Pressable 
-          onPress={() => router.push('/add-card')} 
-          style={styles.addButton}
-        >
-          <Ionicons name="add" size={20} color="#D4AF37" />
-        </Pressable>
+                  onPress={() => router.push('/add-card')} 
+                  style={styles.addButton}
+                >
+                <Ionicons name="add" size={24} color="#D4AF37" />
+              </Pressable>
       </View>
 
       <ScrollView 
@@ -218,17 +219,12 @@ export default function MyCardsScreen() {
             <Text style={styles.emptySubtitle}>
               İlk kartınızı ekleyerek hızlı ödeme için kaydedin.
             </Text>
-            <Pressable onPress={() => router.push('/add-card')}>
-              <LinearGradient
-                colors={['#D4AF37', '#C48913', '#B8860B']}
-                style={styles.addFirstButton}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Ionicons name="add-outline" size={20} color="#000000" />
-                <Text style={styles.addFirstButtonText}>İlk Kartını Ekle</Text>
-              </LinearGradient>
-            </Pressable>
+            <GoldenButton
+              title="İlk Kartını Ekle"
+              iconName="add-outline"
+              onPress={() => router.push('/add-card')}
+              size="medium"
+            />
           </View>
         ) : (
           <View style={styles.cardsContainer}>

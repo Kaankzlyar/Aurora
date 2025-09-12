@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,11 +16,14 @@ import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { GoldenButton } from '../components/GoldenButton';
 
 export default function AddCardScreen() {
   const { isAuthenticated } = useAuth();
   const { notification, showError, showSuccess, showWarning, hideNotification } = useNotification();
   const [loading, setLoading] = useState(false);
+  const [currentToken, setCurrentToken] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   
   const [formData, setFormData] = useState({
     holderName: '',
@@ -29,6 +32,21 @@ export default function AddCardScreen() {
     expYear: '',
     cvv: '',
   });
+
+  useEffect(() => {
+    const checkAuthAndLoad = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        setCurrentToken(token);
+        console.log('[AddCard] Token checked:', token ? 'FOUND' : 'NOT_FOUND');
+        setAuthChecked(true);
+      } catch (error) {
+        console.error('[AddCard] Error checking token:', error);
+        setAuthChecked(true);
+      }
+    };
+    checkAuthAndLoad();
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -122,7 +140,25 @@ export default function AddCardScreen() {
     return formatted;
   };
 
-  if (!isAuthenticated) {
+  if (!authChecked) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Text style={styles.backButtonText}>← Geri</Text>
+          </Pressable>
+          <Text style={styles.title}>Yeni Kart</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.content}>
+          <ActivityIndicator size="large" color="#D4AF37" />
+          <Text style={styles.loadingText}>Yükleniyor...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!isAuthenticated && !currentToken) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -243,27 +279,17 @@ export default function AddCardScreen() {
 
         {/* Kaydet Butonu */}
         <View style={styles.submitSection}>
-          <Pressable
-            style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#0B0B0B" />
-            ) : (
-              <LinearGradient
-                colors={['#D4AF37', '#C48913', '#B8860B']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.submitButtonGradient}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Ionicons name="card" size={20} color="#0B0B0B" />
-                  <Text style={styles.submitButtonText}>Kartı Kaydet</Text>
-                </View>
-              </LinearGradient>
-            )}
-          </Pressable>
+          {loading ? (
+            <View style={[styles.submitButton, { opacity: 0.5, justifyContent: 'center', alignItems: 'center' }]}>
+              <ActivityIndicator size="small" color="#D4AF37" />
+            </View>
+          ) : (
+            <GoldenButton
+              title="Kartı Kaydet"
+              iconName="card"
+              onPress={handleSubmit}
+            />
+          )}
         </View>
       </ScrollView>
       
@@ -414,5 +440,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_500Medium',
     textAlign: 'center',
     marginTop: 100,
+  },
+  loadingText: {
+    color: '#CCCCCC',
+    marginTop: 10,
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

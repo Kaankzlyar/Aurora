@@ -23,26 +23,35 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      console.log('[LoginScreen] Attempting login with:', formData.email);
-      
+      console.log('[LoginScreen] 🔄 handleLogin function started');
+      console.log('[LoginScreen] 📧 Attempting login with email:', formData.email);
+
+      console.log('[LoginScreen] 🚀 Calling loginUser API...');
       const result = await loginUser(formData.email, formData.password);
-      
-      if (result?.token) {
-        await AsyncStorage.setItem('userToken', result.token);
-        
+      console.log('[LoginScreen] 📥 loginUser result received:', result);
+
+      if (result?.accessToken) {
+        console.log('[LoginScreen] ✅ AccessToken found, proceeding with login');
+        console.log('[LoginScreen] 💾 Saving accessToken to AsyncStorage...');
+        await AsyncStorage.setItem('userToken', result.accessToken);
+        console.log('[LoginScreen] ✅ AccessToken saved successfully');
+
+        console.log('[LoginScreen] 🔍 Extracting user info from JWT token...');
         // Try to extract user info from JWT token first
-        const tokenUserInfo = await getUserInfoFromToken(result.token);
-        
+        const tokenUserInfo = await getUserInfoFromToken(result.accessToken);
+        console.log('[LoginScreen] 📋 Token user info extracted:', tokenUserInfo);
+
         let userInfo;
         if (tokenUserInfo && (tokenUserInfo.email || tokenUserInfo.name)) {
+          console.log('[LoginScreen] 🎯 Using info from JWT token');
           // Use info from JWT token
-          const displayName = tokenUserInfo.fullName || 
-                             tokenUserInfo.name || 
+          const displayName = tokenUserInfo.fullName ||
+                             tokenUserInfo.name ||
                              `${tokenUserInfo.firstName || ''} ${tokenUserInfo.lastName || ''}`.trim() ||
                              tokenUserInfo.username ||
                              formData.email.split('@')[0] || // Use email username part as fallback
                              'Kullanıcı';
-          
+
           userInfo = {
             name: displayName,
             email: tokenUserInfo.email || formData.email,
@@ -51,7 +60,9 @@ export default function LoginScreen() {
             id: tokenUserInfo.id,
             username: tokenUserInfo.username
           };
+          console.log('[LoginScreen] 👤 User info created from token:', userInfo);
         } else if (result.user || result.email) {
+          console.log('[LoginScreen] 🔄 Using fallback response data');
           // Fallback to response data
           userInfo = {
             name: result.user?.name || result.name || formData.email.split('@')[0] || 'Kullanıcı',
@@ -59,25 +70,35 @@ export default function LoginScreen() {
             firstName: result.user?.firstName || result.firstName,
             lastName: result.user?.lastName || result.lastName
           };
+          console.log('[LoginScreen] 👤 User info created from response:', userInfo);
         } else {
+          console.log('[LoginScreen] ⚠️ Using last fallback - email username part');
           // Last fallback - use email username part
           userInfo = {
             name: formData.email.split('@')[0] || 'Kullanıcı',
             email: formData.email
           };
+          console.log('[LoginScreen] 👤 User info created from fallback:', userInfo);
         }
-        
+
+        console.log('[LoginScreen] 💾 Saving user info to AsyncStorage...');
         await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
         await AsyncStorage.setItem('userEmail', userInfo.email);
-        console.log('[LoginScreen] Saved user info:', userInfo);
-        
+        console.log('[LoginScreen] ✅ User info saved successfully');
+        console.log('[LoginScreen] 📝 Final saved user info:', userInfo);
+
+        console.log('[LoginScreen] 🧭 Navigating to main app...');
         // Navigate to main app
         router.replace('/(tabs)');
+        console.log('[LoginScreen] ✅ Navigation completed');
       } else {
+        console.log('[LoginScreen] ❌ No token found in result');
+        console.log('[LoginScreen] 📋 Result object:', result);
         alert(result?.message || 'Giriş başarısız');
       }
     } catch (error) {
-      console.error('[LoginScreen] Login error:', error);
+      console.error('[LoginScreen] ❌ Login error occurred:', error);
+      console.error('[LoginScreen] 📋 Error details:', error);
       alert('Giriş sırasında hata oluştu');
     }
   };

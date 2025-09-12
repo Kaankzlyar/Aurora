@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Brand, Category, getBrands, getCategories } from "../services/catalog";
+import { GoldenButton } from "./GoldenButton";
 
 interface FilterModalProps {
   visible: boolean;
@@ -134,9 +135,11 @@ export default function FilterModal({ visible, onClose, value, onChange }: Filte
             <Text style={styles.clearButtonText}>Temizle</Text>
           </Pressable>
           
-          <Pressable onPress={handleApply} style={[styles.button, styles.applyButton]}>
-            <Text style={styles.applyButtonText}>Uygula</Text>
-          </Pressable>
+          <GoldenButton
+            title="Uygula"
+            onPress={handleApply}
+            buttonStyle={{ flex: 1 }}
+          />
         </View>
       </View>
     </Modal>

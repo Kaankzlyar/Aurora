@@ -24,6 +24,7 @@ import { useNotification } from '../hooks/useNotification';
 import NotificationAlert from '../components/NotificationAlert';
 import AuroraHeader from '../components/AuroraHeader';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GoldenButton } from '../components/GoldenButton';
 
 // Country and city data
 const COUNTRIES = [
@@ -133,6 +134,8 @@ export default function AddAddressScreen() {
   const { isAuthenticated } = useAuth();
   const { notification, showError, showSuccess, showWarning, hideNotification } = useNotification();
   const [loading, setLoading] = useState(false);
+  const [currentToken, setCurrentToken] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [showCityModal, setShowCityModal] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
@@ -152,6 +155,21 @@ export default function AddAddressScreen() {
     line2: '',
     contactPhone: '',
   });
+
+  useEffect(() => {
+    const checkAuthAndLoad = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        setCurrentToken(token);
+        console.log('[AddAddress] Token checked:', token ? 'FOUND' : 'NOT_FOUND');
+        setAuthChecked(true);
+      } catch (error) {
+        console.error('[AddAddress] Error checking token:', error);
+        setAuthChecked(true);
+      }
+    };
+    checkAuthAndLoad();
+  }, []);
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
@@ -257,7 +275,28 @@ export default function AddAddressScreen() {
     }
   };
 
-  if (!isAuthenticated) {
+  if (!authChecked) {
+    return (
+      <View style={styles.container}>
+        <AuroraHeader />
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="arrow-back" size={20} color="#D4AF37" />
+              <SilverText style={styles.title}>Yeni Adres</SilverText>
+            </View>
+          </Pressable>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.content}>
+          <ActivityIndicator size="large" color="#D4AF37" />
+          <Text style={styles.loadingText}>Yükleniyor...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!isAuthenticated && !currentToken) {
     return (
       <View style={styles.container}>
         <AuroraHeader />
@@ -450,27 +489,17 @@ export default function AddAddressScreen() {
 
         {/* Kaydet Butonu */}
         <View style={styles.submitSection}>
-          <Pressable
-            style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#0B0B0B" />
-            ) : (
-              <LinearGradient
-                colors={['#D4AF37', '#C48913', '#B8860B']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.submitButtonGradient}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Ionicons name="checkmark" size={20} color="#0B0B0B" />
-                  <Text style={styles.submitButtonText}>Adresi Kaydet</Text>
-                </View>
-              </LinearGradient>
-            )}
-          </Pressable>
+          {loading ? (
+            <View style={[styles.submitButton, { opacity: 0.5, justifyContent: 'center', alignItems: 'center' }]}>
+              <ActivityIndicator size="small" color="#D4AF37" />
+            </View>
+          ) : (
+            <GoldenButton
+              title="Adresi Kaydet"
+              iconName="checkmark"
+              onPress={handleSubmit}
+            />
+          )}
         </View>
       </ScrollView>
       
@@ -604,11 +633,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_500Medium',
   },
   submitButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 106,
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 16,
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   title: {
     fontSize: 20,
@@ -681,16 +710,18 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: '#D4AF37',
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: 16,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
     alignItems: 'center',
+    overflow: 'hidden',
   },
   submitButtonDisabled: {
     backgroundColor: '#666',
   },
   submitButtonText: {
     color: '#0B0B0B',
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
   },
   errorText: {
@@ -763,5 +794,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'Montserrat_400Regular',
+  },
+  loadingText: {
+    color: '#CCCCCC',
+    marginTop: 10,
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

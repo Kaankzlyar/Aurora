@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Button } from "react-nat
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMemo } from "react";
 import { LinearGradient } from "expo-linear-gradient";
+import { GoldenButton } from "./GoldenButton";
 
 function FeaturedBanner({ onPress }: { onPress: () => void }) {
   return (
@@ -22,9 +23,12 @@ function FeaturedBanner({ onPress }: { onPress: () => void }) {
             Discover our latest collection of luxury pieces
           </Text>
 
-          <Pressable onPress={onPress} style={styles.cta}>
-            <Text style={styles.ctaText}>EXPLORE</Text>
-          </Pressable>
+          <GoldenButton
+            title="EXPLORE"
+            onPress={onPress}
+            size="small"
+            buttonStyle={{ alignSelf: 'flex-start' }}
+          />
         </View>
       </LinearGradient>
 
