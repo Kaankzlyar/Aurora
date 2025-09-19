@@ -4,6 +4,7 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import AdminManagement from "@/pages/AdminManagement";
 import OrderManagement from "@/pages/OrderManagement";
+import ProductManagement from "@/pages/ProductManagement";
 import { useAuth } from "@/hooks/useAuth";
 
 
@@ -31,6 +32,14 @@ path : "/order-management",
 element: (
 <Protected>
 <OrderManagement />
+</Protected>
+)
+},
+{
+path : "/product-management",
+element: (
+<Protected>
+<ProductManagement />
 </Protected>
 )
 },

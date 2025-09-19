@@ -32,7 +32,6 @@ import { CartProvider } from '../contexts/CartContext';
 import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
-  // Load custom fonts
   const [fontsLoaded, fontError] = useFonts({
     PlayfairDisplay_400Regular,
     PlayfairDisplay_700Bold, 
@@ -51,7 +50,6 @@ export default function RootLayout() {
     Cinzel_900Black
   });
 
-  // Don't render anything until fonts are loaded
   if (!fontsLoaded && !fontError) {
     return null;
   }

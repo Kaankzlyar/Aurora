@@ -615,7 +615,6 @@ useEffect(() => {
           <View style={s.greetingRow}>
             <SilverText style={s.welcomeText}>{getGreeting()}, </SilverText>
             {authLoading ? (
-      // tiny shimmer/spinner while name loads
       <ActivityIndicator size="small" color="#C48913" />
     ) : (
       <GoldText style={s.userName}>
