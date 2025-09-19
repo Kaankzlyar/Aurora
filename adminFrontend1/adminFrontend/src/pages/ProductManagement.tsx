@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 import Beams from '../components/Beams';
-import SpotlightCard from "@/components/SpotlightCard";
 import GradientText from "@/components/GradientText";
 import { Trash2, Edit, Plus, Search, Image as ImageIcon } from "lucide-react";
 import ProductForm from "../components/ProductForm";
@@ -123,14 +122,14 @@ export default function ProductManagement() {
       {/* Beams Background */}
       <div className="fixed inset-0 z-0">
         <Beams
-          beamWidth={2}
-          beamHeight={15}
-          beamNumber={12}
-          lightColor="#C48913"
-          speed={1.5}
-          noiseIntensity={1.75}
-          scale={0.3}
-          rotation={0}
+          beamWidth={3}
+          beamHeight={45}
+          beamNumber={35}
+          lightColor="#D4AF37"
+          speed={2.5}
+          noiseIntensity={1.95}
+          scale={0.2}
+          rotation={20}
         />
       </div>
       
@@ -141,9 +140,9 @@ export default function ProductManagement() {
         <div className="flex justify-between items-center">
           <GradientText
             colors={["#C48913", "#D4AF37", "#C48913"]}
-            animationSpeed={6}
+            animationSpeed={3}
             showBorder={false}
-            className="text-3xl font-['Cinzel'] font-bold"
+            className="text-3xl font-['Cinzel']"
           >
             Ürün Yönetimi
           </GradientText>
@@ -151,7 +150,7 @@ export default function ProductManagement() {
           <div className="flex items-center space-x-4">
             <Button
               onClick={() => setShowAddForm(true)}
-              className="bg-[#C48913] hover:bg-[#D4AF37] text-white font-medium"
+              className="bg-[#C48913] hover:text-[#C48913]  font-medium"
             >
               <Plus className="w-4 h-4 mr-2" />
               Yeni Ürün Ekle
@@ -159,7 +158,7 @@ export default function ProductManagement() {
             <Button
               variant="outline"
               onClick={() => window.history.back()}
-              className="border-[#C48913] text-[#C48913] hover:bg-[#C48913]/10"
+              className="border-[#C48913] text-[#C48913] hover:text-[#C48913]"
             >
               Geri Dön
             </Button>
@@ -213,7 +212,7 @@ export default function ProductManagement() {
               setSelectedBrand(null);
               setSearchTerm("");
             }}
-            className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
+            className="border-neutral-600 text-neutral-300 hover:text-[#c40000]"
           >
             Filtreleri Temizle
           </Button>
@@ -225,10 +224,9 @@ export default function ProductManagement() {
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map(product => (
-            <SpotlightCard key={product.id} className="bg-neutral-900/30 backdrop-blur-sm border border-neutral-700/50">
-              <Card className="bg-transparent border-none">
-                <CardHeader className="p-4">
-                  <div className="aspect-square relative bg-neutral-800/60 backdrop-blur-sm rounded-lg overflow-hidden mb-3">
+            <Card key={product.id} className="bg-neutral-900/20 backdrop-blur-sm border border-neutral-700/30 hover:bg-neutral-900/30 transition-all duration-300">
+              <CardHeader className="p-4">
+                <div className="aspect-square relative bg-neutral-800/40 backdrop-blur-sm rounded-lg overflow-hidden mb-3">
                     {product.imagePath ? (
                       <img
                         src={getImageUrl(product.imagePath)}
@@ -255,7 +253,7 @@ export default function ProductManagement() {
                       <Badge variant="secondary" className="text-xs">
                         {product.categoryName}
                       </Badge>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="default" className="text-xs">
                         {product.brandName}
                       </Badge>
                     </div>
@@ -280,8 +278,7 @@ export default function ProductManagement() {
                   </div>
                 </CardContent>
               </Card>
-            </SpotlightCard>
-          ))}
+            ))}
         </div>
 
         {filteredProducts.length === 0 && (
