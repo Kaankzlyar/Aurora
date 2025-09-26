@@ -157,7 +157,7 @@ export default function ProductManagement() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => window.history.back()}
+              onClick={() => window.location.href = "/"}
               className="border-[#C48913] text-[#C48913] hover:text-[#C48913]"
             >
               Geri Dön

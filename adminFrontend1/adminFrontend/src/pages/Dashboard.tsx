@@ -96,7 +96,7 @@ export default function Dashboard() {
             <UserProfile />
             <button
               onClick={logout}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium transition-colors"
+              className="px-4 py-2 hover:bg-[#ffffff]/20 hover:text-[#C40000] transition-colors rounded-lg text-white font-medium"
             >
               Logout
             </button>
@@ -205,18 +205,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="mt-8 bg-neutral-900 border border-neutral-800 rounded-lg p-6">
-          <h3 className="text-lg font-medium mb-4">Admin Privileges</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {["User Management", "Product Management", "Order Management", "Analytics Access"].map((title) => (
-              <div key={title} className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm">{title}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <Card className="py-4 sm:py-0 mt-8">
+<Card className="py-4 sm:py-0 mt-8">
             <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
               <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
                 <CardTitle>Kayıt Olan Kullanıcılar - Zaman Grafiği</CardTitle>
@@ -270,6 +259,19 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+
+        <div className="mt-8 bg-neutral-900 border border-neutral-800 rounded-lg p-6">
+          <h3 className="text-lg font-medium mb-4">Admin Privileges</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {["User Management", "Product Management", "Order Management", "Analytics Access"].map((title) => (
+              <div key={title} className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm">{title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        
       </main>
     </div>
   );

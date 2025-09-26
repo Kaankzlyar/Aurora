@@ -36,12 +36,8 @@
             {
                 name = user.Name,
                 lastname = user.LastName,
-<<<<<<< HEAD
                 email = user.Email,
                 registerDate = user.CreatedAt
-=======
-                email = user.Email
->>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
             });
         }
 

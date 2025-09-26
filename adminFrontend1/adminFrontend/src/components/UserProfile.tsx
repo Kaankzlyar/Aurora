@@ -13,7 +13,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ className = '' }) => {
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
       <div className="flex flex-col">
-        <span className="font-medium text-gray-900 dark:text-white">
+        <span className="font-medium text-[#C48913]">
           {user.name}
         </span>
         <span className="text-sm text-gray-500 dark:text-gray-400">
