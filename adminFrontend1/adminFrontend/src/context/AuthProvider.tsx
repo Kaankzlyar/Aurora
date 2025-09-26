@@ -37,9 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const raw =
         localStorage.getItem("aurora.user") ||
         sessionStorage.getItem("aurora.user");
-      const rawToken =
-        localStorage.getItem("aurora.token") ||
-        sessionStorage.getItem("aurora.token");
       if (raw) setUser(JSON.parse(raw));
       const { access, refresh } = storage.tokens;
       if (access) setAccessToken(access);

@@ -10,13 +10,12 @@ import logo from "@/assets/aurora_Logo.png";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import type { DashboardStats } from "@/lib/api";
+import ShinyText from "@/components/ShinyText";
 
 // Yeni tip: RegisterChartData
 type RegisterChartData = {
@@ -25,7 +24,7 @@ type RegisterChartData = {
 };
 
 export default function Dashboard() {
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     activeOrders: 0,
@@ -205,29 +204,39 @@ export default function Dashboard() {
           </div>
         )}
 
-<Card className="py-4 sm:py-0 mt-8">
+<Card className="py-4 sm:py-0 mt-8 bg-black border border-neutral-800">
             <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
-              <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
-                <CardTitle>Kayıt Olan Kullanıcılar - Zaman Grafiği</CardTitle>
-                <CardDescription>
-                  Son 3 ayda günlük kayıt olan kullanıcı sayısı
-                </CardDescription>
+              <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0 text-white">
+                <ShinyText 
+                text="Registered Users - Time Graph" 
+                disabled={false} 
+                speed={6} 
+                className="text-3xl font-['Montserrat']" />
+                  
+                <ShinyText
+                  text="Daily registered users in the last 3 months" 
+                  disabled={false} 
+                  speed={6} 
+                  className="text-sm font-['Montserrat']" />
+                  
               </div>
             </CardHeader>
             <CardContent className="px-2 sm:p-6 w-full">
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full bg-black rounded-md">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
                     data={registerChartData}
                     margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
+                    style={{ backgroundColor: '#000000' }}
                   >
-                    <CartesianGrid vertical={false} />
+                    <CartesianGrid vertical={false} stroke="#333333" />
                     <XAxis
                       dataKey="date"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={8}
                       minTickGap={32}
+                      tick={{ fill: '#BBBBBB' }}
                       tickFormatter={(value) => {
                         const date = new Date(value);
                         return date.toLocaleDateString("tr-TR", {
@@ -241,11 +250,15 @@ export default function Dashboard() {
                       axisLine={false}
                       allowDecimals={false}
                       tickMargin={8}
+                      tick={{ fill: '#BBBBBB' }}
                     />
                     <Tooltip
-                      cursor={{ stroke: "#444", strokeWidth: 1 }}
-                      labelFormatter={(value) => new Date(value as string).toLocaleDateString("tr-TR", { month: "long", day: "numeric", year: "numeric" })}
-                      formatter={(value) => [String(value), "Kayıt Sayısı"]}
+                      cursor={{ stroke: '#444444', strokeWidth: 1 }}
+                      contentStyle={{ backgroundColor: '#000000', border: '1px solid #333333' }}
+                      labelStyle={{ color: '#DDDDDD' }}
+                      itemStyle={{ color: '#DDDDDD' }}
+                      labelFormatter={(value) => new Date(value as string).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      formatter={(value) => [String(value), 'Registered Users']}
                     />
                     <Line
                       dataKey="count"
