@@ -1,0 +1,10 @@
+wwwroot\images\tom-ford\TomFordSuit1.jpg
+wwwroot\images\tom-ford\TomFordSuit1.1.jpg
+wwwroot\images\prada\PradaEyewear4.jpg
+wwwroot\images\prada\PradaEyewear4.1.jpg
+wwwroot\images\prada\PradaEyewear3.jpg
+wwwroot\images\prada\PradaEyewear2.jpg
+wwwroot\images\prada\PradaEyewear1.jpg
+wwwroot\images\prada\PradaEyewear1.1.jpg
+wwwroot\images\gucci\GucciAyakkabı1.jpg
+wwwroot\images\gucci\GucciAyakkabı1.1.jpg
