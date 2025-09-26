@@ -1,8 +1,14 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "W3Bp+jR51Hs=",
   "success": true,
   "projectFilePath": "C:\\Users\\kaank\\OneDrive\\Masaüstü\\Aurora-master\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj",
+=======
+  "dgSpecHash": "5MRwtKg170Y=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\kaank\\OneDrive\\Masaüstü\\eCommerceApp-master\\EcommerceAPI\\EcommerceAPI\\EcommerceAPI.csproj",
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
   "expectedPackageFiles": [
     "C:\\Users\\kaank\\.nuget\\packages\\anglesharp\\1.3.0\\anglesharp.1.3.0.nupkg.sha512",
     "C:\\Users\\kaank\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",

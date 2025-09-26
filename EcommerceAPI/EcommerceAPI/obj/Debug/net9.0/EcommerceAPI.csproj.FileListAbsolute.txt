@@ -338,6 +338,7 @@ C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI\bin\Debug\net9.0\EcommerceAPI.pdb
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.genruntimeconfig.cache
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\ref\EcommerceAPI.dll
+<<<<<<< HEAD
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\EcommerceAPI\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\EcommerceAPI\bin\Debug\net9.0\appsettings.json
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\EcommerceAPI\bin\Debug\net9.0\EcommerceAPI.staticwebassets.runtime.json
@@ -509,3 +510,5 @@ C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\EcommerceAPI\obj\D
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.pdb
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.genruntimeconfig.cache
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\EcommerceAPI\obj\Debug\net9.0\ref\EcommerceAPI.dll
+=======
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477

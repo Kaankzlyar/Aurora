@@ -1,4 +1,8 @@
 {
+<<<<<<< HEAD
   "tailwindCSS.experimental.configFile": "adminFrontend/tailwind.config.js",
   "git.ignoreLimitWarning": true
+=======
+  "tailwindCSS.experimental.configFile": "adminFrontend/tailwind.config.js"
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
 }

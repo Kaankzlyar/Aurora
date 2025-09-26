@@ -180,6 +180,7 @@ C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\obj\Debug\ne
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.dll
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\obj\Debug\net9.0\refint\EcommerceAPI.dll
 C:\Users\kaank\OneDrive\Masaüstü\eCommerceApp-master\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.pdb
+<<<<<<< HEAD
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.csproj.AssemblyReference.cache
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\obj\Debug\net9.0\rpswa.dswa.cache.json
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.GeneratedMSBuildEditorConfig.editorconfig
@@ -192,3 +193,5 @@ C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\obj\Debug\net9.0\E
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.dll
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\obj\Debug\net9.0\refint\EcommerceAPI.dll
 C:\Users\kaank\OneDrive\Masaüstü\Aurora-master\EcommerceAPI\obj\Debug\net9.0\EcommerceAPI.pdb
+=======
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477

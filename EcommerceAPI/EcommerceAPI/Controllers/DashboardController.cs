@@ -3,7 +3,10 @@ using EcommerceAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+<<<<<<< HEAD
 using System.Globalization;
+=======
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
 
 namespace EcommerceAPI.Controllers
 {
@@ -98,6 +101,7 @@ namespace EcommerceAPI.Controllers
                 return BadRequest(new { message = "Son kullanıcılar alınırken hata oluştu." });
             }
         }
+<<<<<<< HEAD
 
         // Günlük kayıt olan kullanıcı sayısı (son N gün)
         [HttpGet("register-chart")]
@@ -133,5 +137,7 @@ namespace EcommerceAPI.Controllers
 
             return Ok(result);
         }
+=======
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
     }
 }

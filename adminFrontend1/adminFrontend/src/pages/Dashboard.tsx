@@ -159,7 +159,6 @@ export default function Dashboard() {
               {loading ? "..." : stats.totalUsers.toLocaleString()}
             </p>
           </SpotlightCard>
-
           
 
           <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">

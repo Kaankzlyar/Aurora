@@ -4623,11 +4623,19 @@
   "project": {
     "version": "1.0.0",
     "restore": {
+<<<<<<< HEAD
       "projectUniqueName": "C:\\Users\\kaank\\OneDrive\\Masaüstü\\Aurora-master\\EcommerceAPI\\EcommerceAPI.csproj",
       "projectName": "EcommerceAPI",
       "projectPath": "C:\\Users\\kaank\\OneDrive\\Masaüstü\\Aurora-master\\EcommerceAPI\\EcommerceAPI.csproj",
       "packagesPath": "C:\\Users\\kaank\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\kaank\\OneDrive\\Masaüstü\\Aurora-master\\EcommerceAPI\\obj\\",
+=======
+      "projectUniqueName": "C:\\Users\\kaank\\OneDrive\\Masaüstü\\eCommerceApp-master\\EcommerceAPI\\EcommerceAPI.csproj",
+      "projectName": "EcommerceAPI",
+      "projectPath": "C:\\Users\\kaank\\OneDrive\\Masaüstü\\eCommerceApp-master\\EcommerceAPI\\EcommerceAPI.csproj",
+      "packagesPath": "C:\\Users\\kaank\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\kaank\\OneDrive\\Masaüstü\\eCommerceApp-master\\EcommerceAPI\\obj\\",
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

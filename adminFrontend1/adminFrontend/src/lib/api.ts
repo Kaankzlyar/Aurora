@@ -1,12 +1,18 @@
 import axios from 'axios';
+<<<<<<< HEAD
 import { storage } from './storage';
 
+=======
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
 
 const BASE_URL = 'http://localhost:5270';
 
 export const api = axios.create({
   baseURL: BASE_URL,
+<<<<<<< HEAD
   timeout : 15000,
+=======
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
 });
 
 api.interceptors.request.use((config) => {
@@ -18,6 +24,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+<<<<<<< HEAD
 export type User = {
   id: string;
   name: string;
@@ -55,6 +62,27 @@ export type DashboardStats = {
   pendingAdminRequests: number;
 };
 
+=======
+export type LoginResponse = {
+    accessToken: string;
+    refreshToken?: string;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        role? : string;
+        isSuperAdmin: boolean;
+    }
+}
+
+export type RegisterRequest = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    role?: string;
+}
+>>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
 
 export async function loginApi(email: string, password: string): Promise<LoginResponse> {
     const response = await api.post<LoginResponse>('/api/auth/login', { email, password });
