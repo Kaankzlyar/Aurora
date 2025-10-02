@@ -24,18 +24,29 @@ import SilverText from '@/components/SilverText';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function OrdersScreen() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const params = useLocalSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
   const opacity = useSharedValue(0);
 
+  // Token kontrolü ve sipariş yükleme
   useEffect(() => {
-    if (isAuthenticated) {
-      loadOrders();
-    }
-  }, [isAuthenticated]);
+    const checkAndLoadOrders = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      setHasToken(!!token);
+      
+      if (token) {
+        await loadOrders();
+      } else {
+        setLoading(false);
+      }
+    };
+
+    checkAndLoadOrders();
+  }, []);
 
   // Smooth fade animasyonu için useEffect - Reanimated ile performans optimizasyonu
   useEffect(() => {
@@ -110,7 +121,7 @@ export default function OrdersScreen() {
   
 
 
-  if (!isAuthenticated) {
+  if (!hasToken && !loading) {
     return (
       <View style={styles.container}>
         <AuroraHeader />
@@ -124,7 +135,19 @@ export default function OrdersScreen() {
                 <View style={styles.placeholder} />
               </View>
           <View style={styles.content}>
-            <Text style={styles.errorText}>Giriş yapmanız gerekiyor.</Text>
+            <View style={styles.emptyState}>
+              <Ionicons name="log-in-outline" size={64} color="#D4AF37" />
+              <Text style={styles.emptyStateTitle}>Giriş Yapmanız Gerekiyor</Text>
+              <Text style={styles.emptyStateText}>
+                Siparişlerinizi görmek için lütfen giriş yapın.
+              </Text>
+              <Pressable 
+                style={styles.emptyStateButton}
+                onPress={() => router.push('/(auth)/login')}
+              >
+                <Text style={styles.emptyStateButtonText}>Giriş Yap</Text>
+              </Pressable>
+            </View>
           </View>
       </View> 
     );
