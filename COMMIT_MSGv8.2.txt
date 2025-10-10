@@ -1,0 +1,10 @@
+Added missing backend endpoint GET /api/dashboard/register-chart in EcommerceAPI/EcommerceAPI/Controllers/DashboardController.cs to return last-N-days registration data as { date, count }. This unblocked the chart.     
+
+Made the dashboard chart responsive and full-width by wrapping it with ResponsiveContainer and removing fixed width in adminFrontend1/adminFrontend/src/pages/Dashboard.tsx.
+Improved readability of the chart:
+Added YAxis (no decimals) and Tooltip with localized date label and 'Kayıt Sayısı.'
+ Adjusted margins and set a fixed height container for consistent layout.
+ Set the page background to pure black by changing the wrapper class to bg-black in Dashboard.tsx.
+Fixed errors in API and Mobile section.
+ Added registered user chart for admin panel.
+Planned imporevements: Equaling the styling on every page at Admin frontend section.

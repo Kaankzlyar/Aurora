@@ -38,6 +38,7 @@ import SilverText from "../../components/SilverText";
 import { Ionicons } from "@expo/vector-icons";
 import GoldText from "@/components/GoldText";
 import { LinearGradient } from 'expo-linear-gradient';
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 export default function CollectionTab() {
   // 🔑 TOKEN ALMA SİSTEMİ
@@ -50,6 +51,7 @@ export default function CollectionTab() {
   const [currentToken, setCurrentToken] = useState<string | null>(null);
   const [data, setData] = useState<CartSummary | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showClearConfirmation, setShowClearConfirmation] = useState(false);
 
   const [basketCount, setBasketCount] = useState(0);
   
@@ -344,6 +346,37 @@ export default function CollectionTab() {
     }
   };
 
+  // 🧹 SEPETİ TEMİZLE FONKSİYONLARI
+  const onClearCart = () => {
+    setShowClearConfirmation(true);
+  };
+
+  const handleConfirmClearCart = async () => {
+    try {
+      // 🚀 UI'da hemen temizle
+      setData({
+        items: [],
+        totalQuantity: 0,
+        subtotal: 0
+      });
+      setBasketCount(0);
+      // 🔄 Global cart count'u güncelle
+      updateCartCount();
+      
+      // Backend'i temizle (background'da)
+      await clearCart(currentToken!);
+    } catch (error) {
+      // Hata durumunda tekrar yükle
+      refresh();
+    } finally {
+      setShowClearConfirmation(false);
+    }
+  };
+
+  const handleCancelClearCart = () => {
+    setShowClearConfirmation(false);
+  };
+
   return (
     <View style={styles.container}>
       {/* AURORA HEADER */}
@@ -437,35 +470,7 @@ export default function CollectionTab() {
                 </View>
                 <Pressable 
                   style={styles.clearCartButton}
-                  onPress={() => 
-                    Alert.alert(
-                      "Sepeti Temizle", 
-                      "Tüm ürünleri sepetten çıkarmak istediğinizden emin misiniz?",
-                      [
-                        { text: "İptal", style: "cancel" },
-                        { 
-                          text: "Evet", 
-                          onPress: () => {
-                            // 🚀 UI'da hemen temizle
-                            setData({
-                              items: [],
-                              totalQuantity: 0,
-                              subtotal: 0
-                            });
-                            setBasketCount(0);
-                            // 🔄 Global cart count'u güncelle
-                            updateCartCount();
-                            
-                            // Backend'i temizle (background'da)
-                            clearCart(currentToken!).catch(() => {
-                              // Hata durumunda tekrar yükle
-                              refresh();
-                            });
-                          }
-                        }
-                      ]
-                    )
-                  }
+                  onPress={onClearCart}
                 >
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                   <Ionicons name="trash-outline" size={20} color="#FF6B6B" />
@@ -518,6 +523,18 @@ export default function CollectionTab() {
           </TouchableOpacity>
         )}
       </View>
+
+      {/* CONFIRMATION DIALOG */}
+      <ConfirmationDialog
+        visible={showClearConfirmation}
+        title="Sepeti Temizle"
+        message="Tüm ürünleri sepetten çıkarmak istediğinizden emin misiniz?"
+        confirmText="Evet, Temizle"
+        cancelText="İptal"
+        onConfirm={handleConfirmClearCart}
+        onCancel={handleCancelClearCart}
+        type="danger"
+      />
     </View>
   );
 }

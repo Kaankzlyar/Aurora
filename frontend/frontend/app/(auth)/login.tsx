@@ -5,8 +5,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loginUser, getUserInfoFromToken } from '../../api/auth';
 import { AuthPage } from '../../components/AuthPage';
 import { PremiumTransition } from '../../components/PremiumTransition';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginScreen() {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -86,6 +88,11 @@ export default function LoginScreen() {
         await AsyncStorage.setItem('userEmail', userInfo.email);
         console.log('[LoginScreen] ✅ User info saved successfully');
         console.log('[LoginScreen] 📝 Final saved user info:', userInfo);
+
+        console.log('[LoginScreen] 🔄 Updating AuthContext state...');
+        // Call the AuthContext login method to update the authentication state
+        await login(userInfo.email);
+        console.log('[LoginScreen] ✅ AuthContext state updated');
 
         console.log('[LoginScreen] 🧭 Navigating to main app...');
         // Navigate to main app

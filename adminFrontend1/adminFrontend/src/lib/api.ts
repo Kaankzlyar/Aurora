@@ -1,9 +1,12 @@
 import axios from 'axios';
+// import { storage } from './storage';
+
 
 const BASE_URL = 'http://localhost:5270';
 
 export const api = axios.create({
   baseURL: BASE_URL,
+  timeout : 15000,
 });
 
 api.interceptors.request.use((config) => {
@@ -15,25 +18,43 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role?: string;
+  isSuperAdmin: boolean;
+};
+
 export type LoginResponse = {
-    accessToken: string;
-    refreshToken?: string;
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        role? : string;
-        isSuperAdmin: boolean;
-    }
-}
+  accessToken: string;
+  refreshToken?: string;
+  user: User;
+};
 
 export type RegisterRequest = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    role?: string;
-}
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role?: string;
+};
+
+export type ProfileResponse = {
+  name: string;
+  lastname: string;
+  email: string;
+  registerDate: string; // ISO
+};
+
+export type DashboardStats = {
+  totalUsers: number;
+  activeOrders: number;
+  totalOrders: number;
+  totalAdmins: number;
+  pendingAdminRequests: number;
+};
+
 
 export async function loginApi(email: string, password: string): Promise<LoginResponse> {
     const response = await api.post<LoginResponse>('/api/auth/login', { email, password });

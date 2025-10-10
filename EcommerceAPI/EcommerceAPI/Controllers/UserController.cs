@@ -36,7 +36,8 @@
             {
                 name = user.Name,
                 lastname = user.LastName,
-                email = user.Email
+                email = user.Email,
+                registerDate = user.CreatedAt
             });
         }
 

@@ -3,6 +3,7 @@ using EcommerceAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace EcommerceAPI.Controllers
 {
@@ -96,6 +97,41 @@ namespace EcommerceAPI.Controllers
                 Console.WriteLine($"❌ Recent users error: {ex.Message}");
                 return BadRequest(new { message = "Son kullanıcılar alınırken hata oluştu." });
             }
+        }
+        
+        // Günlük kayıt olan kullanıcı sayısı (son N gün)
+        [HttpGet("register-chart")]
+        public async Task<IActionResult> GetRegisterChart([FromQuery] int days = 90)
+        {
+            if (days <= 0 || days > 365) days = 90;
+
+            // Bitiş bugün (UTC), başlangıç N gün önce (UTC)
+            var endDateUtc = DateTime.UtcNow.Date;
+            var startDateUtc = endDateUtc.AddDays(-days + 1);
+
+            // İlgili aralıkta kayıt olanları çek
+            var users = await _context.Users
+                .Where(u => u.CreatedAt >= startDateUtc && u.CreatedAt < endDateUtc.AddDays(1))
+                .Select(u => new { u.CreatedAt })
+                .ToListAsync();
+
+            // Gün bazında grupla
+            var countsByDate = users
+                .GroupBy(u => u.CreatedAt.Date)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            // Eksik günleri 0 ile doldur ve ISO formatlı tarih dön
+            var result = Enumerable
+                .Range(0, days)
+                .Select(offset => startDateUtc.AddDays(offset))
+                .Select(d => new
+                {
+                    date = d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                    count = countsByDate.TryGetValue(d, out var c) ? c : 0
+                })
+                .ToList();
+
+            return Ok(result);
         }
     }
 }

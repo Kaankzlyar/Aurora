@@ -5,6 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import Beams from '../components/Beams';
+import GradientText from '@/components/GradientText';
+import { Link } from 'react-router-dom';
+import logo from '@/assets/aurora_Logo.png';
 import { 
   Users, 
   UserCheck, 
@@ -145,30 +149,59 @@ const AdminManagement = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white">Yükleniyor...</div>
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 z-0">
+          <Beams beamWidth={3} beamHeight={45} beamNumber={35} lightColor="#D4AF37" speed={2.5} noiseIntensity={1.95} scale={0.2} rotation={20} />
+        </div>
+        <div className="relative z-10 min-h-screen bg-neutral-950/40 text-neutral-100 flex items-center justify-center">
+          <div className="text-xl">Yükleniyor...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 bg-black min-h-screen">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Admin Yönetimi</h1>
-        {!showRequestForm && pendingRequests.length === 0 && (
-          <Button 
-            onClick={() => setShowRequestForm(true)}
-            className="bg-[#C48913] hover:bg-[#D4AF37] text-black"
-          >
-            <UserPlus className="w-4 h-4 mr-2" />
-            Admin Yetkisi İste
-          </Button>
-        )}
+    <div className="min-h-screen relative">
+      {/* Beams Background */}
+      <div className="fixed inset-0 z-0">
+        <Beams beamWidth={3} beamHeight={45} beamNumber={35} lightColor="#D4AF37" speed={2.5} noiseIntensity={1.95} scale={0.2} rotation={20} />
       </div>
+
+      {/* Content Overlay */}
+      <div className="relative z-10 min-h-screen bg-neutral-950/40 text-neutral-100">
+        {/* Header */}
+        <header className="border-b border-neutral-800/50 bg-neutral-950/30 backdrop-blur-sm">
+          <div className="px-6 h-16 md:h-20 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link to="/" aria-label="Ana sayfa" className="inline-flex items-center shrink-0">
+                <img src={logo} alt="Aurora" className="h-12 md:h-14 w-auto object-contain" />
+              </Link>
+              <GradientText
+                colors={["#916201", "#D4AF37", "#916201"]}
+                animationSpeed={4}
+                showBorder={false}
+                className="text-2xl md:text-3xl font-['Cinzel'] leading-none select-none"
+              >
+                Admin Yönetimi
+              </GradientText>
+            </div>
+            {!showRequestForm && pendingRequests.length === 0 && (
+              <Button 
+                onClick={() => setShowRequestForm(true)}
+                className="bg-[#C48913] hover:bg-[#D4AF37] text-white"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Admin Yetkisi İste
+              </Button>
+            )}
+          </div>
+        </header>
+
+        <div className="p-6 space-y-6">
 
       {/* Admin Request Form */}
       {showRequestForm && (
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-neutral-900/20 backdrop-blur-sm border border-neutral-700/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center">
               <UserPlus className="w-5 h-5 mr-2" />
@@ -182,7 +215,7 @@ const AdminManagement = () => {
                 value={requestReason}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRequestReason(e.target.value)}
                 placeholder="Admin yetkisi isteme sebebinizi detaylı olarak açıklayın..."
-                className="w-full bg-black/20 border border-gray-600 text-white mt-2 p-3 rounded-md resize-none focus:border-[#C48913] focus:outline-none"
+                className="w-full bg-neutral-800/40 backdrop-blur-sm border border-neutral-700/30 text-white mt-2 p-3 rounded-md resize-none focus:border-[#C48913] focus:outline-none"
                 rows={4}
               />
             </div>
@@ -190,7 +223,7 @@ const AdminManagement = () => {
               <Button
                 onClick={handleRequestAdmin}
                 disabled={requestLoading}
-                className="bg-[#C48913] hover:bg-[#D4AF37] text-black"
+                className="text-white hover:text-[#C48913] transition-colors"
               >
                 {requestLoading ? 'Gönderiliyor...' : 'İstek Gönder'}
               </Button>
@@ -200,7 +233,7 @@ const AdminManagement = () => {
                   setRequestReason('');
                 }}
                 variant="outline"
-                className="border-gray-600 text-white hover:bg-gray-800"
+                className="border-neutral-600 text-white hover:text-[#C40000] transition-colors"
               >
                 İptal
               </Button>
@@ -211,7 +244,7 @@ const AdminManagement = () => {
 
       {/* Pending Admin Requests */}
       {pendingRequests.length > 0 && (
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-neutral-900/20 backdrop-blur-sm border border-neutral-700/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center">
               <Clock className="w-5 h-5 mr-2" />
@@ -221,7 +254,7 @@ const AdminManagement = () => {
           <CardContent>
             <div className="space-y-4">
               {pendingRequests.map((request) => (
-                <div key={request.id} className="bg-black/20 p-4 rounded-lg border border-gray-600">
+                <div key={request.id} className="bg-neutral-800/40 backdrop-blur-sm p-4 rounded-lg border border-neutral-700/30">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -232,11 +265,11 @@ const AdminManagement = () => {
                           Bekliyor
                         </Badge>
                       </div>
-                      <p className="text-gray-300 text-sm mb-2">{request.email}</p>
-                      <p className="text-gray-400 text-sm mb-2">
+                      <p className="text-neutral-300 text-sm mb-2">{request.email}</p>
+                      <p className="text-neutral-400 text-sm mb-2">
                         <strong>Sebep:</strong> {request.adminRequestReason}
                       </p>
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-neutral-500 text-xs">
                         İstek Tarihi: {new Date(request.adminRequestDate).toLocaleString('tr-TR')}
                       </p>
                     </div>
@@ -270,7 +303,7 @@ const AdminManagement = () => {
 
       {/* Current Admins */}
       {admins.length > 0 && (
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-neutral-900/20 backdrop-blur-sm border border-neutral-700/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center">
               <Users className="w-5 h-5 mr-2" />
@@ -280,7 +313,7 @@ const AdminManagement = () => {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {admins.map((admin) => (
-                <div key={admin.id} className="bg-black/20 p-4 rounded-lg border border-gray-600">
+                <div key={admin.id} className="bg-neutral-800/40 backdrop-blur-sm p-4 rounded-lg border border-neutral-700/30">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       {admin.isSuperAdmin ? (
@@ -299,8 +332,8 @@ const AdminManagement = () => {
                       {admin.isSuperAdmin ? 'Super Admin' : 'Admin'}
                     </Badge>
                   </div>
-                  <p className="text-gray-300 text-sm mb-2">{admin.email}</p>
-                  <p className="text-gray-500 text-xs mb-3">
+                  <p className="text-neutral-300 text-sm mb-2">{admin.email}</p>
+                  <p className="text-neutral-500 text-xs mb-3">
                     Kayıt: {new Date(admin.createdAt).toLocaleDateString('tr-TR')}
                   </p>
                   {!admin.isSuperAdmin && (
@@ -309,7 +342,7 @@ const AdminManagement = () => {
                       disabled={actionLoading === admin.id}
                       size="sm"
                       variant="destructive"
-                      className="w-full"
+                      className="w-full hover:text-[#C40000] transition-colors"
                     >
                       <UserX className="w-4 h-4 mr-1" />
                       Admin Yetkisini Kaldır
@@ -329,15 +362,17 @@ const AdminManagement = () => {
       )}
 
       {pendingRequests.length === 0 && admins.length === 0 && !showRequestForm && (
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-neutral-900/20 backdrop-blur-sm border border-neutral-700/30">
           <CardContent className="text-center py-8">
-            <Users className="w-16 h-16 mx-auto text-gray-500 mb-4" />
-            <p className="text-gray-400">
+            <Users className="w-16 h-16 mx-auto text-neutral-500 mb-4" />
+            <p className="text-neutral-400">
               Henüz admin verisi yok. Admin yetkisi istemek için yukarıdaki butonu kullanabilirsiniz.
             </p>
           </CardContent>
         </Card>
       )}
+        </div>
+      </div>
     </div>
   );
 };

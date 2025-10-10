@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
-import { api } from '../lib/api';
-import { useAuth } from '../hooks/useAuth';
+import { api } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
+import Beams from '../components/Beams';
+import GradientText from '@/components/GradientText';
+import logo from '@/assets/aurora_Logo.png';
+import { Link } from 'react-router-dom';
 import {
   Package,
   Eye,
@@ -21,6 +25,7 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react';
+import ShinyText from '@/components/ShinyText';
 
 interface OrderItem {
   productId: number;
@@ -200,49 +205,89 @@ const OrderManagement = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-white">Yükleniyor...</div>
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 z-0">
+          <Beams beamWidth={3} beamHeight={45} beamNumber={35} lightColor="#D4AF37" speed={2.5} noiseIntensity={1.95} scale={0.2} rotation={20} />
+        </div>
+        <div className="relative z-10 min-h-screen bg-neutral-950/40 text-neutral-100 flex items-center justify-center">
+          <div className="text-xl">Yükleniyor...</div>
+        </div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-white">Lütfen giriş yapın</div>
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 z-0">
+          <Beams beamWidth={3} beamHeight={45} beamNumber={35} lightColor="#D4AF37" speed={2.5} noiseIntensity={1.95} scale={0.2} rotation={20} />
+        </div>
+        <div className="relative z-10 min-h-screen bg-neutral-950/40 text-neutral-100 flex items-center justify-center">
+          <div className="text-xl">Lütfen giriş yapın</div>
+        </div>
       </div>
     );
   }
 
   if (!user.isSuperAdmin && user.role !== 'admin') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-white">Bu sayfaya erişim yetkiniz yok</div>
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 z-0">
+          <Beams beamWidth={3} beamHeight={45} beamNumber={35} lightColor="#D4AF37" speed={2.5} noiseIntensity={1.95} scale={0.2} rotation={20} />
+        </div>
+        <div className="relative z-10 min-h-screen bg-neutral-950/40 text-neutral-100 flex items-center justify-center">
+          <div className="text-xl">Bu sayfaya erişim yetkiniz yok</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 bg-black min-h-screen text-white">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Sipariş Yönetimi</h1>
-        <div className="text-sm text-gray-400">
-          Toplam {orders.length} sipariş
-        </div>
+    <div className="min-h-screen relative">
+      {/* Beams Background */}
+      <div className="fixed inset-0 z-0">
+        <Beams beamWidth={3} beamHeight={45} beamNumber={35} lightColor="#D4AF37" speed={2.5} noiseIntensity={1.95} scale={0.2} rotation={20} />
       </div>
 
-      {/* Orders Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Content Overlay */}
+      <div className="relative z-10 min-h-screen bg-neutral-950/40 text-neutral-100">
+        {/* Header */}
+        <header className="border-b border-neutral-800/50 bg-neutral-950/30 backdrop-blur-sm">
+          <div className="px-6 h-16 md:h-20 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link to="/" aria-label="Ana sayfa" className="inline-flex items-center shrink-0">
+                <img src={logo} alt="Aurora" className="h-12 md:h-14 w-auto object-contain" />
+              </Link>
+              <GradientText
+                colors={["#916201", "#D4AF37", "#916201"]}
+                animationSpeed={4}
+                showBorder={false}
+                className="text-2xl md:text-3xl font-['Cinzel'] leading-none select-none"
+              >
+                Sipariş Yönetimi
+              </GradientText>
+            </div>
+            <ShinyText
+              text={`Toplam ${orders.length} sipariş`}
+              disabled={false}
+              speed={3}
+              className="text-sm md:text-base text-neutral-400"
+            />
+          </div>
+        </header>
+
+        {/* Orders Grid */}
+        <div className="p-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {orders.map((order) => (
-          <Card key={order.id} className="bg-gray-900 border-gray-700">
-            <CardHeader className="pb-3">
+          <Card key={order.id} className="bg-neutral-900/20 backdrop-blur-sm border border-neutral-700/30 hover:bg-neutral-900/30 transition-all duration-300">
+            <CardHeader className="pb-3 p-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg text-white">
                   Sipariş #{order.id}
                 </CardTitle>
                 {getStatusBadge(order.status)}
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-4 text-sm text-neutral-400 mt-2">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   {new Date(order.createdAt).toLocaleDateString('tr-TR')}
@@ -253,18 +298,18 @@ const OrderManagement = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 pt-0">
               {/* User Info */}
               {order.userName && (
-                <div className="bg-black/20 p-3 rounded-lg">
+                <div className="bg-neutral-800/40 backdrop-blur-sm p-3 rounded-lg border border-neutral-700/30">
                   <div className="flex items-center gap-2 mb-1">
-                    <User className="w-4 h-4 text-gray-400" />
+                    <User className="w-4 h-4 text-neutral-400" />
                     <span className="text-sm font-medium text-white">{order.userName}</span>
                   </div>
                   {order.userEmail && (
                     <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-300">{order.userEmail}</span>
+                      <Mail className="w-4 h-4 text-neutral-400" />
+                      <span className="text-sm text-neutral-300">{order.userEmail}</span>
                     </div>
                   )}
                 </div>
@@ -272,11 +317,11 @@ const OrderManagement = () => {
 
               {/* Order Items */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-300">Ürünler ({order.items.length})</h4>
+                <h4 className="text-sm font-medium text-neutral-300">Ürünler ({order.items.length})</h4>
                 <div className="max-h-32 overflow-y-auto space-y-1">
                   {order.items.map((item, index) => (
                     <div key={index} className="flex justify-between text-sm">
-                      <span className="text-gray-400 truncate">{item.productName}</span>
+                      <span className="text-neutral-400 truncate">{item.productName}</span>
                       <span className="text-white">x{item.quantity}</span>
                     </div>
                   ))}
@@ -301,14 +346,14 @@ const OrderManagement = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-800"
+                      className="flex-1 border-neutral-600 text-neutral-300 hover:text-[#C48913]"
                       onClick={() => setSelectedOrder(order)}
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       Detay
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
                         {getStatusIcon(order.status)}
@@ -319,14 +364,14 @@ const OrderManagement = () => {
                       {/* Order Info */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-gray-400">Durum</Label>
+                          <Label className="text-neutral-400">Durum</Label>
                           <div className="flex items-center gap-2 mt-1">
                             {getStatusIcon(order.status)}
                             {getStatusBadge(order.status)}
                           </div>
                         </div>
                         <div>
-                          <Label className="text-gray-400">Tarih</Label>
+                          <Label className="text-neutral-400">Tarih</Label>
                           <p className="text-white mt-1">
                             {new Date(order.createdAt).toLocaleString('tr-TR')}
                           </p>
@@ -335,8 +380,8 @@ const OrderManagement = () => {
 
                       {/* User Info */}
                       {order.userName && (
-                        <div className="bg-black/20 p-4 rounded-lg">
-                          <Label className="text-gray-400">Müşteri Bilgileri</Label>
+                        <div className="bg-neutral-800/40 backdrop-blur-sm p-4 rounded-lg border border-neutral-700/30">
+                          <Label className="text-neutral-400">Müşteri Bilgileri</Label>
                           <div className="mt-2 space-y-1">
                             <p className="text-white"><strong>Ad:</strong> {order.userName}</p>
                             <p className="text-white"><strong>Email:</strong> {order.userEmail}</p>
@@ -346,10 +391,10 @@ const OrderManagement = () => {
 
                       {/* Items */}
                       <div>
-                        <Label className="text-gray-400">Ürünler</Label>
+                        <Label className="text-neutral-400">Ürünler</Label>
                         <div className="mt-2 space-y-2">
                           {order.items.map((item, index) => (
-                            <div key={index} className="bg-black/20 p-3 rounded-lg">
+                            <div key={index} className="bg-neutral-800/40 backdrop-blur-sm p-3 rounded-lg border border-neutral-700/30">
                               <div className="flex justify-between items-start">
                                 <div className="flex-1">
                                   <p className="text-white font-medium">{item.productName}</p>
@@ -367,14 +412,14 @@ const OrderManagement = () => {
                       </div>
 
                       {/* Totals */}
-                      <div className="bg-black/20 p-4 rounded-lg">
+                      <div className="bg-neutral-800/40 backdrop-blur-sm p-4 rounded-lg border border-neutral-700/30">
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Ara Toplam:</span>
+                            <span className="text-neutral-400">Ara Toplam:</span>
                             <span className="text-white">₺{order.subtotal.toFixed(2)}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Kargo:</span>
+                            <span className="text-neutral-400">Kargo:</span>
                             <span className="text-white">₺{order.shippingFee.toFixed(2)}</span>
                           </div>
                           <div className="flex justify-between font-medium border-t border-gray-600 pt-2">
@@ -405,7 +450,7 @@ const OrderManagement = () => {
                       setShowCancelDialog(true);
                     }}
                   >
-                    <X className="w-4 h-4 mr-1" />
+                    <X className="w-4 h-4 mr-1 hover:text-[#C40000] transition-colors" />
                     İptal Et
                   </Button>
                 )}
@@ -413,11 +458,11 @@ const OrderManagement = () => {
             </CardContent>
           </Card>
         ))}
-      </div>
+        </div>
 
-      {/* Cancel Order Dialog */}
-      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <DialogContent className="bg-gray-900 border-gray-700 text-white">
+        {/* Cancel Order Dialog */}
+        <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+          <DialogContent className="bg-neutral-900 border-neutral-700 text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-red-400" />
@@ -437,42 +482,45 @@ const OrderManagement = () => {
                 value={cancelReason}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCancelReason(e.target.value)}
                 placeholder="İptal sebebini detaylı olarak açıklayın..."
-                className="mt-2 bg-black/20 border-gray-600 text-white placeholder-gray-500"
+                  className="mt-2 bg-neutral-800/40 backdrop-blur-sm border-neutral-700/30 text-white placeholder-gray-500"
                 rows={4}
               />
             </div>
             <div className="flex gap-2 justify-end">
               <Button
-                variant="outline"
+                  variant="outline"
                 onClick={() => {
                   setShowCancelDialog(false);
                   setCancelReason('');
                   setSelectedOrder(null);
                 }}
-                className="border-gray-600 text-white hover:bg-gray-800"
+                  className="border-neutral-600 text-white hover:text-[#7A88FF] transition-colors"
               >
-                İptal
+                Geri Dön
               </Button>
               <Button
                 onClick={handleCancelOrder}
                 disabled={cancelLoading || !cancelReason.trim()}
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-red-600 hover:text-[#C40000] transition-colors"
               >
                 {cancelLoading ? 'İptal Ediliyor...' : 'İptal Et'}
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
 
-      {orders.length === 0 && (
-        <Card className="bg-gray-900 border-gray-700">
-          <CardContent className="text-center py-12">
-            <Package className="w-16 h-16 mx-auto text-gray-500 mb-4" />
-            <p className="text-gray-400">Henüz hiç sipariş yok.</p>
-          </CardContent>
-        </Card>
-      )}
+        {orders.length === 0 && (
+          <div className="p-6">
+            <Card className="bg-neutral-900/20 backdrop-blur-sm border border-neutral-700/30">
+              <CardContent className="text-center py-12">
+                <Package className="w-16 h-16 mx-auto text-neutral-500 mb-4" />
+                <p className="text-neutral-400">Henüz hiç sipariş yok.</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

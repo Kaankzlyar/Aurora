@@ -58,6 +58,9 @@ export default function ProductForm({
   );
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showNewBrandForm, setShowNewBrandForm] = useState(false);
+  const [newBrandName, setNewBrandName] = useState("");
+  const [addingBrand, setAddingBrand] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function getImageUrl(imagePath: string): string {
@@ -119,11 +122,53 @@ export default function ProductForm({
     }
   };
 
+  const handleAddNewBrand = async () => {
+    if (!newBrandName.trim()) {
+      alert('Marka adını girin.');
+      return;
+    }
+
+    setAddingBrand(true);
+    try {
+      const response = await api.post('/api/brands', {
+        name: newBrandName.trim()
+      });
+      
+      // Yeni marka listesini güncelle (parent component'ten brands listesini güncellemek için)
+      // Bu durumda sadece formData'yı güncelliyoruz
+      setFormData({ ...formData, brandId: response.data.id.toString() });
+      setNewBrandName("");
+      setShowNewBrandForm(false);
+      alert('Yeni marka başarıyla eklendi!');
+    } catch (error) {
+      console.error('Brand creation error:', error);
+      alert('Marka eklenirken hata oluştu!');
+    } finally {
+      setAddingBrand(false);
+    }
+  };
+
+  const handleBrandChange = (value: string) => {
+    if (value === "other") {
+      setShowNewBrandForm(true);
+      setFormData({ ...formData, brandId: "" });
+    } else {
+      setShowNewBrandForm(false);
+      setFormData({ ...formData, brandId: value });
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (!formData.name.trim() || !formData.price || !formData.categoryId || !formData.brandId) {
+    if (!formData.name.trim() || !formData.price || !formData.categoryId || (!formData.brandId && !showNewBrandForm)) {
       alert('Lütfen tüm gerekli alanları doldurun.');
+      return;
+    }
+
+    // Eğer yeni marka ekleme formu açık ise ve brandId boş ise
+    if (showNewBrandForm && !formData.brandId) {
+      alert('Lütfen önce yeni markayı ekleyin veya mevcut bir marka seçin.');
       return;
     }
 
@@ -192,7 +237,7 @@ export default function ProductForm({
               variant="ghost"
               size="sm"
               onClick={onCancel}
-              className="text-neutral-400 hover:text-white"
+              className="text-neutral-400 hover:text-[#C48913]"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -253,7 +298,7 @@ export default function ProductForm({
                 <select
                   id="brand"
                   value={formData.brandId}
-                  onChange={(e) => setFormData({ ...formData, brandId: e.target.value })}
+                  onChange={(e) => handleBrandChange(e.target.value)}
                   className="w-full mt-1 px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-md text-white"
                   required
                 >
@@ -261,7 +306,49 @@ export default function ProductForm({
                   {brands.map(brand => (
                     <option key={brand.id} value={brand.id}>{brand.name}</option>
                   ))}
+                  <option value="other">+ Yeni Marka Ekle</option>
                 </select>
+                
+                {/* Yeni Marka Ekleme Formu */}
+                {showNewBrandForm && (
+                  <div className="mt-3 p-3 bg-neutral-800/50 rounded-lg border border-neutral-600">
+                    <Label htmlFor="newBrand" className="text-white text-sm">Yeni Marka Adı</Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        id="newBrand"
+                        value={newBrandName}
+                        onChange={(e) => setNewBrandName(e.target.value)}
+                        placeholder="Marka Adı"
+                        className="bg-neutral-700 border-neutral-500 text-white text-sm"
+                        disabled={addingBrand}
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleAddNewBrand}
+                        disabled={addingBrand || !newBrandName.trim()}
+                        className="bg-[#C48913] hover:text-[#C48913] text-white text-sm px-3"
+                      >
+                        {addingBrand ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          'Ekle'
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowNewBrandForm(false);
+                          setNewBrandName("");
+                          setFormData({ ...formData, brandId: "" });
+                        }}
+                        className="border-neutral-500 text-neutral-300 hover:text-[#C40000] text-sm px-3"
+                      >
+                        İptal
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -315,7 +402,7 @@ export default function ProductForm({
                         fileInputRef.current.value = '';
                       }
                     }}
-                    className="border-red-600 text-red-400 hover:bg-red-600/10"
+                    className="border-red-600 text-red-400 hover:text-[#C40000]"
                   >
                     Resmi Kaldır
                   </Button>
@@ -330,14 +417,14 @@ export default function ProductForm({
                 variant="outline"
                 onClick={onCancel}
                 disabled={loading || uploadingImage}
-                className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
+                className="border-neutral-600 text-neutral-300 hover:text-[#C40000]"
               >
                 İptal
               </Button>
               <Button
                 type="submit"
                 disabled={loading || uploadingImage}
-                className="bg-[#C48913] hover:bg-[#D4AF37] text-black font-medium"
+                className="bg-[#C48913] hover:bg-[#D4AF37] text-white font-medium"
               >
                 {loading || uploadingImage ? (
                   <>

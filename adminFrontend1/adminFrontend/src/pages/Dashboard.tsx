@@ -1,20 +1,27 @@
-import UserProfile from "@/components/UserProfile";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import logo from "@/assets/aurora_Logo.png";
-import ShinyText from "@/components/ShinyText";
-import SpotlightCard from "@/components/SpotlightCard";
-import GradientText from "@/components/GradientText";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 
-interface DashboardStats {
-  totalUsers: number;
-  activeOrders: number;
-  totalOrders: number;
-  totalAdmins: number;
-  pendingAdminRequests: number;
-}
+import UserProfile from "@/components/UserProfile";
+import GradientText from "@/components/GradientText";
+import SpotlightCard from "@/components/SpotlightCard";
+import { Button } from "@/components/ui/button";
+import logo from "@/assets/aurora_Logo.png";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from "@/components/ui/card";
+
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import type { DashboardStats } from "@/lib/api";
+import ShinyText from "@/components/ShinyText";
+
+// Yeni tip: RegisterChartData
+type RegisterChartData = {
+  date: string;
+  count: number;
+};
 
 export default function Dashboard() {
   const { logout } = useAuth();
@@ -26,9 +33,13 @@ export default function Dashboard() {
     pendingAdminRequests: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [registerDate, setRegisterDate] = useState<string>("");
+  const [registerChartData, setRegisterChartData] = useState<RegisterChartData[]>([]);
 
   useEffect(() => {
-    fetchDashboardStats();
+    void fetchDashboardStats();
+    void fetchUserProfile();
+    void fetchRegisterChartData();
   }, []);
 
   const fetchDashboardStats = async () => {
@@ -42,8 +53,29 @@ export default function Dashboard() {
     }
   };
 
+  const fetchUserProfile = async () => {
+    try {
+      const response = await api.get("/api/user/profile"); // Header interceptor'dan geliyor
+      setRegisterDate(response.data.registerDate);
+    } catch (error) {
+      console.error("User profile fetch error:", error);
+    }
+  };
+
+  const fetchRegisterChartData = async () => {
+    try {
+      const res = await api.get<RegisterChartData[]>("/api/dashboard/register-chart", {
+        params: { days: 90 },
+      });
+      setRegisterChartData(res.data ?? []);
+    } catch (error) {
+      console.warn("Register chart data fetch error:", error);
+      setRegisterChartData([]);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-black text-neutral-100">
       {/* Header */}
       <header className="border-b border-neutral-800 p-6">
         <div className="flex justify-between items-center">
@@ -63,7 +95,7 @@ export default function Dashboard() {
             <UserProfile />
             <button
               onClick={logout}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium transition-colors"
+              className="px-4 py-2 hover:bg-[#ffffff]/20 hover:text-[#C40000] transition-colors rounded-lg text-white font-medium"
             >
               Logout
             </button>
@@ -73,21 +105,27 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Welcome Card */}
-          <SpotlightCard className="
-          bg-gradient-to-r from-[#C48913]/20 to-[#D4AF37]/20 
-          border border-[#C48913]/30
-          rounded-lg p-6 
-          lg:col-span-2
-        ">
+        {registerDate && (
+          <div className="mb-6 bg-neutral-900 border border-neutral-800 rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-2">Kullanıcı Kayıt Tarihi</h3>
+            <p className="text-xl text-[#C48913]">
+              {new Date(registerDate).toLocaleDateString("tr-TR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+          </div>
+        )}
 
-            <h2 className="text-xl font-semibold text-[#C48913] mb-2">
-              Hoşgeldiniz!
-            </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <SpotlightCard className="bg-gradient-to-r from-[#C48913]/20 to-[#D4AF37]/20 border border-[#C48913]/30 rounded-lg p-6 lg:col-span-2">
+            <h2 className="text-xl font-semibold text-[#C48913] mb-2">Hoşgeldiniz!</h2>
             <p className="text-neutral-300">
-              You are successfully logged in as an admin. Web sitesinden kayıt
-              olan kullanıcılar otomatik admin yetkisi alır.
+              You are successfully logged in as an admin. Web sitesinden kayıt olan
+              kullanıcılar otomatik admin yetkisi alır.
             </p>
             <div className="flex flex-wrap gap-2 mt-4">
               <Button
@@ -114,9 +152,7 @@ export default function Dashboard() {
             </div>
           </SpotlightCard>
 
-          {/* Stats Cards */}
-          <SpotlightCard
-          className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
+          <SpotlightCard className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
             <h3 className="text-lg font-medium mb-2">Total Users</h3>
             <p className="text-3xl font-bold text-[#C48913]">
               {loading ? "..." : stats.totalUsers.toLocaleString()}
@@ -132,16 +168,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Second Row - Orders */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
             <h3 className="text-lg font-medium mb-2">Active Orders</h3>
             <p className="text-3xl font-bold text-[#C48913]">
               {loading ? "..." : stats.activeOrders.toLocaleString()}
             </p>
-            <p className="text-sm text-neutral-400 mt-1">
-              Paid, Preparing, Shipped
-            </p>
+            <p className="text-sm text-neutral-400 mt-1">Paid, Preparing, Shipped</p>
           </div>
 
           <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
@@ -153,7 +186,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Pending Admin Requests Alert */}
         {stats.pendingAdminRequests > 0 && (
           <div className="mt-6 bg-orange-900/20 border border-orange-700 rounded-lg p-4">
             <h3 className="text-lg font-medium mb-2 text-orange-400">
@@ -172,28 +204,87 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Admin Info */}
+<Card className="py-4 sm:py-0 mt-8 bg-black border border-neutral-800">
+            <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
+              <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0 text-white">
+                <ShinyText 
+                text="Registered Users - Time Graph" 
+                disabled={false} 
+                speed={6} 
+                className="text-3xl font-['Montserrat']" />
+                  
+                <ShinyText
+                  text="Daily registered users in the last 3 months" 
+                  disabled={false} 
+                  speed={6} 
+                  className="text-sm font-['Montserrat']" />
+                  
+              </div>
+            </CardHeader>
+            <CardContent className="px-2 sm:p-6 w-full">
+              <div className="h-[300px] w-full bg-black rounded-md">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={registerChartData}
+                    margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
+                    style={{ backgroundColor: '#000000' }}
+                  >
+                    <CartesianGrid vertical={false} stroke="#333333" />
+                    <XAxis
+                      dataKey="date"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      minTickGap={32}
+                      tick={{ fill: '#BBBBBB' }}
+                      tickFormatter={(value) => {
+                        const date = new Date(value);
+                        return date.toLocaleDateString("tr-TR", {
+                          month: "short",
+                          day: "numeric",
+                        });
+                      }}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                      tickMargin={8}
+                      tick={{ fill: '#BBBBBB' }}
+                    />
+                    <Tooltip
+                      cursor={{ stroke: '#444444', strokeWidth: 1 }}
+                      contentStyle={{ backgroundColor: '#000000', border: '1px solid #333333' }}
+                      labelStyle={{ color: '#DDDDDD' }}
+                      itemStyle={{ color: '#DDDDDD' }}
+                      labelFormatter={(value) => new Date(value as string).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      formatter={(value) => [String(value), 'Registered Users']}
+                    />
+                    <Line
+                      dataKey="count"
+                      type="monotone"
+                      stroke="#C48913"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
         <div className="mt-8 bg-neutral-900 border border-neutral-800 rounded-lg p-6">
           <h3 className="text-lg font-medium mb-4">Admin Privileges</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm">User Management</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm">Product Management</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm">Order Management</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm">Analytics Access</span>
-            </div>
+            {["User Management", "Product Management", "Order Management", "Analytics Access"].map((title) => (
+              <div key={title} className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm">{title}</span>
+              </div>
+            ))}
           </div>
         </div>
+        
       </main>
     </div>
   );
