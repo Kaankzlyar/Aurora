@@ -29,8 +29,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#0B0B0B"
     },
-<<<<<<< HEAD
-=======
       "navigationBar": {
         "backgroundColor": "#0B0B0B",
         "barStyle": "light-content"
@@ -39,7 +37,6 @@
         "backgroundColor": "#0B0B0B",
         "barStyle": "light-content"
       },
->>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/aurora_Logo.png",
@@ -67,11 +64,7 @@
       "expo-font"
     ],
     "extra": {
-<<<<<<< HEAD
       "API_URL": "http://192.168.0.10:5270"
-=======
-      "API_URL": "http://192.168.1.142:5270"
->>>>>>> ffcb4278176d55c38840c162d432d16f57abc477
     }
   }
 }
