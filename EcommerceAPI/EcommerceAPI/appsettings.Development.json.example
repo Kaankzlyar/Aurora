@@ -1,0 +1,15 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "Jwt": {
+    "Key": "REPLACE_WITH_A_LONG_RANDOM_SECRET_AT_LEAST_32_CHARS"
+  },
+  "SuperAdmin": {
+    "Email": "admin@example.com",
+    "Password": "REPLACE_WITH_A_STRONG_PASSWORD"
+  }
+}

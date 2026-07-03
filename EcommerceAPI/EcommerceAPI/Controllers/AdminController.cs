@@ -14,11 +14,14 @@ namespace EcommerceAPI.Controllers
     public class AdminController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private const string SUPER_ADMIN_EMAIL = "kaankizilyar2@gmail.com"; // Kaan Kızılyar'ın email'i
+        // Super-admin email comes from configuration (SuperAdmin:Email) — never hardcoded.
+        // When unset, only users with the IsSuperAdmin flag are treated as super admins.
+        private readonly string SUPER_ADMIN_EMAIL;
 
-        public AdminController(AppDbContext context)
+        public AdminController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            SUPER_ADMIN_EMAIL = configuration["SuperAdmin:Email"] ?? string.Empty;
         }
 
         // Admin olmak için istek gönder

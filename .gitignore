@@ -1,1 +1,30 @@
-/frontend/node_modules/
+# ---------- Secrets / local config ----------
+# Real secrets live here locally; commit the *.example templates instead.
+.env
+*.local.env
+**/appsettings.Development.json
+**/appsettings.*.Local.json
+# Keep the example templates tracked
+!**/appsettings.Development.json.example
+!.env.example
+
+# ---------- .NET ----------
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+
+# ---------- Node / Expo (frontend & admin) ----------
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db

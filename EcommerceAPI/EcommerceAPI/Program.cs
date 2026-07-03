@@ -80,13 +80,23 @@ namespace EcommerceAPI
             builder.Services.AddDbContext<AppDbContext>
         (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            // JWT signing key must be supplied via configuration: an environment
+            // variable (Jwt__Key), user-secrets, or appsettings.Development.json.
+            var jwtKey = builder.Configuration["Jwt:Key"];
+            if (string.IsNullOrWhiteSpace(jwtKey))
+            {
+                throw new InvalidOperationException(
+                    "Jwt:Key is not configured. Set it via an environment variable (Jwt__Key), " +
+                    "user-secrets, or appsettings.Development.json.");
+            }
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "default-secret-key-12345")
+                Encoding.UTF8.GetBytes(jwtKey)
             ),
             ValidateIssuer = false,
             ValidateAudience = false
@@ -123,49 +133,55 @@ namespace EcommerceAPI
             
             app.MapControllers();
 
-            // Seed super admin (Kaan Kızılyar) if not exists
-            SeedSuperAdmin(app.Services);
+            // Seed super admin from configuration if not exists
+            SeedSuperAdmin(app.Services, app.Configuration);
 
             app.Run();
 
         }
 
-        private static void SeedSuperAdmin(IServiceProvider services)
+        private static void SeedSuperAdmin(IServiceProvider services, IConfiguration configuration)
         {
+            // Super-admin credentials come from configuration (env vars, user-secrets,
+            // or appsettings.Development.json) — never hardcoded. Skip if not provided.
+            var superAdminEmail = configuration["SuperAdmin:Email"];
+            var superAdminPassword = configuration["SuperAdmin:Password"];
+
+            if (string.IsNullOrWhiteSpace(superAdminEmail) || string.IsNullOrWhiteSpace(superAdminPassword))
+            {
+                Console.WriteLine("[SEEDING] SuperAdmin:Email / SuperAdmin:Password not configured — skipping super-admin seeding.");
+                return;
+            }
+
             using (var scope = services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                
-                const string SUPER_ADMIN_EMAIL = "kaankizilyar2@gmail.com";
-                const string SUPER_ADMIN_PASSWORD = "kutay2003"; // Varsayılan şifre, değiştirilebilir
-                
+
                 try
                 {
                     // Check if super admin already exists
-                    var existingSuperAdmin = context.Users.FirstOrDefault(u => u.Email == SUPER_ADMIN_EMAIL);
-                    
+                    var existingSuperAdmin = context.Users.FirstOrDefault(u => u.Email == superAdminEmail);
+
                     if (existingSuperAdmin == null)
                     {
-                        Console.WriteLine("[SEEDING] Creating super admin: Kaan Kızılyar");
-                        
+                        Console.WriteLine($"[SEEDING] Creating super admin: {superAdminEmail}");
+
                         var superAdmin = new EcommerceAPI.Models.User
                         {
-                            Name = "Kaan",
-                            LastName = "Kızılyar",
-                            Email = SUPER_ADMIN_EMAIL,
-                            PasswordHash = BCrypt.Net.BCrypt.HashPassword(SUPER_ADMIN_PASSWORD),
+                            Name = "Super",
+                            LastName = "Admin",
+                            Email = superAdminEmail,
+                            PasswordHash = BCrypt.Net.BCrypt.HashPassword(superAdminPassword),
                             IsAdmin = true,
                             IsSuperAdmin = true,
                             CreatedAt = DateTime.UtcNow
                         };
-                        
+
                         context.Users.Add(superAdmin);
                         context.SaveChanges();
-                        
-                        Console.WriteLine($"✅ Super admin created successfully!");
-                        Console.WriteLine($"📧 Email: {SUPER_ADMIN_EMAIL}");
-                        Console.WriteLine($"🔑 Password: {SUPER_ADMIN_PASSWORD}");
-                        Console.WriteLine("⚠️  Please change the password after first login!");
+
+                        Console.WriteLine("✅ Super admin created successfully!");
+                        Console.WriteLine("⚠️  Please change the seeded password after first login!");
                     }
                     else
                     {
@@ -175,11 +191,11 @@ namespace EcommerceAPI
                             existingSuperAdmin.IsSuperAdmin = true;
                             existingSuperAdmin.IsAdmin = true;
                             context.SaveChanges();
-                            Console.WriteLine($"✅ Existing user {SUPER_ADMIN_EMAIL} promoted to super admin!");
+                            Console.WriteLine($"✅ Existing user {superAdminEmail} promoted to super admin!");
                         }
                         else
                         {
-                            Console.WriteLine($"✅ Super admin {SUPER_ADMIN_EMAIL} already exists");
+                            Console.WriteLine($"✅ Super admin {superAdminEmail} already exists");
                         }
                     }
                 }
